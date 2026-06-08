@@ -1,0 +1,111 @@
+\chapter{TINJAUAN PUSTAKA}
+\label{chap:tinjauanpustaka}
+
+
+\section{Hasil Penelitian/Perancangan Terdahulu}
+\label{sec:hasil_terdahulu}
+
+\subsection{A Survey of Modern and Capable Mobile Robotics Algorithms in the Robot Operating System 2}
+Penelitian oleh \parencite[]{macenski2023desks} membahas metode \emph{layered costmap}, yaitu sebuah metode untuk menambah lapisan secara sistematis dengan tiap lapisan mampu menyimpan informasi lingkungan tertentu. Tiap lapisan dapat mewakili sumber informasi, algortma, ataupun hasil berbeda. Setiap siklus update dapat memperbarui informasi pada grid \emph{costmap}. Manfaatnya dengan menggunakan \emph{layered costmap} termasuk pembaruan yang lebih jelas, area pembaruan yang dinamis, proses pembaruan yang teratur, dan konfigurasi yang fleksibel, memungkinkan representasi nilai biaya yang kompleks dan perilaku navigasi yang peka konteks, seperti navigasi sosial. Implementasi ini telah terintegrasi dengan ROS 2 dan diadopsi sebagai algoritma navigasi default.
+\subsection{A Slope-Adaptive Navigation Approach for Ground Mobile Robots}
+Studi oleh \parencite{hu2022slope} mengusulkan pendekatan navigasi adaptif kemiringan untuk robot bergerak darat, yang bertujuan mengatasi keterbatasan peta biaya 2-dimensi yang sering salah mengartikan kemiringan (slope) sebagai area terlarang. Pendekatan baru ini didasarkan pada peta biaya multi-lapis yang secara aktif mengintegrasikan informasi kemiringan selama tahap pembuatan peta lingkungan. Sebuah algoritma deteksi kemiringan dikembangkan untuk mengidentifikasi kemiringan dan secara adaptif mengubah peta biaya selama navigasi, sehingga kemiringan dianggap sebagai jalur yang dapat dilalui, hanya dengan biaya tambahan. Selain itu, untuk skenario di mana kemiringan mengarah ke lantai baru, sistem mengadopsi kode Aruco untuk memicu peralihan informasi peta dan sistem koordinat referensi yang sesuai, memungkinkan navigasi berlanjut tanpa gangguan. Kontribusi utama meliputi deteksi kemiringan, lapisan peta biaya kemiringan, dan navigasi 3-dimensi. Baik simulasi maupun hasil eksperimen di dunia nyata menunjukkan efektivitas tinggi dari pendekatan yang diusulkan ini, memastikan robot dapat menyelesaikan tugas navigasi di medan dengan karakteristik kemiringan secara lancar tanpa memengaruhi akurasi posisi.
+\subsection{Path Planning of a Mobile Delivery Robot Operating in a
+ Multi-Story Building Based on a Predefined Navigation Tree}
+Penelitian oleh \parencite{palacin2023path} membahas metode perencanaan jalur untuk robot pengirim paket yang bisa bekerja pada bangunan bertingkat, sebuah masalah yang membutuhkan informasi spasial dan operasional. Paper ini menggunakan \emph{static navigation tree} yang menggambarkan \emph{weighted paths} dalam bangunan bertingkat. Lalu, \emph{navigation tree} digunakan untuk merencanakan jalur dan mengestimasi durasi dari semua rute pengiriman menggunakan algoritma dijkstra. Metode ini dapat digunakan dengan asumsi berikut: (1) peta lantai bangunan sudah diketahui; (2) posisi titik awal dan tujuan sudah diketahui; (3) robot memiliki sensor untuk lokalisasi diri; (4) Bangunan memiliki lift yang dapat dioperasi dengan remot; (5) semua pintu dalam keadaan terbuka. Hasil eksperimen menunjukkan bahwa metode ini dapat efektif merencanakan jalur optimal untuk robot pengirim paket di bangunan bertingkat.
+
+\subsection{ATV Navigation in Complex and Unstructured Environment Containing Stairs}
+Penelitian oleh \parencite[]{zhu2020atv} mengusulkan metode \emph{real-time} untuk mendeteksi dan lokalisasi tangga. Metode ini diterapkan pada robot \emph{All-Terrain Vehicle} (ATV) yang yang sering digunakan untuk misi di daerah dengan lingkungan kompleks. Sensor LiDAR VLP-16 digunakan untuk mendeteksi fitur geometris dari tangga berupa bidang miring dan garis paralel. Sensor IMU 3-axis juga digunakan saat robot memanjat tangga dengan basis antara coupling antara roll dan yaw pada bidang miring. Eksperiman yang telah dilakukan menunjukkan bahwa metode ini dapat mendeteksi tangga dengan akurasi tinggi dan memungkinkan ATV untuk menavigasi tangga secara otonom.
+
+\subsection{A Procedure for Taking a Remotely Controlled Elevator with an Autonomous Mobile Robot Based on 2D LiDAR}
+
+Studi oleh \parencite[]{palacin2023procedure} menyajikan prosedur bagi robot mobile otonom untuk bernavigasi antar lantai di gedung bertingkat dengan menggunakan lift yang dikontrol dari jarak jauh dengan menggunakan informasi dari sensor 2D LiDAR. Pendekatan ini menggunakan robot APR-02 di dalam eksperimen, untuk melakukan self-localization dengan mencocokkan scan 2D LiDAR saat ini dengan peta 2D yang sudah ada, proses yang didasarkan pada algoritma Iterative Closest Point (ICP). Peta tersebut mencakup \emph{waypoint} yang secara spesifik mendefinisikan posisi setiap lift, baik di luar maupun di dalam kabin. Interaksi dengan lift, termasuk memanggil dan memilih lantai tujuan, dicapai melalui perintah jarak jauh yang dikirim ke perangkat \emph{Internet of Things} (IoT) tambahan yang dikembangkan untuk mengontrol tombol lift asli tanpa manipulasi invasif. Prosedur ini melibatkan urutan aksi untuk masuk dan keluar lift, yang memerlukan robot untuk menavigasi jalur yang tepat dan mendeteksi status pintu lift dengan memantau titik scan 2D LiDAR dalam area persegi panjang yang ditentukan. Hasil eksperimental menunjukkan bahwa self-localization robot tidak terpengaruh signifikan oleh status pintu dan pelacakan jalur masuk dan keluar lift berhasil, meskipun keterbatasan teridentifikasi di mana kurangnya umpan balik lantai dari perangkat IoT dapat menyebabkan kesalahan jika lift berhenti mendadak. kemampuan robot untuk "membedakan lantai" bergantung pada gabungan pengetahuannya tentang peta multi-lantai, pemberian perintah lantai tujuan tertentu melalui sistem kontrol jarak jauh, dan asumsi bahwa robot berada di lantai yang benar ketika pintu lift terbuka.
+
+\subsection{Development of an Indoor Delivery Mobile Robot for a Multi-Floor Environment}
+
+Studi oleh \parencite[]{kim2024development} menguraikan pengembangan \emph{indoor delivery mobile robot} dengan arsitektur yang dirancang khusus untuk lingkungan multi-lantai. Arsitektur yang diusulkan terdiri dari lima modul utama: manajemen peta, lokalisasi, perencanaan jalur, persepsi, dan perencanaan tugas. Untuk mengatasi tantangan navigasi di gedung bertingkat, robot ini menggunakan peta navigasi terintegrasi yang dibuat dengan menggabungkan peta \emph{point cloud} multi-lantai dan peta topologi berbasis node graph, memungkinkan lokalisasi yang efektif dan perencanaan rute 3D yang mencakup pergerakan antar-lantai. Modul persepsi memungkinkan robot untuk mendeteksi dan naik turun elevator secara mandiri melalui ekstraksi area yang dapat dilalui, sementara modul perencanaan tugas mengelola berbagai perilaku yang diperlukan untuk layanan pengiriman, seperti mengemudi, naik/turun elevator, pengiriman, dan docking. Efektivitas dan ketahanan arsitektur ini telah berhasil ditunjukkan melalui uji lapangan selama sebulan di gedung biasa selama jam kerja.
+
+\subsection{Autonomous Floor Navigation Control of Mobile Robot Using Elevator Button Recognition with Deep learning}
+
+Penelitian oleh \parencite[]{lee2023autonomous} memperkenalkan sistem kontrol navigasi lantai otonom untuk robot bergerak yang memanfaatkan pengenalan tombol lift dengan \emph{deep learning} untuk memungkinkan robot beroperasi secara mandiri di antara lantai tanpa memerlukan modifikasi fasilitas lift yang ada atau sistem manajemen gedung tambahan. Sistem yang diusulkan menggunakan deep neural network yang dilatih dengan dataset besar gambar tombol lift untuk secara akurat mengenali dan menentukan posisi tombol. Sebuah robot bergerak, dilengkapi dengan kamera OAK-D dan manipulator myCobot 280, mampu menavigasi ke lift, mendeteksi dan menekan tombol yang diinginkan (baik tombol naik/turun maupun tombol lantai tujuan), memasuki lift, berputar di dalamnya, dan keluar di lantai yang benar. Efektivitas dan keandalan sistem ini telah berhasil dibuktikan melalui uji coba di lingkungan nyata, dengan tingkat keberhasilan tinggi (7 dari 8 percobaan berhasil) dalam memindahkan robot dari lantai empat ke lantai dua.
+
+\subsection{Autonomous Traversing across Floors Based on Vision for reconfigurable tracked robot}
+
+Studi oleh \parencite[]{xie2023autonomous} menyajikan sistem navigasi otonom \emph{full-stack} untuk \emph{reconfigurable tracked robot} yang dirancang khusus untuk melintasi lantai dan tangga dengan aman di lingkungan buatan manusia. Sistem ini mengintegrasikan algoritma A* untuk perencanaan jalur awal dan \emph{DWA-based path following} untuk permukaan datar. Untuk navigasi tangga, robot menggunakan algoritma deteksi tangga berbasis visi dari data gambar kedalaman kamera RGB-D untuk mengekstrak parameter tangga seperti tinggi dan lebar langkah. Kemudian, strategi gerakan yang terbagi dalam empat tahap diterapkan untuk melintasi tangga secara mandiri, termasuk penyesuaian sudut flipper dan penggunaan kontroler PD  untuk mempertahankan orientasi tegak lurus terhadap tangga dan mencegah selip. Robot ini dilengkapi dengan \emph{Flipper Auxiliary Rotation System (FARS)} yang meningkatkan kemampuan melintasi rintangan melalui penyesuaian bentuk trek. Validasi eksperimental di lingkungan nyata (tangga indoor dan outdoor) menunjukkan bahwa pendekatan ini memungkinkan robot menyelesaikan tugas lintasan antar-lantai secara stabil, mulus, dan aman, bahkan mampu mengoreksi deviasi arah akibat selip.
+
+\subsection{Mobile Service Robot Multi-floor Navigation Using Visual Detection and Recognition of Elevator Features}
+
+Paper oleh \parencite[]{kim2020mobile} membahas navigasi multi-lantai robot layanan seluler, khususnya dalam hal masuk dan keluar lift. Penulis mengusulkan metode deteksi dan pengenalan fitur lift serta navigasi robot menggunakan pembelajaran mendalam. Pendekatan ini melibatkan dua metode: ekstraksi koordinat tombol lift melalui ekstraktor fitur tradisional seperti adaptive thresholding, blob detection, dan template matching, serta pengenalan berbasis \emph{deep learning} menggunakan YOLO untuk panel display penghitung lantai. Hasil analisis menunjukkan bahwa ekstraktor fitur tradisional mengungguli sistem pengenalan berbasis \emph{deep learning} dalam kondisi sulit seperti pantulan cahaya dan motion blur, menjadikannya sistem yang lebih kuat untuk deteksi dan pengenalan. Perangkat keras robot meliputi dua kamera, lengan robot, LiDAR, dan router, dengan setiap kamera memiliki fungsi spesifik dalam deteksi tombol dan pengenalan panel display. Sistem kontrol robot secara keseluruhan terdiri dari modul Persepsi, Koordinasi, dan Eksekusi. Eksperimen navigasi robot berhasil memverifikasi metode yang diusulkan dalam lingkungan nyata.
+
+\subsection{Autonomous Elevator Button Recognition and Operation Framework for Multi-Floor Mobile Manipulator Navigation}
+
+Paper oleh \parencite{li2021autonomous} mengusulkan Kerangka kerja Autonomous Elevator Button Recognition and Operation (AEBRO) yang memungkinkan manipulator bergerak beroda menavigasi gedung bertingkat dengan mengoperasikan lift secara otonom. Kerangka kerja ini terdiri dari tiga fase berurutan: Fase I berfokus pada deteksi Region of Interest (ROI), menggunakan metode berbasis wilayah konektif dengan detektor Maximally Stable Extremal Regions (MSER) untuk menemukan teks angka dan algoritma klasterisasi untuk mengusulkan posisi tombol. Fase II melibatkan pengenalan teks angka ini menggunakan model jaringan saraf konvolusional (CNN) berskala kecil. Terakhir, Fase III menangani pengoperasian tombol lift, mengintegrasikan mekanisme koreksi kesalahan berdasarkan tata letak spasial dan kontinuitas angka untuk memperbaiki deteksi positif palsu dan memprediksi tombol yang tidak terdeteksi, diikuti oleh kontrol manipulator yang dipandu oleh data kamera penginderaan kedalaman. Evaluasi pada kumpulan data panel tombol lift yang bervariasi dan eksperimen dunia nyata menunjukkan bahwa kerangka kerja AEBRO mencapai F1-score tinggi sebesar 0,985, mengungguli metode mutakhir dalam akurasi dan ketahanan di berbagai lift dan kondisi, dengan kecepatan pengenalan (dalam 0,25 detik) yang sebanding dengan persepsi manusia.
+
+\subsection{MuNES: Multifloor Navigation Including Elevators and Stairs}
+
+Paper oleh \parencite[]{jung2024munes} mengusulkan skema untuk pemetaan tunggal \emph{multifloor} dan perencanaan lintasan bagi robot mobil, termasuk penggunaan lift dan tangga, untuk mengatasi ketiadaan peta \emph{multifloor} yang cocok dalam metode yang ada. Sistem ini menciptakan peta \emph{multifloor} tunggal dengan mengestimasi perubahan ketinggian berdasarkan data tekanan dan melakukan deteksi loop berbasis lantai untuk akurasi yang lebih baik. Peta kemudian di-"voxelize" untuk perencanaan lintasan optimal dan realistis. Algoritma A* digunakan dengan fungsi biaya yang mempertimbangkan faktor-faktor realistis seperti waktu tunggu lift, memungkinkan robot memilih mode pergerakan antar lantai (lift atau tangga) secara efisien berdasarkan titik awal, titik akhir, dan waktu tunggu lift. Pendekatan ini mengatasi keterbatasan metode sebelumnya yang kesulitan memetakan di dalam lift atau memiliki akumulasi error odometri dari sensor lain seperti IMU.
+
+\section{Teori/Konsep Dasar}
+\label{sec:konsep dasar}
+
+subsection{Layered Costmap}
+Costmap adalah representasi grid dua dimensi dari lingkungan robot yang digunakan dalam sistem navigasi, dengan tiap sel pada grid memiliki harga yang terasosiasi dengannya. Pada \emph{costmap} modern, tiap sel merupakan integer dari 0 hingga 255 yang merepresentasikan biaya navigasi. Secara umum, algoritma perencanaan jalur akan mengutamakan melewati sel dengan harga rendah dan menghindari sel dengan harga tinggi. Metode \emph{costmap} memberikan keseimbangan antara kualitas informasi dan efisiensi algoritma. Sebagai ekstensi dari \emph{costmap}, digunakan konsep \emph{layered costmap}, yaitu struktur costmap yang terbagi menjadi beberapa layer terpisah berdasarkan jenis data atau fungsi spesifik (misalnya static map, obstacle, inflation, proxemic). Setiap layer memodifikasi master costmap secara terstruktur dan independen, memungkinkan sistem navigasi mempertimbangkan konteks yang lebih kompleks dan menghasilkan perilaku pergerakan robot yang lebih cerdas dan adaptif terhadap lingkungan \parencite[]{macenski2023desks}.
+
+\subsection{Lokalisasi Iterative Closest Point (ICP)}
+Lokalisasi robot adalah proses untuk menentukan posisi dan orientasi robot (pose) relatif terhadap peta lingkungan tempat robot beroperasi. Kemampuan ini sangat penting bagi robot untuk melakukan navigasi dan pengambilan keputusan yang tepat dalam menjalankan misi otonom. Lokalisasi umumnya menggunakan informasi dari sensor internal, seperti encoder roda dan IMU, dan sensor eksternal, seperti kamera atau LiDAR, untuk memperkirakan posisi robot berdasarkan model gerak dan observasi lingkungan. 
+\par
+Salah satu kategori metode lokalisasi adalah map-maptching, dimana data sensor dari lingkungan dicoba untuk disamakan dengan fixed map yang sudah ada. Algoritma iterative closest point (ICP) merupakan salah satu algoritma yang bekerja dengan metode map-matching ini. Cara kerja algoritma ICP adalah dengan mencoba mengurangi jarak Euclidean antara input data dengan sebuah model referensi (dalam lokalisasi adalah fixed map). Secara matematis, bayangkan terdapat dua set titik 2D A dan B. Tujuan algoritma adalah menemukan sebuah transformasi A ke B untuk mencari mean squared distance (MSD) antara titik A dan B \parencite[]{sobreira2019map}.
+\begin{equation}
+\text{MSD}(A, B, u) = \frac{1}{n} \sum_{a \in A, b \in B} \left\| b - u(a) \right\|^2
+\end{equation}
+
+Dengan rumus matematika diatas, algoritma ICP mencoba untuk mengurangi MSD pada setiap iterasi. ICP terbagi menjadi dua tahap, yaitu matching stage dan transformation stage. Matching stage adalah tahap pertama dari ICP dan bertujuan untuk meminimalkan nilai mean square distance dengan dengan matching terbaik antara set titik A dan B.
+\par
+Transformation stage adalah tahap kedua yang bertujuan untuk mencari nilai paling optimal dari transformasi rotasi R dan translasi t untuk mencapai MSD paling kecil. ICP menggunakan simple least square solver untuk menemukan transformasi matrix (R | t) yang meminimalkan MSD. untuk mencapai hal tersebut dilakukan pengurangan dari data referensi dan point cloud sensor nilai centroid masing-masing, yang ditunjukan di rumus dibawah \parencite[]{sobreira2019map}.
+
+\begin{equation}
+a'_i = a_i - \frac{1}{n} \sum_{i=0}^{n} a_i
+\end{equation}
+
+\begin{equation}
+b'_i = b_i - \frac{1}{m} \sum_{i=0}^{m} b_i
+\end{equation}
+
+Setelah itu, nilai kovarian silang matrix dikomputasi menggunakan persamaan dibawah dengan $A'$ dan $B'$ sama dengan set poin $a'_i$ dan $b'_i$.
+\begin{equation}
+H = A'B'^T
+\end{equation}
+Lalu, sudut rotasi $\theta$ bisa dihitung dengan rumus dibawah .
+\begin{equation}
+\theta = \text{atan2}((H(0, 1) - H(1, 0)), (H(0, 0) + H(1, 1)))
+\end{equation}
+
+Pada akhir tahap transformasi, data sensor diubah menggunakan matriks (R | t) yang diperkirakan dan algoritma kembali ke tahap pencocokan, kecuali jika kriteria penghentian diverifikasi (misalnya, jumlah iterasi, peningkatan kesalahan Euclidean antar iterasi, dll.) \parencite[]{sobreira2019map}.
+\begin{equation}
+R = m \begin{bmatrix} \cos(\theta) & -\sin(\theta) \\ \sin(\theta) & \cos(\theta) \end{bmatrix}
+\end{equation}
+\begin{equation}
+t = \bar{b} - R\bar{a}
+\end{equation}
+
+subsection{KNN}
+
+\subsection{Path Planning A* }
+\emph{Path planning} adalah proses perencanaan jalur geometris yang menghubungkan titik awal ke titik tujuan tanpa menabrak rintangan, biasanya dilakukan dalam ruang konfigurasi (configuration space) dengan mempertimbangkan berbagai batasan lingkungan. Metode \emph{path planning} umum mencakup teknik roadmap, cell decomposition, dan artificial potential field.
+\par
+Salah satu algoritma \emph{path planning} yang paling sering digunakan adalah A*. A* dikategorikan sebagai sebagai algoritma best first search (BFS) yang menggabungkan kelebihan uniform-cost dan greedy searches dengan menggunakan fitness function. 
+\begin{equation}
+    f(n) = g(n) + h(n)
+\end{equation}
+\par
+Pada persamaan diatas, g(n) adalah biaya kumulatif dari titik awal ke simpul n, dan h(n) adalah estimasi heuristik biaya tersisa menuju simpul tujuan. Selama pencarian, A* mengelola daftar terbuka (simpul yang akan dipertimbangkan) dan daftar tertutup (simpul yang sudah dikunjungi). Algoritma ini bekerja dengan memperluas simpul dari daftar terbuka dengan fungsi kecocokan minimal, memindahkannya ke daftar tertutup, dan menambahkan tetangganya ke daftar terbuka hingga simpul tujuan diperluas.
+\par
+Pilihan heuristik yang baik sangat penting untuk kualitas dan efisiensi pencarian A*. Heuristik yang mengestimasi biaya nyata menjamin jalur terpendek, tetapi bisa memperluas terlalu banyak simpul. Sebaliknya, heuristik yang melebih-lebihkan dapat mempercepat pencarian ke tujuan, namun berisiko melambatkan jika jalur optimal menyimpang. Meskipun A* banyak digunakan karena menemukan jalur biaya minimum dan memastikan keberadaan jalur bebas, kelemahan utamanya adalah konsumsi waktu yang tinggi dan berat komputasi yang signifikan \parencite[]{damle2022dynamic}.
+
+\subsection{Path Tracking Pure Pursuit}
+\emph{Path tracking} atau trajectory planning bertugas menambahkan informasi waktu pada jalur tersebut, sehingga menghasilkan lintasan yang dapat diikuti oleh robot secara fisik. Proses ini mempertimbangkan batasan kinematik dan dinamik dari robot, termasuk kecepatan, percepatan, dan jerk, untuk menghasilkan lintasan yang halus, aman, dan efisien. \emph{path tracking} memastikan bahwa gerakan aktual robot mengikuti jalur yang telah direncanakan dengan akurat dan memastikan kestabilan robot serta performa yang sesuai dengan sistem kontrol yang digunakan
+\parencite[]{yao2020control}.
+\par
+\emph{Pure-pursuit} adalah metode \emph{path tracking} geometris yang efektif untuk robot otonom. Cara kerjanya adalah membayangkan kendaraan mengikuti sebuah titik di jalur yang diberikan, beberapa jarak di depannya. Titik ini dipilih pada jarak pandang ke depan (look-ahead distance) yang ditentukan. Implementasinya meliputi penentuan lokasi kendaraan saat ini, menemukan titik terdekat di jalur, memilih titik tujuan pada jarak pandang ke depan konstan, mengubah koordinat titik tujuan ke kendaraan, menghitung kelengkungan, dan memperoleh sudut kemudi. Keunggulan metode ini adalah kemudahan penyetelan jarak pandang ke depan, kesederhanaan komputasi, dan ketiadaan istilah turunan \parencite[]{yao2020control}.
+\begin{equation}
+    \text{Error}_{\text{cte}} = \text{Error}_{\text{calculate}} + \text{Error}_{\text{tracking}}
+\end{equation}

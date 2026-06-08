@@ -1,0 +1,28 @@
+\begin{center}
+  \large\textbf{ABSTRACT}
+\end{center}
+
+\addcontentsline{toc}{chapter}{ABSTRACT}
+
+\vspace{2ex}
+
+\begingroup
+% Menghilangkan padding
+\setlength{\tabcolsep}{0pt}
+
+\noindent
+\begin{tabularx}{\textwidth}{l >{\centering}m{3em} X}
+  \emph{Name}     & : & \name{}         \\
+
+  \emph{Title}    & : & \engtatitle{}   \\
+
+  \emph{Advisors} & : & 1. \advisor{}   \\
+                  &   & 2. \coadvisor{} \\
+\end{tabularx}
+\endgroup
+
+\emph{% Isi Abstrak
+Indonesia is a country experiencing high frequency of earthquake disasters, and so often needs to conduct Search and Rescue (SAR) missions in hazardous indoor environments, which pose significant risks to personnel. To mitigate these risks, autonomous robots can play a role in replacing human personnel in certain conditions. To carry out its mission autonomously, a robot needs navigation capabilities that can operate in multi-story post-earthquake environments. This final project proposal discusses the development of a navigation method using a \emph{layered costmap} to enable robots to traverse such complex environments. This scheme represents multi-story environments as a collection of layered \emph{costmaps}. Each layer in the \emph{costmap} stores crucial information such as static obstacles, dynamic obstacles, inflation zones, and \emph{transition regions} between \emph{maps}, enabling comprehensive navigation. In the developed navigation architecture, each floor or level in the \textit{indoor} environment is uniquely represented by an individual \emph{map}. This approach effectively simplifies 3D environmental information into a manageable 2D representation, thus allowing the use of a 2D \textit{Lidar} sensor for robot environmental data collection. The navigation algorithm then intelligently integrates and combines these individual 2D \emph{maps} into a cohesive whole, enabling the robot to comprehensively understand and navigate multi-floor environments. This system allows the robot to seamlessly transition from one \emph{map} to another, corresponding to its physical position between different floors within the building. This navigation algorithm will be tested in a laboratory environment designed to simulate post-earthquake conditions.}
+% % Ubah kata-kata berikut dengan kata kunci dari tugas akhir dalam Bahasa Inggris
+
+\emph{Keywords}: \emph{Navigation, Costmap, Robot, Inter-floor}.

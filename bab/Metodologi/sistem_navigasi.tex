@@ -1,0 +1,138 @@
+Placeholder
+
+Map Server mempublish map utama dan map transisi
+Map utama adalah hasil kombinasi dari masing-masing map setap region
+Map transisi adalah map yang menyimpan informasi sementara
+Tf dan initial pose
+TF memberikan hubungan koordinat antar komponen robot, seperti antara posisi lidar dan robot utama
+Initial pose adalah posisi dan orientasi awal robot
+Costmap generation
+Local costmap menerima data dari lidar untuk membangun obstacle layer, yang digunakan untuk menghindari obstacle yang tidak ada di map
+Global costmap membangun data dari main map untuk menghasilkan static layer dan inflation layer, fungsinya untuk membantu global planner membuat path yang menghindari obstacle statis. 
+Lalu menggunakan transition map untuk membangun transition layer, yang fungsinya memudahkan transisi antar map pada zona yang sulit mendapat lokalisasi
+Lokalisasi ICP dan map jumper
+ICP menerima TF dan pose untuk menentukan posisi awal robot. Map jumper membaca posisi robot dari ICP, lalu saat berada di sel transisi atau expansi, maka melakukan pemindahan pose robot ke map selanjutnya
+Path interceptor dan Planner
+Path interceptor menerima goal navigasi, lalu apabila goal berada di region map berbeda, maka diberi goal sementara yang bertuju ke zona transisi. Sementara global planner membuat path menuju zona transisi
+Path tracker mengikuti local path yang dihasilkan dan menghasilkan command velocity vektor yang digunakan untuk gerak hexapod
+Robot sampai ke lokasi.
+
+
+\subsection{Lokalisasi Iterative Closest Point (ICP)}
+\label{sec:subsystemnavigasi}
+
+\subsubsection{Prekomputasi KNN}
+Sistem ini melakukan pre-komputasi atas semua korespondensi saat menerima \emph{map} baru lalu menyimpan informasi tersebut di dalam tabel hash. Ini memungkinkan karena \emph{occupancy grid} sudah diketahui dan bersifat diskrit, sehingga dapat diketahui relasi antara sel bebas yang berada di dekat tembok dengan \emph{K nearest} sel rintangan.
+
+Untuk setiap sel rintangan pada indeks $i_{\text{occ}}$:
+
+\begin{enumerate}
+    \item Cek kejangkauan menggunakan \emph{Moore neighbourhood} 3x3 untuk mengecek keberadaan sel bebas di sekitarnya. Jika tidak ada sel bebas, maka sel rintangan tersebut tidak dapat dijangkau dan diabaikan.
+    \item Disekitar indeks $i_{\text{occ}}$ yang memenuhi syarat sebelumnya, dilakukan iterasi mencari semua sel dengan radius $r$ 
+    \item Untuk setiap cell tersebut pada index $i_{\text{nb}}$:
+   Insert posisi dari $i_{\text{occ}}$ ke dalam daftar KNN milik $i_{\text{nb}}$. Jaga urutan terurut berdasarkan Euclidean distance
+\end{enumerate}
+
+\subsubsection{Proses Scan}
+Untuk scan dengan $N$ beams pada sudut $\theta_0, \theta_1, \dots, \theta_{N-1}$:
+
+$$\mathbf{C} = \begin{bmatrix} \cos\theta_0 & \cos\theta_1 & \cdots & \cos\theta_{N-1} \\ \sin\theta_0 & \sin\theta_1 & \cdots & \sin\theta_{N-1} \end{bmatrix}_{2 \times N}$$
+
+Cache hanya dihitung ulang ketika parameter scan (jumlah beams, rentang sudut, increment) berubah.
+
+Diberikan range readings $r_0, r_1, \dots, r_{N-1}$:
+
+$$\mathbf{S} = \begin{bmatrix} r_0 \cos\theta_0 & r_1 \cos\theta_1 & \cdots \\ r_0 \sin\theta_0 & r_1 \sin\theta_1 & \cdots \end{bmatrix}$$
+
+\subsubsection{Loop Utama}
+
+\begin{algorithm}[H]
+\caption{ICP Single Iteration}
+\begin{algorithmic}[1]
+\Require $scan$ \Comment{$N$ points dalam sensor frame}
+\Ensure $new\_to\_old$ \Comment{transform\_t}
+\State $T \gets \text{Identity}$
+\For{$iteration = 1$ \textbf{to} $max\_iter$}
+    \State $random\_scan \gets \text{sampler}(scan)$ \Comment{subsample dengan random stride}
+    \State $data \gets T \cdot random\_scan$ \Comment{transform ke map frame}
+    \State $M \gets \text{matches}(data, knn)$ \Comment{cari correspondences}
+    \State $w \gets \text{get\_weights}(M)$ \Comment{weight setiap match}
+    \State $T\_update \gets \text{point\_to\_map}(M, w)$ \Comment{SVD solver}
+    \State $T \gets T\_update \cdot T$ \Comment{akumulasi}
+    \If{$\text{converged}(T\_update)$}
+        \State \textbf{break}
+    \EndIf
+\EndFor
+\State \Return $T$
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Correspondence Matching}
+
+Untuk setiap sensor point $s_j$:
+
+\begin{enumerate}
+  \item Cek apakah $s_j$ berada di dalam map bounds: \texttt{converter\_.valid\_position}($s_j$)
+  \item Konversi posisi ke flat index: $i = \text{converter.to\_index}(s_j)$
+  \item Lookup \texttt{knn\_[i]} --- sebuah sorted vector berisi hingga $K$ occupied map points
+  \item Duplikasi $s_j$ untuk setiap nearest neighbors-nya, menghasilkan $(s_j, m_{j,1}), (s_j, m_{j,2}), \dots, (s_j, m_{j,K})$
+\end{enumerate}
+
+Ini memperluas $N$ sensor points menjadi hingga $N \times K$ pasangan yang cocok.
+
+\subsubsection{Solusi SVD}
+
+Diberikan $M$ pasangan $\{s_i\}$ (sensor) dan $\{m_i\}$ (map) dengan weights $\{w_i\}$, kita mencari rigid transform $T \in SE(2)$ yang meminimalkan:
+
+$$T^* = \arg\min_{R,\,t} \sum_{i=1}^{M} w_i \, \big\| m_i - (R s_i + t) \big\|^2$$
+
+Langkah 1: Weighted Centroids
+
+$$\bar{s} = \frac{\sum_{i=1}^{M} w_i s_i}{\sum_{i=1}^{M} w_i}, \qquad \bar{m} = \frac{\sum_{i=1}^{M} w_i m_i}{\sum_{i=1}^{M} w_i}$$
+
+Langkah 2: Centering (pindahkan titik ke pusat koordinat)
+
+$$s_i' = s_i - \bar{s}, \qquad m_i' = m_i - \bar{m}$$
+
+Langkah 3: Cross-Covariance Matrix
+
+$$H = \sum_{i=1}^{M} w_i \, m_i' (s_i')^\top = M \, W \, S^\top$$
+
+dimana $S, M \in \mathbb{R}^{2 \times M}$ adalah matriks yang kolomnya berisi titik-titik yang sudah di-center, dan $W = \operatorname{diag}(w_1, \dots, w_M)$.
+
+Langkah 4: Singular Value Decomposition
+
+$$H = U \Sigma V^\top$$
+
+dengan $U, V \in \mathbb{R}^{2 \times 2}$ orthonormal dan $\Sigma = \operatorname{diag}(\sigma_1, \sigma_2)$.
+
+Langkah 5: Rotasi Optimal
+
+$$R = U V^\top$$
+
+Jika $\det(R) < 0$ (menghasilkan refleksi, bukan rotasi murni), koreksi dengan membalik tanda baris pertama $V^\top$:
+
+$$\text{if } \det(R) < 0: \quad V^\top_{0,:} \gets -V^\top_{0,:}, \quad R = U V^\top$$
+
+Langkah 6: Translasi Optimal
+
+$$t = \bar{m} - R \bar{s}$$
+
+Langkah 7: Susun Rigid Transform 2D
+
+$$T_{\text{update}} = \begin{bmatrix} R & t \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} \cos\Delta\theta & -\sin\Delta\theta & t_x \\ \sin\Delta\theta & \cos\Delta\theta & t_y \\ 0 & 0 & 1 \end{bmatrix}$$
+
+Setelah iterasi, cek apakah transform update cukup kecil:
+
+$$\text{converged} \iff \|t\| < t_{\text{norm}} \land \big|\arctan2(R_{1,0}, R_{0,0})\big| < r_{\text{norm}}$$
+
+Default: $t_{\text{norm}} = 0.01\,\text{m}$, $r_{\text{norm}} = 0.01\,\text{rad}$ ($\approx 0.57^\circ$).
+
+Untuk mempercepat, hanya $1/s$ dari scan points yang digunakan:
+
+1. Pilih offset acak $o \in [0, s-1]$
+2. Ambil setiap point ke-$s$ mulai dari $o$:
+
+$$p_k' = p_{o + k \cdot s}, \quad k = 0, 1, \dots, \left\lfloor \frac{N}{s} \right\rfloor - 1$$
+
+Default $s = 3$ 

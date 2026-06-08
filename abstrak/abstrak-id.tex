@@ -1,0 +1,27 @@
+\begin{center}
+  \large\textbf{ABSTRAK}
+\end{center}
+
+\addcontentsline{toc}{chapter}{ABSTRAK}
+
+\vspace{2ex}
+
+\begingroup
+% Menghilangkan padding
+\setlength{\tabcolsep}{0pt}
+
+\noindent
+\begin{tabularx}{\textwidth}{l >{\centering}m{2em} X}
+  Nama Mahasiswa    & : & \name{}         \\
+
+  Judul Tugas Akhir & : & \tatitle{}      \\
+
+  Pembimbing        & : & 1. \advisor{}   \\
+                    &   & 2. \coadvisor{} \\
+\end{tabularx}
+\endgroup
+
+Indonesia, sebagai negara yang mengalami frekuensi bencana gempa bumi yang tinggi, seringkali harus melakukan misi Search and Rescue (SAR)  di lingkungan indoor yang berbahaya, menimbulkan risiko signifikan bagi petugas. Untuk mengurangi risiko tersebut, robot otonom dapat berperan dalam menggantikan peran manusia pada kondisi tertentu. Untuk dapat melakukan misinya secara otonom, robot perlu memiliki kemampuan navigasi yang dapat bekerja pada lingkungan pasca gempa yang bertingkat. Proposal tugas akhir ini membahas pengembangan metode navigasi menggunakan \emph{layered costmap} supaya robot dapat melintasi lingkungan tersebut. Skema ini merepresentasikan lingkungan bertingkat sebagai kumpulan \emph{costmap} berlapis. Tiap layer pada costmap menyimpan informasi krusial seperti rintangan statis, area \emph{obstacle dinamis}, zona inflasi, dan zona transisi antar \emph{map}, yang memungkinkan navigasi komprehensif. Dalam arsitektur navigasi yang dikembangkan, setiap lantai atau tingkat pada lingkungan \textit{indoor} direpresentasikan secara unik oleh satu \emph{map} individual. Pendekatan ini secara efektif menyederhanakan informasi lingkungan 3D menjadi representasi 2D yang dapat dikelola, sehingga memungkinkan penggunaan sensor \textit{Lidar} 2D untuk pengumpulan data lingkungan robot. Algoritma navigasi kemudian mengintegrasikan dan menggabungkan \emph{map-map} 2D individual ini menjadi satu kesatuan yang kohesif, memungkinkan robot untuk memahami dan menavigasi lingkungan multi-lantai secara komprehensif. Sistem ini memungkinkan robot untuk berpindah dari satu \emph{map} ke \emph{map} lain, sesuai dengan posisi fisiknya di antara lantai-lantai yang berbeda dalam bangunan. Algoritma navigasi ini akan diuji coba di lingkungan laboratorium yang dirancang untuk mensimulasikan kondisi pasca gempa.
+
+% % Ubah kata-kata berikut dengan kata kunci dari tugas akhir
+Kata Kunci:  \emph{Navigasi, Costmap, Robot, Antar lantai}

@@ -1,0 +1,1135 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{apa/apasortcite//global/global}
+    \entry{inverseKinematics}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=3840ee155c9e3a301dba23be27bf7369}{%
+           family={Djoko},
+           familyi={D\bibinitperiod},
+           given={Purwanto},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{3840ee155c9e3a301dba23be27bf7369}
+      \strng{fullhash}{3840ee155c9e3a301dba23be27bf7369}
+      \strng{bibnamehash}{3840ee155c9e3a301dba23be27bf7369}
+      \strng{authorbibnamehash}{3840ee155c9e3a301dba23be27bf7369}
+      \strng{authornamehash}{3840ee155c9e3a301dba23be27bf7369}
+      \strng{authorfullhash}{3840ee155c9e3a301dba23be27bf7369}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Bahan Kuliah Elektronika Industri dan Robotika}
+      \field{title}{Pengenalan Robot Industri, Kinematika, dan Perencanaan Gerak}
+      \field{year}{2024}
+    \endentry
+    \entry{10554226}{article}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=87137962870320a3205530de619c1e96}{%
+           family={Dologa},
+           familyi={D\bibinitperiod},
+           given={Răzvan\bibnamedelima Ștefan},
+           giveni={R\bibinitperiod\bibinitdelim Ș\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=d557e62c5d8bb374cc082a9b6170e3fa}{%
+           family={Vălean},
+           familyi={V\bibinitperiod},
+           given={Honoriu},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=e9ede828c7e7211dc2a689a8b0173141}{%
+           family={Ianosi},
+           familyi={I\bibinitperiod},
+           given={Alexandru},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{d8a5a5a387d5cc5245015c2183f1d319}
+      \strng{fullhash}{69ce8de85816b31ee6b454f6196f381e}
+      \strng{bibnamehash}{69ce8de85816b31ee6b454f6196f381e}
+      \strng{authorbibnamehash}{69ce8de85816b31ee6b454f6196f381e}
+      \strng{authornamehash}{d8a5a5a387d5cc5245015c2183f1d319}
+      \strng{authorfullhash}{69ce8de85816b31ee6b454f6196f381e}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2024 IEEE International Conference on Automation, Quality and Testing, Robotics (AQTR)}
+      \field{title}{Design of a Stepping Hexapod Bio-Inspired Robot}
+      \field{year}{2024}
+      \field{pages}{1\bibrangedash 6}
+      \range{pages}{6}
+      \verb{doi}
+      \verb 10.1109/AQTR61889.2024.10554226
+      \endverb
+      \keyw{Legged locomotion;Industries;Automation;Service robots;Focusing;Kinematics;Testing;Hexapod;CAD;PCB;Kinematics;modular platform;biomimetic;application}
+    \endentry
+    \entry{RobotHexapod}{article}{}
+      \name{author}{4}{}{%
+        {{un=0,uniquepart=base,hash=93b97cb262353b37af9f3f87e85559d7}{%
+           family={Gonzalez-de-Santos},
+           familyi={G\bibinithyphendelim S\bibinitperiod},
+           given={Pablo},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=e31dd8a4c49925bbcf1bb214c7b3effc}{%
+           family={Garcia},
+           familyi={G\bibinitperiod},
+           given={Elliot},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=f3bc1fb672b0adaa7bc4193f54ca5857}{%
+           family={Cobano},
+           familyi={C\bibinitperiod},
+           given={J.},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=197fbd172315b86f43d66cb074bf2307}{%
+           family={Ramirez},
+           familyi={R\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{47880e3d3f1e17d3ecbb8a3e641a9b9e}
+      \strng{fullhash}{42bcb6047adfdd8c7692b259916e12fa}
+      \strng{bibnamehash}{42bcb6047adfdd8c7692b259916e12fa}
+      \strng{authorbibnamehash}{42bcb6047adfdd8c7692b259916e12fa}
+      \strng{authornamehash}{47880e3d3f1e17d3ecbb8a3e641a9b9e}
+      \strng{authorfullhash}{42bcb6047adfdd8c7692b259916e12fa}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{1-889335-21-5}
+      \field{month}{01}
+      \field{title}{SIL06: A six-legged robot for humanitarian de-mining tasks}
+      \field{year}{2004}
+      \field{pages}{523\bibrangedash 528}
+      \range{pages}{6}
+      \verb{doi}
+      \verb 10.1109/WAC.2004.185271
+      \endverb
+    \endentry
+    \entry{SIC431}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=800c1b26873a5ebb93b90393c92c9fb3}{%
+           family={Incorporated},
+           familyi={I\bibinitperiod},
+           given={Diodes},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \strng{fullhash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \strng{bibnamehash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \strng{authorbibnamehash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \strng{authornamehash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \strng{authorfullhash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://www.diodes.com/datasheet/download/AP63200-AP63201-AP63203-AP63205.pdf}}
+      \field{title}{3.8V TO 32V INPUT, 2A LOW IQ SYNCHRONOUS BUCK WITH ENHANCED EMI REDUCTION}
+      \field{year}{2018}
+    \endentry
+    \entry{TPS259530DSGR}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=98891ef37ae74f3a00ae9a7c9c316e78}{%
+           family={Instruments},
+           familyi={I\bibinitperiod},
+           given={Texas},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{fullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{bibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorbibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authornamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorfullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \field{extraname}{1}
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://www.ti.com/lit/ds/symlink/tps2595.pdf}}
+      \field{title}{TPS2595xx 2.7 V to 18 V, 4-A, 34-m$\Omega$ eFuse With Fast Overvoltage Protection}
+      \field{year}{2018}
+    \endentry
+    \entry{TPD4E05U06DQA}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=98891ef37ae74f3a00ae9a7c9c316e78}{%
+           family={Instruments},
+           familyi={I\bibinitperiod},
+           given={Texas},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{fullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{bibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorbibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authornamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorfullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \field{extraname}{2}
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://www.ti.com/lit/ds/symlink/tpd4e05u06.pdf}}
+      \field{title}{TPDxE05U06 1, 4, 6 Channel ESD Protection Device for Super-Speed (Up to 6 Gbps) Interface}
+      \field{year}{2024}
+    \endentry
+    \entry{TPS25200}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=98891ef37ae74f3a00ae9a7c9c316e78}{%
+           family={Instruments},
+           familyi={I\bibinitperiod},
+           given={Texas},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{fullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{bibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorbibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authornamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorfullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \field{extraname}{3}
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://www.ti.com/lit/ds/symlink/tps25200.pdf}}
+      \field{title}{TPS25200 5V eFuse With Precision Adjustable Current Limit and Overvoltage Clamp}
+      \field{year}{2025}
+    \endentry
+    \entry{lloyd2022quik}{article}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=e13711d34ba6173618726425ad5de9d1}{%
+           family={Lloyd},
+           familyi={L\bibinitperiod},
+           given={Steffan},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=923dc1842fe49e34928d16821f4d61ed}{%
+           family={Irani},
+           familyi={I\bibinitperiod},
+           given={Rishad},
+           giveni={R\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=b0e4d3d0eb4f13cbeb203eaa9ba942ca}{%
+           family={Ahmadi},
+           familyi={A\bibinitperiod},
+           given={Mojtaba},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{8655795e52ad77ae942090159c1263a4}
+      \strng{fullhash}{f1957e086844a5605f113386ac4efb12}
+      \strng{bibnamehash}{f1957e086844a5605f113386ac4efb12}
+      \strng{authorbibnamehash}{f1957e086844a5605f113386ac4efb12}
+      \strng{authornamehash}{8655795e52ad77ae942090159c1263a4}
+      \strng{authorfullhash}{f1957e086844a5605f113386ac4efb12}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Transactions on Robotics}
+      \field{number}{3}
+      \field{title}{Fast and Robust Inverse Kinematics of Serial Robots using Halley’s Method}
+      \field{volume}{38}
+      \field{year}{2022}
+      \field{pages}{1769\bibrangedash 1785}
+      \range{pages}{17}
+      \verb{doi}
+      \verb 10.1109/TRO.2022.3162954
+      \endverb
+    \endentry
+    \entry{LinierInterpolation}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=f5a564ed2081dafb1b121aa49b20eb4b}{%
+           family={Lothar},
+           familyi={L\bibinitperiod},
+           given={Reichel},
+           giveni={R\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \strng{fullhash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \strng{bibnamehash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \strng{authorbibnamehash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \strng{authornamehash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \strng{authorfullhash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Kent State University}
+      \field{title}{\emph{Introduction to Numerical Computing I}}
+      \field{year}{2009}
+    \endentry
+    \entry{ModernRobotics}{book}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=ab9086b1452a1a9813fc6765151b4f61}{%
+           family={Lynch},
+           familyi={L\bibinitperiod},
+           given={Kevin\bibnamedelima M.},
+           giveni={K\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=66f19f2d439b6eb60c024ab622b0389f}{%
+           family={Park},
+           familyi={P\bibinitperiod},
+           given={Frank\bibnamedelima C.},
+           giveni={F\bibinitperiod\bibinitdelim C\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {USA}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{fullhash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{bibnamehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{authorbibnamehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{authornamehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{authorfullhash}{8d01efb70f6cec86f711e78e22f97a48}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{1st}
+      \field{isbn}{1107156300}
+      \field{title}{Modern Robotics: Mechanics, Planning, and Control}
+      \field{year}{2017}
+    \endentry
+    \entry{GaitRobot}{book}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=38f7a70abf2d86e432d63826f560ab93}{%
+           family={Siciliano},
+           familyi={S\bibinitperiod},
+           given={Bruno},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=a1ed48939870abd896792330bc735967}{%
+           family={Khatib},
+           familyi={K\bibinitperiod},
+           given={Oussama},
+           giveni={O\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Berlin, Heidelberg}%
+      }
+      \list{publisher}{1}{%
+        {Springer-Verlag}%
+      }
+      \strng{namehash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \strng{fullhash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \strng{bibnamehash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \strng{authorbibnamehash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \strng{authornamehash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \strng{authorfullhash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{354023957X}
+      \field{title}{Springer Handbook of Robotics}
+      \field{year}{2007}
+    \endentry
+    \entry{GaitSwingSupport}{article}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=c0a46c31c644a3334e0b1826e7e4071a}{%
+           family={Sorin},
+           familyi={S\bibinitperiod},
+           given={Mănoiu-Olaru},
+           giveni={M\bibinithyphendelim O\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=ad7d82b0e631cbf008d9c48aac04d653}{%
+           family={Mircea},
+           familyi={M\bibinitperiod},
+           given={Niţulescu},
+           giveni={N\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{4ba00bf203fa81666fb425676a013a1e}
+      \strng{fullhash}{4ba00bf203fa81666fb425676a013a1e}
+      \strng{bibnamehash}{4ba00bf203fa81666fb425676a013a1e}
+      \strng{authorbibnamehash}{4ba00bf203fa81666fb425676a013a1e}
+      \strng{authornamehash}{4ba00bf203fa81666fb425676a013a1e}
+      \strng{authorfullhash}{4ba00bf203fa81666fb425676a013a1e}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2012 16th International Conference on System Theory, Control and Computing (ICSTCC)}
+      \field{title}{The modeling of the hexapod mobile robot leg and associated interpolated movements while stepping}
+      \field{year}{2012}
+      \keyw{Legged locomotion;Joints;Robot kinematics;Trajectory;Kinematics;Mathematical model}
+    \endentry
+    \entry{Thilderkvist2015}{thesis}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=db6189d24e2a482bbc7e42ef4a55c8e1}{%
+           family={Thilderkvist},
+           familyi={T\bibinitperiod},
+           given={Dan},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=726359b07ff22898e5d72ad6b7adefa8}{%
+           family={Svensson},
+           familyi={S\bibinitperiod},
+           given={Sebastian},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{institution}{1}{%
+        {Lund University, Department of Automatic Control}%
+      }
+      \list{location}{1}{%
+        {Lund, Sweden}%
+      }
+      \strng{namehash}{742a028985b2303bed3257be02dc4677}
+      \strng{fullhash}{742a028985b2303bed3257be02dc4677}
+      \strng{bibnamehash}{742a028985b2303bed3257be02dc4677}
+      \strng{authorbibnamehash}{742a028985b2303bed3257be02dc4677}
+      \strng{authornamehash}{742a028985b2303bed3257be02dc4677}
+      \strng{authorfullhash}{742a028985b2303bed3257be02dc4677}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{ISRN LUTFD2/TFRT--5971--SE}
+      \field{title}{Motion Control of Hexapod using Model-Based Design}
+      \field{type}{MSc Thesis}
+      \field{year}{2015}
+    \endentry
+    \entry{wang2024kinematics}{article}{}
+      \name{author}{6}{}{%
+        {{un=0,uniquepart=base,hash=2bd81199d4df903bf67fd2812eaec7de}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Xinan},
+           giveni={X\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5eb4c3e75d14d3af4ceb7f957e07f41c}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Bing},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=ada75a07b25d5c53326d4404d66009ef}{%
+           family={Liu},
+           familyi={L\bibinitperiod},
+           given={Zhanqiang},
+           giveni={Z\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=65afd11c8e50cacdbd6ae4f35d03e308}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Feng},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5db6d8bf01b58c9b32aabc3e45b86a57}{%
+           family={Miao},
+           familyi={M\bibinitperiod},
+           given={Jiabing},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=296742b446c8455407f6fa84879c3ec6}{%
+           family={Wei},
+           familyi={W\bibinitperiod},
+           given={Yulan},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{5340fbe4bc8ba6d5ab7aecce5718f7b0}
+      \strng{fullhash}{ea1c4747ecde15dabcf3aa1c7c59924c}
+      \strng{bibnamehash}{ea1c4747ecde15dabcf3aa1c7c59924c}
+      \strng{authorbibnamehash}{ea1c4747ecde15dabcf3aa1c7c59924c}
+      \strng{authornamehash}{5340fbe4bc8ba6d5ab7aecce5718f7b0}
+      \strng{authorfullhash}{ea1c4747ecde15dabcf3aa1c7c59924c}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2024 6th International Symposium on Robotics \& Intelligent Manufacturing Technology (ISRIMT)}
+      \field{title}{Kinematics Analysis of 6-DOF Humanoid Robotic Arm}
+      \field{year}{2024}
+      \field{pages}{211\bibrangedash 215}
+      \range{pages}{5}
+      \verb{doi}
+      \verb 10.1109/ISRIMT63979.2024.10875225
+      \endverb
+      \keyw{Humanoid robots,Kinematics,Manipulators,6-DOF,Mathematical models,Numerical models,Manufacturing,Faces,inverse kinematics,numerical method,algebraic method,humanoid robotic arm}
+    \endentry
+    \entry{GaitAlgorithm}{article}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=ee68fa5a6828d61bdf80f8d4445b5fdb}{%
+           family={Zak},
+           familyi={Z\bibinitperiod},
+           given={Marek},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5dce0914a47d7a51b7a02cffe3f48a54}{%
+           family={Rozman},
+           familyi={R\bibinitperiod},
+           given={Jaroslav},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=8a63fa10fcb285bdac8c889d5cbd67da}{%
+           family={Zboril},
+           familyi={Z\bibinitperiod},
+           given={Frantisek},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{0f6144ca4690dc6a2ef26a97cfbfca5c}
+      \strng{fullhash}{2e477865c1984f5561c9d03ccc81e224}
+      \strng{bibnamehash}{2e477865c1984f5561c9d03ccc81e224}
+      \strng{authorbibnamehash}{2e477865c1984f5561c9d03ccc81e224}
+      \strng{authornamehash}{0f6144ca4690dc6a2ef26a97cfbfca5c}
+      \strng{authorfullhash}{2e477865c1984f5561c9d03ccc81e224}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Open Computer Science}
+      \field{month}{12}
+      \field{title}{Design and Control of 7-DOF Omni-directional Hexapod Robot}
+      \field{volume}{11}
+      \field{year}{2020}
+      \field{pages}{80\bibrangedash 89}
+      \range{pages}{10}
+      \verb{doi}
+      \verb 10.1515/comp-2020-0189
+      \endverb
+    \endentry
+  \enddatalist
+  \datalist[entry]{apa/global//global/global}
+    \entry{inverseKinematics}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=3840ee155c9e3a301dba23be27bf7369}{%
+           family={Djoko},
+           familyi={D\bibinitperiod},
+           given={Purwanto},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{3840ee155c9e3a301dba23be27bf7369}
+      \strng{fullhash}{3840ee155c9e3a301dba23be27bf7369}
+      \strng{bibnamehash}{3840ee155c9e3a301dba23be27bf7369}
+      \strng{authorbibnamehash}{3840ee155c9e3a301dba23be27bf7369}
+      \strng{authornamehash}{3840ee155c9e3a301dba23be27bf7369}
+      \strng{authorfullhash}{3840ee155c9e3a301dba23be27bf7369}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Bahan Kuliah Elektronika Industri dan Robotika}
+      \field{title}{Pengenalan Robot Industri, Kinematika, dan Perencanaan Gerak}
+      \field{year}{2024}
+    \endentry
+    \entry{10554226}{article}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=87137962870320a3205530de619c1e96}{%
+           family={Dologa},
+           familyi={D\bibinitperiod},
+           given={Răzvan\bibnamedelima Ștefan},
+           giveni={R\bibinitperiod\bibinitdelim Ș\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=d557e62c5d8bb374cc082a9b6170e3fa}{%
+           family={Vălean},
+           familyi={V\bibinitperiod},
+           given={Honoriu},
+           giveni={H\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=e9ede828c7e7211dc2a689a8b0173141}{%
+           family={Ianosi},
+           familyi={I\bibinitperiod},
+           given={Alexandru},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{d8a5a5a387d5cc5245015c2183f1d319}
+      \strng{fullhash}{69ce8de85816b31ee6b454f6196f381e}
+      \strng{bibnamehash}{69ce8de85816b31ee6b454f6196f381e}
+      \strng{authorbibnamehash}{69ce8de85816b31ee6b454f6196f381e}
+      \strng{authornamehash}{d8a5a5a387d5cc5245015c2183f1d319}
+      \strng{authorfullhash}{69ce8de85816b31ee6b454f6196f381e}
+      \field{sortinit}{D}
+      \field{sortinithash}{6f385f66841fb5e82009dc833c761848}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2024 IEEE International Conference on Automation, Quality and Testing, Robotics (AQTR)}
+      \field{title}{Design of a Stepping Hexapod Bio-Inspired Robot}
+      \field{year}{2024}
+      \field{pages}{1\bibrangedash 6}
+      \range{pages}{6}
+      \verb{doi}
+      \verb 10.1109/AQTR61889.2024.10554226
+      \endverb
+      \keyw{Legged locomotion;Industries;Automation;Service robots;Focusing;Kinematics;Testing;Hexapod;CAD;PCB;Kinematics;modular platform;biomimetic;application}
+    \endentry
+    \entry{RobotHexapod}{article}{}
+      \name{author}{4}{}{%
+        {{un=0,uniquepart=base,hash=93b97cb262353b37af9f3f87e85559d7}{%
+           family={Gonzalez-de-Santos},
+           familyi={G\bibinithyphendelim S\bibinitperiod},
+           given={Pablo},
+           giveni={P\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=e31dd8a4c49925bbcf1bb214c7b3effc}{%
+           family={Garcia},
+           familyi={G\bibinitperiod},
+           given={Elliot},
+           giveni={E\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=f3bc1fb672b0adaa7bc4193f54ca5857}{%
+           family={Cobano},
+           familyi={C\bibinitperiod},
+           given={J.},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=197fbd172315b86f43d66cb074bf2307}{%
+           family={Ramirez},
+           familyi={R\bibinitperiod},
+           given={A.},
+           giveni={A\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{47880e3d3f1e17d3ecbb8a3e641a9b9e}
+      \strng{fullhash}{42bcb6047adfdd8c7692b259916e12fa}
+      \strng{bibnamehash}{42bcb6047adfdd8c7692b259916e12fa}
+      \strng{authorbibnamehash}{42bcb6047adfdd8c7692b259916e12fa}
+      \strng{authornamehash}{47880e3d3f1e17d3ecbb8a3e641a9b9e}
+      \strng{authorfullhash}{42bcb6047adfdd8c7692b259916e12fa}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{1-889335-21-5}
+      \field{month}{01}
+      \field{title}{SIL06: A six-legged robot for humanitarian de-mining tasks}
+      \field{year}{2004}
+      \field{pages}{523\bibrangedash 528}
+      \range{pages}{6}
+      \verb{doi}
+      \verb 10.1109/WAC.2004.185271
+      \endverb
+    \endentry
+    \entry{SIC431}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=800c1b26873a5ebb93b90393c92c9fb3}{%
+           family={Incorporated},
+           familyi={I\bibinitperiod},
+           given={Diodes},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \strng{fullhash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \strng{bibnamehash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \strng{authorbibnamehash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \strng{authornamehash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \strng{authorfullhash}{800c1b26873a5ebb93b90393c92c9fb3}
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://www.diodes.com/datasheet/download/AP63200-AP63201-AP63203-AP63205.pdf}}
+      \field{title}{3.8V TO 32V INPUT, 2A LOW IQ SYNCHRONOUS BUCK WITH ENHANCED EMI REDUCTION}
+      \field{year}{2018}
+    \endentry
+    \entry{TPS259530DSGR}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=98891ef37ae74f3a00ae9a7c9c316e78}{%
+           family={Instruments},
+           familyi={I\bibinitperiod},
+           given={Texas},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{fullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{bibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorbibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authornamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorfullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \field{extraname}{1}
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://www.ti.com/lit/ds/symlink/tps2595.pdf}}
+      \field{title}{TPS2595xx 2.7 V to 18 V, 4-A, 34-m$\Omega$ eFuse With Fast Overvoltage Protection}
+      \field{year}{2018}
+    \endentry
+    \entry{TPD4E05U06DQA}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=98891ef37ae74f3a00ae9a7c9c316e78}{%
+           family={Instruments},
+           familyi={I\bibinitperiod},
+           given={Texas},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{fullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{bibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorbibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authornamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorfullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \field{extraname}{2}
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://www.ti.com/lit/ds/symlink/tpd4e05u06.pdf}}
+      \field{title}{TPDxE05U06 1, 4, 6 Channel ESD Protection Device for Super-Speed (Up to 6 Gbps) Interface}
+      \field{year}{2024}
+    \endentry
+    \entry{TPS25200}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=98891ef37ae74f3a00ae9a7c9c316e78}{%
+           family={Instruments},
+           familyi={I\bibinitperiod},
+           given={Texas},
+           giveni={T\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{fullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{bibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorbibnamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authornamehash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \strng{authorfullhash}{98891ef37ae74f3a00ae9a7c9c316e78}
+      \field{extraname}{3}
+      \field{sortinit}{I}
+      \field{sortinithash}{8d291c51ee89b6cd86bf5379f0b151d8}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{\url{https://www.ti.com/lit/ds/symlink/tps25200.pdf}}
+      \field{title}{TPS25200 5V eFuse With Precision Adjustable Current Limit and Overvoltage Clamp}
+      \field{year}{2025}
+    \endentry
+    \entry{lloyd2022quik}{article}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=e13711d34ba6173618726425ad5de9d1}{%
+           family={Lloyd},
+           familyi={L\bibinitperiod},
+           given={Steffan},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=923dc1842fe49e34928d16821f4d61ed}{%
+           family={Irani},
+           familyi={I\bibinitperiod},
+           given={Rishad},
+           giveni={R\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=b0e4d3d0eb4f13cbeb203eaa9ba942ca}{%
+           family={Ahmadi},
+           familyi={A\bibinitperiod},
+           given={Mojtaba},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{8655795e52ad77ae942090159c1263a4}
+      \strng{fullhash}{f1957e086844a5605f113386ac4efb12}
+      \strng{bibnamehash}{f1957e086844a5605f113386ac4efb12}
+      \strng{authorbibnamehash}{f1957e086844a5605f113386ac4efb12}
+      \strng{authornamehash}{8655795e52ad77ae942090159c1263a4}
+      \strng{authorfullhash}{f1957e086844a5605f113386ac4efb12}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{IEEE Transactions on Robotics}
+      \field{number}{3}
+      \field{title}{Fast and Robust Inverse Kinematics of Serial Robots using Halley’s Method}
+      \field{volume}{38}
+      \field{year}{2022}
+      \field{pages}{1769\bibrangedash 1785}
+      \range{pages}{17}
+      \verb{doi}
+      \verb 10.1109/TRO.2022.3162954
+      \endverb
+    \endentry
+    \entry{LinierInterpolation}{misc}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=f5a564ed2081dafb1b121aa49b20eb4b}{%
+           family={Lothar},
+           familyi={L\bibinitperiod},
+           given={Reichel},
+           giveni={R\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \strng{fullhash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \strng{bibnamehash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \strng{authorbibnamehash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \strng{authornamehash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \strng{authorfullhash}{f5a564ed2081dafb1b121aa49b20eb4b}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Kent State University}
+      \field{title}{\emph{Introduction to Numerical Computing I}}
+      \field{year}{2009}
+    \endentry
+    \entry{ModernRobotics}{book}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=ab9086b1452a1a9813fc6765151b4f61}{%
+           family={Lynch},
+           familyi={L\bibinitperiod},
+           given={Kevin\bibnamedelima M.},
+           giveni={K\bibinitperiod\bibinitdelim M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=66f19f2d439b6eb60c024ab622b0389f}{%
+           family={Park},
+           familyi={P\bibinitperiod},
+           given={Frank\bibnamedelima C.},
+           giveni={F\bibinitperiod\bibinitdelim C\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {USA}%
+      }
+      \list{publisher}{1}{%
+        {Cambridge University Press}%
+      }
+      \strng{namehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{fullhash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{bibnamehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{authorbibnamehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{authornamehash}{8d01efb70f6cec86f711e78e22f97a48}
+      \strng{authorfullhash}{8d01efb70f6cec86f711e78e22f97a48}
+      \field{sortinit}{L}
+      \field{sortinithash}{7c47d417cecb1f4bd38d1825c427a61a}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{1st}
+      \field{isbn}{1107156300}
+      \field{title}{Modern Robotics: Mechanics, Planning, and Control}
+      \field{year}{2017}
+    \endentry
+    \entry{GaitRobot}{book}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=38f7a70abf2d86e432d63826f560ab93}{%
+           family={Siciliano},
+           familyi={S\bibinitperiod},
+           given={Bruno},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=a1ed48939870abd896792330bc735967}{%
+           family={Khatib},
+           familyi={K\bibinitperiod},
+           given={Oussama},
+           giveni={O\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{location}{1}{%
+        {Berlin, Heidelberg}%
+      }
+      \list{publisher}{1}{%
+        {Springer-Verlag}%
+      }
+      \strng{namehash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \strng{fullhash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \strng{bibnamehash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \strng{authorbibnamehash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \strng{authornamehash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \strng{authorfullhash}{0bdecfa7d3574a8d04c99af970a7506e}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{354023957X}
+      \field{title}{Springer Handbook of Robotics}
+      \field{year}{2007}
+    \endentry
+    \entry{GaitSwingSupport}{article}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=c0a46c31c644a3334e0b1826e7e4071a}{%
+           family={Sorin},
+           familyi={S\bibinitperiod},
+           given={Mănoiu-Olaru},
+           giveni={M\bibinithyphendelim O\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=ad7d82b0e631cbf008d9c48aac04d653}{%
+           family={Mircea},
+           familyi={M\bibinitperiod},
+           given={Niţulescu},
+           giveni={N\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{4ba00bf203fa81666fb425676a013a1e}
+      \strng{fullhash}{4ba00bf203fa81666fb425676a013a1e}
+      \strng{bibnamehash}{4ba00bf203fa81666fb425676a013a1e}
+      \strng{authorbibnamehash}{4ba00bf203fa81666fb425676a013a1e}
+      \strng{authornamehash}{4ba00bf203fa81666fb425676a013a1e}
+      \strng{authorfullhash}{4ba00bf203fa81666fb425676a013a1e}
+      \field{sortinit}{S}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2012 16th International Conference on System Theory, Control and Computing (ICSTCC)}
+      \field{title}{The modeling of the hexapod mobile robot leg and associated interpolated movements while stepping}
+      \field{year}{2012}
+      \keyw{Legged locomotion;Joints;Robot kinematics;Trajectory;Kinematics;Mathematical model}
+    \endentry
+    \entry{Thilderkvist2015}{thesis}{}
+      \name{author}{2}{}{%
+        {{un=0,uniquepart=base,hash=db6189d24e2a482bbc7e42ef4a55c8e1}{%
+           family={Thilderkvist},
+           familyi={T\bibinitperiod},
+           given={Dan},
+           giveni={D\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=726359b07ff22898e5d72ad6b7adefa8}{%
+           family={Svensson},
+           familyi={S\bibinitperiod},
+           given={Sebastian},
+           giveni={S\bibinitperiod},
+           givenun=0}}%
+      }
+      \list{institution}{1}{%
+        {Lund University, Department of Automatic Control}%
+      }
+      \list{location}{1}{%
+        {Lund, Sweden}%
+      }
+      \strng{namehash}{742a028985b2303bed3257be02dc4677}
+      \strng{fullhash}{742a028985b2303bed3257be02dc4677}
+      \strng{bibnamehash}{742a028985b2303bed3257be02dc4677}
+      \strng{authorbibnamehash}{742a028985b2303bed3257be02dc4677}
+      \strng{authornamehash}{742a028985b2303bed3257be02dc4677}
+      \strng{authorfullhash}{742a028985b2303bed3257be02dc4677}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{ISRN LUTFD2/TFRT--5971--SE}
+      \field{title}{Motion Control of Hexapod using Model-Based Design}
+      \field{type}{MSc Thesis}
+      \field{year}{2015}
+    \endentry
+    \entry{wang2024kinematics}{article}{}
+      \name{author}{6}{}{%
+        {{un=0,uniquepart=base,hash=2bd81199d4df903bf67fd2812eaec7de}{%
+           family={Wang},
+           familyi={W\bibinitperiod},
+           given={Xinan},
+           giveni={X\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5eb4c3e75d14d3af4ceb7f957e07f41c}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Bing},
+           giveni={B\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=ada75a07b25d5c53326d4404d66009ef}{%
+           family={Liu},
+           familyi={L\bibinitperiod},
+           given={Zhanqiang},
+           giveni={Z\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=65afd11c8e50cacdbd6ae4f35d03e308}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Feng},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5db6d8bf01b58c9b32aabc3e45b86a57}{%
+           family={Miao},
+           familyi={M\bibinitperiod},
+           given={Jiabing},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=296742b446c8455407f6fa84879c3ec6}{%
+           family={Wei},
+           familyi={W\bibinitperiod},
+           given={Yulan},
+           giveni={Y\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{5340fbe4bc8ba6d5ab7aecce5718f7b0}
+      \strng{fullhash}{ea1c4747ecde15dabcf3aa1c7c59924c}
+      \strng{bibnamehash}{ea1c4747ecde15dabcf3aa1c7c59924c}
+      \strng{authorbibnamehash}{ea1c4747ecde15dabcf3aa1c7c59924c}
+      \strng{authornamehash}{5340fbe4bc8ba6d5ab7aecce5718f7b0}
+      \strng{authorfullhash}{ea1c4747ecde15dabcf3aa1c7c59924c}
+      \field{sortinit}{W}
+      \field{sortinithash}{4315d78024d0cea9b57a0c6f0e35ed0d}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{2024 6th International Symposium on Robotics \& Intelligent Manufacturing Technology (ISRIMT)}
+      \field{title}{Kinematics Analysis of 6-DOF Humanoid Robotic Arm}
+      \field{year}{2024}
+      \field{pages}{211\bibrangedash 215}
+      \range{pages}{5}
+      \verb{doi}
+      \verb 10.1109/ISRIMT63979.2024.10875225
+      \endverb
+      \keyw{Humanoid robots,Kinematics,Manipulators,6-DOF,Mathematical models,Numerical models,Manufacturing,Faces,inverse kinematics,numerical method,algebraic method,humanoid robotic arm}
+    \endentry
+    \entry{GaitAlgorithm}{article}{}
+      \name{author}{3}{}{%
+        {{un=0,uniquepart=base,hash=ee68fa5a6828d61bdf80f8d4445b5fdb}{%
+           family={Zak},
+           familyi={Z\bibinitperiod},
+           given={Marek},
+           giveni={M\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=5dce0914a47d7a51b7a02cffe3f48a54}{%
+           family={Rozman},
+           familyi={R\bibinitperiod},
+           given={Jaroslav},
+           giveni={J\bibinitperiod},
+           givenun=0}}%
+        {{un=0,uniquepart=base,hash=8a63fa10fcb285bdac8c889d5cbd67da}{%
+           family={Zboril},
+           familyi={Z\bibinitperiod},
+           given={Frantisek},
+           giveni={F\bibinitperiod},
+           givenun=0}}%
+      }
+      \strng{namehash}{0f6144ca4690dc6a2ef26a97cfbfca5c}
+      \strng{fullhash}{2e477865c1984f5561c9d03ccc81e224}
+      \strng{bibnamehash}{2e477865c1984f5561c9d03ccc81e224}
+      \strng{authorbibnamehash}{2e477865c1984f5561c9d03ccc81e224}
+      \strng{authornamehash}{0f6144ca4690dc6a2ef26a97cfbfca5c}
+      \strng{authorfullhash}{2e477865c1984f5561c9d03ccc81e224}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{extradatescope}{labelyear}
+      \field{labeldatesource}{}
+      \true{uniqueprimaryauthor}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Open Computer Science}
+      \field{month}{12}
+      \field{title}{Design and Control of 7-DOF Omni-directional Hexapod Robot}
+      \field{volume}{11}
+      \field{year}{2020}
+      \field{pages}{80\bibrangedash 89}
+      \range{pages}{10}
+      \verb{doi}
+      \verb 10.1515/comp-2020-0189
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
