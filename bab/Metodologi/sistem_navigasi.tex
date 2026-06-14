@@ -1,25 +1,13 @@
-Placeholder
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{gambar/draft_navigation_flow.drawio.png}
+\caption{Diagram Navigasi}
+\label{fig:main_navigation_flow}
+\end{figure}
 
-Map Server mempublish map utama dan map transisi
-Map utama adalah hasil kombinasi dari masing-masing map setap region
-Map transisi adalah map yang menyimpan informasi sementara
-Tf dan initial pose
-TF memberikan hubungan koordinat antar komponen robot, seperti antara posisi lidar dan robot utama
-Initial pose adalah posisi dan orientasi awal robot
-Costmap generation
-Local costmap menerima data dari lidar untuk membangun obstacle layer, yang digunakan untuk menghindari obstacle yang tidak ada di map
-Global costmap membangun data dari main map untuk menghasilkan static layer dan inflation layer, fungsinya untuk membantu global planner membuat path yang menghindari obstacle statis. 
-Lalu menggunakan transition map untuk membangun transition layer, yang fungsinya memudahkan transisi antar map pada zona yang sulit mendapat lokalisasi
-Lokalisasi ICP dan map jumper
-ICP menerima TF dan pose untuk menentukan posisi awal robot. Map jumper membaca posisi robot dari ICP, lalu saat berada di sel transisi atau expansi, maka melakukan pemindahan pose robot ke map selanjutnya
-Path interceptor dan Planner
-Path interceptor menerima goal navigasi, lalu apabila goal berada di region map berbeda, maka diberi goal sementara yang bertuju ke zona transisi. Sementara global planner membuat path menuju zona transisi
-Path tracker mengikuti local path yang dihasilkan dan menghasilkan command velocity vektor yang digunakan untuk gerak hexapod
-Robot sampai ke lokasi.
 
 
 \subsection{Lokalisasi Iterative Closest Point (ICP)}
-\label{sec:subsystemnavigasi}
 
 \subsubsection{Prekomputasi KNN}
 Sistem ini melakukan pre-komputasi atas semua korespondensi saat menerima \emph{map} baru lalu menyimpan informasi tersebut di dalam tabel hash. Ini memungkinkan karena \emph{occupancy grid} sudah diketahui dan bersifat diskrit, sehingga dapat diketahui relasi antara sel bebas yang berada di dekat tembok dengan \emph{K nearest} sel rintangan.
@@ -135,4 +123,349 @@ Untuk mempercepat, hanya $1/s$ dari scan points yang digunakan:
 
 $$p_k' = p_{o + k \cdot s}, \quad k = 0, 1, \dots, \left\lfloor \frac{N}{s} \right\rfloor - 1$$
 
-Default $s = 3$ 
+Default $s = 3$
+
+\subsection{Costmap}
+
+Costmap adalah representasi grid yang menyimpan informasi biaya untuk navigasi. Setiap sel dalam costmap memiliki nilai biaya yang mencerminkan kesulitan atau risiko melewati area tersebut. Nilai biaya ini dapat dipengaruhi oleh berbagai faktor seperti keberadaan rintangan. Costmap menyimpan informasi map grid 2D dalam bentuk array 1D 
+
+\begin{table}[H]
+\centering
+\caption{Nilai konstanta costmap}
+\label{tab:costmap_constants}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Nama Konstanta} & \textbf{Nilai} & \textbf{Makna} \\
+\midrule
+\texttt{NO\_INFORMATION}                & 255 & Tidak diketahui (\emph{unknown}) \\
+\texttt{LETHAL\_OBSTACLE}               & 254 & Obstacle mematikan  \\
+\texttt{INSCRIBED\_INFLATED\_OBSTACLE}  & 253 & Batas terluar inflasi obstacle \\
+\texttt{INFLATED\_OBSTACLE}              & 6-252 & Inflasi obstacle \\
+\texttt{TRANSITION\_CELL}                 & 1-5 & Area transisi antar region \\
+\texttt{FREE\_SPACE}                    & 0   & Ruang bebas  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Indeks Grid
+
+konversi dari koordinat grid 2D $(m_x, m_y)$ ke flat index 1D:
+
+$$i = m_y \cdot W + m_x$$
+
+dimana $W$ adalah lebar grid (jumlah cell per baris).
+
+Koordinat Dunia - Grid
+
+Diberikan origin grid di $(o_x, o_y)$ dan resolusi $r$ (meter per cell):
+
+**World → Grid:**
+
+$$m_x = \left\lfloor \frac{w_x - o_x}{r} \right\rfloor, \qquad m_y = \left\lfloor \frac{w_y - o_y}{r} \right\rfloor$$
+
+**Grid → World** :
+
+$$w_x = o_x + \left(m_x + \frac{1}{2}\right) \cdot r, \qquad w_y = o_y + \left(m_y + \frac{1}{2}\right) \cdot r$$
+
+1.4 Rolling Window
+
+Untuk local costmap yang bergerak mengikuti robot, origin grid digeser:
+
+$$\Delta_x = \lfloor \text{new\_origin}_x - \text{old\_origin}_x \rfloor, \quad \Delta_y = \lfloor \text{new\_origin}_y - \text{old\_origin}_y \rfloor$$
+
+Array costmap digeser sebesar $$(\Delta_x, \Delta_y)$$ dan cell baru diisi dengan NO\_INFORMATION.
+
+% 1. Jika rolling window, geser origin ke pusat robot
+% 2. Reset bounds: min_x = max_x = robot_x, min_y = max_y = robot_y
+% 3. Untuk setiap layer (urut):
+%      layer->updateBounds(robot_x, robot_y, robot_yaw, &min_x, &min_y, &max_x, &max_y)
+%      → perluas bounds sesuai kebutuhan layer
+% 4. Konversi bounds ke cell coordinates:
+%      worldToMapEnforceBounds(min_x, min_y, &cell_min_x, &cell_min_y)
+%      worldToMapEnforceBounds(max_x, max_y, &cell_max_x, &cell_max_y)
+% 5. Reset region [cell_min..cell_max] ke nilai default
+% 6. Untuk setiap layer (urut):
+%      layer->updateCosts(master, cell_min_x, cell_min_y, cell_max_x, cell_max_y)
+%      → layer menulis cost ke master
+
+
+
+\subsubsection{Static Layer}
+% \label{staticlayer}
+Static layer adalah lapisan costmap paling dasar yang menyimpan informasi \emph{known obstacle} atau tembok yang sudah diketahui. Lapisan costmap ini mengkonversi setiap sel dari nilai occupancy grid (0-100) ke nilai biaya costmap internal (0-255). Sel yang tidak diketahui (unknown) diberi biaya tertinggi, sel bebas diberi biaya terendah, dan sel yang terisi (occupied) diberi biaya tinggi. 
+
+$$C_{\text{internal}} = \begin{cases} 255 & \text{if } OG = -1 \text{ (unknown)} \\ 0 & \text{if } OG = 0 \text{ (free)} \\ 254 & \text{if } OG \geq 100 \text{ (occupied)} \\  \end{cases}$$
+
+\subsubsection{Obstacle Layer}
+Obstacle layer dirancang untuk menangani objek-objek dinamis atau rintangan yang baru terdeteksi di lingkungan. Informasi pada lapisan ini diperoleh secara real-time dari sensor LiDAR robot, yang terus-menerus memindai area sekitar dan memperbarui \emph{costmap} sesuai dengan obstacle yang terdeteksi. Lapisan ini memiliki batasan jangkauan observasi maksimum, yang jaraknya disesuaikan berdasarkan jarak \emph{pointcloud} maksimum dari sensor LiDAR, yang berarti hanya rintangan dalam radius pandang sensor yang akan direpresentasikan di lapisan \emph{costmap} ini.
+
+Untuk setiap beam laser dengan range $r$ dan sudut $\theta$:
+
+\begin{enumerate}
+  \item Hitung endpoint dalam frame sensor: $(r\cos\theta,\; r\sin\theta)$
+  \item Transform ke frame map via TF
+  \item Konversi ke cell: $(m_x, m_y) = \text{worldToMap}(x, y)$
+  \item Set cell ke \texttt{LETHAL\_OBSTACLE} (254)
+\end{enumerate}
+
+Gunakan algoritma **Bresenham 2D** untuk menggambar garis dari robot ke endpoint sensor. Semua cell yang dilewati garis (sebelum endpoint) di-clear:
+
+$$C_{\text{master}}(m_x, m_y) = 0 \quad \forall \text{cell di sepanjang ray} \text{ (kecuali endpoint)}$$
+
+Bresenham 2D Raytracing
+
+Algoritma Bresenham memilih pixel-pixel yang mendekati garis lurus antara dua titik grid. Untuk setiap langkah, algoritma memutuskan apakah akan bergerak di sumbu x, y, atau keduanya berdasarkan error accumulator:
+
+Diberikan titik awal $(x_0, y_0)$ dan titik akhir $(x_1, y_1)$:
+
+$$\Delta_x = |x_1 - x_0|, \quad \Delta_y = |y_1 - y_0|$$
+
+$$\text{err} = \Delta_x - \Delta_y, \quad s_x = \text{sign}(x_1 - x_0), \quad s_y = \text{sign}(y_1 - y_0)$$
+
+\begin{algorithm}[H]
+\caption{Bresenham Raytracing}
+\begin{algorithmic}[1]
+\While{$x \neq x_1 \lor y \neq y_1$}
+    \State $e_2 \gets 2 \cdot \mathit{err}$
+    \If{$e_2 > -\Delta y$}
+        \State $\mathit{err} \gets \mathit{err} - \Delta y$
+        \State $x \gets x + s_x$
+    \EndIf
+    \If{$e_2 < \Delta x$}
+        \State $\mathit{err} \gets \mathit{err} + \Delta x$
+        \State $y \gets y + s_y$
+    \EndIf
+    \State $\text{raytrace\_function}(x, y)$
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Inflation Layer}
+Inflation layer berperan penting dalam memastikan pergerakan robot dapat menghindari berhimpitan dengan rintangan. Lapisan ini menciptakan zona inflasi di sekitar setiap rintangan yang terdeteksi dan memiliki nilai harga navigasi yang tinggi. Radius zona inflasi ini variabel yang ditentukan berdasarkan dimensi fisik atau \emph{footprint} robot sehingga mencegah robot terlalu dekat dengan rintangan dan berpotensi menabrak. Lapisan ini secara efektif "memperbesar" rintangan di \emph{costmap}, sehingga algoritma perencanaan jalur akan menjaga jarak aman dari objek-objek tersebut dari robot. 
+
+Lapisan inflasi berfungsi seperti safe distance minimum robot dari rintangan, namun dapat bekerja lebih dinamis karena memperhitungkan orientasi dan bentuk badan robot. Dengan bentuk robot yang unik, radius zona inflasi dapat berubah secara adaptif sesuai orientasi robot terhadap rintangan.
+
+Layer ini memperluas obstacle dengan gradient cost, sehingga perencana path dapat menjaga jarak dari obstacle.
+
+Algoritma Inflasi
+
+Untuk setiap obstacle cell, terapkan cost ke semua cell dalam radius inflasi $R$.
+
+Cost pada jarak $d$ dari obstacle dihitung dengan fungsi eksponensial:
+
+$$C(d) = \begin{cases} 253 \cdot e^{-\alpha \cdot (d - r_{\text{inscribed}})} & \text{if } d \leq R \\ 0 & \text{otherwise} \end{cases}$$
+
+Atau dalam bentuk weight:
+
+$$C(d) = 252 \cdot \left( e^{-\alpha \cdot (d - r_{\text{inscribed}})} \right)$$
+
+dimana:
+- $d$ = jarak Euclidean dari cell ke obstacle terdekat
+- $R$ = inflation radius (jarak maksimum inflasi)
+- $r_{\text{inscribed}}$ = inscribed radius (radius robot, cost = 253 pada jarak ini)
+- $\alpha$ = scaling factor (mengontrol kecuraman kurva cost)
+
+Cost dibulatkan ke integer 0–252.
+
+%   ^
+%   | 253 ────────── INSCRIBED_INFLATED_OBSTACLE (d = r_inscribed)
+%   |       \
+%   |        \        C(d) = 253 * exp(-α * (d - r_inscribed))
+%   |         \
+%   |          \
+%   |           \
+%   |            \
+%   |             \
+%   0 ─────────────┴───────────────────> d
+%   0            R                (meter)
+%           inflation_radius
+
+\subsubsection{Transition Layer}
+
+Transition layer adalah lapisan yang menambahkan data area transisi ke dalam costmap. Data ini digunakan oleh untuk mendeteksi kapan robot mendekati batas transisi antar region dan melakukan "lompatan" pose antar area.
+
+$$C_{\text{internal}} = \begin{cases} 255 & \text{if } OG = -1 \text{ (unknown)} \\ 0 & \text{if } OG = 0 \text{ (free)} \\ 1 & \text{if } OG \geq 100 \text{ (occupied)} \\  \end{cases}$$
+
+Lapisan ini juga memperluas area transisi dengan radius tertentu, sehingga robot dapat mendeteksi transisi sebelum benar-benar mencapai garis transisi. Hal ini membuat buffer zona deteksi di sekitar data transisi. 
+
+Tiap region di map memiliki metadata transisi unik yang menyimpan informasi relasi antar peta. Informasi tersebut termasuk orientasi relatif terhadap orientasi global yang dijadikan acuan
+
+\subsection{Local Planner}
+
+DWA adalah algoritma **local path planning** yang bekerja dengan cara:
+
+% 1. **Sample** semua kemungkinan kecepatan $(v_x, v_y, \omega)$ yang **dapat dicapai** dalam satu control cycle (Dynamic Window)
+% 2. **Simulasikan** trajectory untuk setiap sample kecepatan menggunakan model kinematik robot
+% 3. **Skor** setiap trajectory berdasarkan:
+%    - Seberapa dekat ke global plan
+%    - Seberapa dekat ke goal
+%    - Seberapa jauh dari obstacle
+%    - Osilasi yang dicegah
+% 4. **Pilih** trajectory dengan skor terbaik
+% 5. **Kirim** perintah kecepatan dari trajectory terbaik ke motor
+
+**DWA** — Velocity window dibatasi oleh apa yang **dapat dicapai dalam satu control cycle**:
+
+$$v_{\text{min}} = \max\left(v_{\text{min\_limit}},\; v_{\text{current}} - \dot{v}_{\text{max}} \cdot \Delta t\right)$$
+
+$$v_{\text{max}} = \min\left(v_{\text{max\_limit}},\; v_{\text{current}} + \dot{v}_{\text{max}} \cdot \Delta t\right)$$
+
+dimana $\Delta t$ adalah sim period = 0.05 s (waktu satu siklus kontrol).
+
+
+**Trajectory Rollout** — Velocity window dibatasi oleh apa yang dapat dicapai **selama waktu simulasi penuh**:
+
+$$v_{\text{max}} = \min\left(v_{\text{max\_limit}},\; v_{\text{current}} + \dot{v}_{\text{max}} \cdot T_{\text{sim}}\right)$$
+
+dimana $T_{\text{sim}}$ adalah sim time
+
+2.2 Velocity Sampling
+
+Untuk setiap dimensi $(v_x, v_y, \omega)$, rentang dibagi menjadi sample merata:
+
+$$\Delta v_x = \frac{v_{x,\text{max}} - v_{x,\text{min}}}{N_{v_x} - 1}$$
+
+$$\Delta v_y = \frac{v_{y,\text{max}} - v_{y,\text{min}}}{N_{v_y} - 1}$$
+
+$$\Delta \omega = \frac{\omega_{\text{max}} - \omega_{\text{min}}}{N_{\omega} - 1}$$
+
+Total trajectory yang di-sample:
+
+$$N_{\text{total}} = N_{v_x} \times N_{v_y} \times N_{\omega}$$
+
+Konfigurasi dari yaml: $N_{v_x} = 6$, $N_{v_y} = 6$, $N_{\omega} = 30$ → total 1080 trajectories per evaluasi.
+
+3.1 Model Kinematik
+
+Untuk setiap sample kecepatan $(v_x, v_y, \omega)$, trajectory disimulasikan menggunakan model kinematik diferensial:
+
+$$x_{t+1} = x_t + \left(v_x \cos\theta_t + v_y \cos\left(\frac{\pi}{2} + \theta_t\right)\right) \cdot \Delta t$$
+
+$$y_{t+1} = y_t + \left(v_x \sin\theta_t + v_y \sin\left(\frac{\pi}{2} + \theta_t\right)\right) \cdot \Delta t$$
+
+$$\theta_{t+1} = \theta_t + \omega \cdot \Delta t$$
+
+Jumlah langkah simulasi ditentukan oleh granularity:
+
+$$N_{\text{steps}} = \frac{T_{\text{sim}}}{\Delta t}$$
+
+$$\Delta t = \min\left(\frac{\text{sim\_granularity}}{|v|},\; \frac{\text{angular\_sim\_granularity}}{|\omega|}\right)$$
+
+Trajectory Scoring
+
+$$C_{\text{total}} = C_{\text{osc}} + w_{\text{obs}} \cdot C_{\text{obs}} + w_{\text{gf}} \cdot C_{\text{gf}} + w_{\text{align}} \cdot C_{\text{align}} + w_{\text{path}} \cdot C_{\text{path}} + w_{\text{goal}} \cdot C_{\text{goal}} + w_{\text{twirl}} \cdot C_{\text{twirl}}$$
+
+% critics[0] = oscillation_costs_      // Mencegah osilasi
+% critics[1] = obstacle_costs_         // Menghindari obstacle
+% critics[2] = goal_front_costs_       // Hidung robot mengarah ke goal
+% critics[3] = alignment_costs_        // Hidung robot sejajar path
+% critics[4] = path_costs_             // Robot mengikuti path
+% critics[5] = goal_costs_             // Robot menuju goal
+% critics[6] = twirling_costs_         // Penalti rotasi berlebih
+
+$$C_{\text{obs}} = \begin{cases} \sum_{k=1}^{N} C_k & \text{if sum\_scores} \\ \max_k C_k & \text{otherwise} \end{cases}$$
+
+5.2.2 Collision Checking
+
+Setiap titik sepanjang trajectory, footprint robot di-rasterize ke costmap:
+
+% ```cpp
+% footprintCost(x, y, theta, scaled_footprint)
+% ```
+
+Menggunakan Bresenham line drawing untuk menelusuri setiap tepi footprint polygon di grid costmap.
+
+5.2.3 Agregasi Cost
+
+Mode sum scores:
+
+$$C_{\text{obs}} = \begin{cases} \sum_{k=1}^{N} C_k & \text{if sum\_scores} \\ \max_k C_k & \text{otherwise} \end{cases}$$
+
+% **Collision detection**: Jika ada footprint cell dengan `LETHAL_OBSTACLE` (254), return `-6.0`. Jika off-map, return `-7.0`.
+
+\subsubsection{MapGridCostFunction}
+
+**Tujuan**: Menilai trajectory berdasarkan jarak ke global plan atau goal
+
+.3.1 Wavefront Propagation
+
+`MapGrid` menggunakan BFS untuk menyebarkan nilai jarak dari target cells:
+
+```
+1. Reset semua cell ke obstacleCosts()
+2. Set target cells (path waypoints atau goal point) → distance = 0
+3. BFS: setiap tetangga yang bukan obstacle mendapat distance = parent distance + 1
+4. Berhenti di LETHAL OBSTACLE, INSCRIBED INFLATED OBSTACLE, NO INFORMATION
+```
+
+$$d_{\text{cell}} = \text{number of BFS steps from nearest target cell}$$
+
+5.3.2 Scoring Mode
+
+Untuk setiap titik pada trajectory, nilai `target dist` dari MapGrid dibaca.
+
+**Aggregation type:**
+
+| Mode | Formula | Kegunaan |
+
+| `Last` | $C = d_N$ (jarak di titik terakhir) | Goal cost |
+
+| `Sum` | $C = \sum_{k=1}^{N} d_k$ | Path cost |
+
+Forward Point Shift
+
+% Untuk `goal_front_costs_` dan `alignment_costs_`, titik scoring digeser ke depan sejauh `forward_point_distance_`:
+
+$$p_{\text{score}} = p_{\text{robot}} + d_{\text{forward}} \cdot \begin{pmatrix} \cos\theta \\ \sin\theta \end{pmatrix}$$
+
+Path Costs ($C_{\text{path}}$)
+
+% ```cpp
+% path_costs_.setTargetPoses(global_plan)
+% // Semua waypoints dalam local costmap menjadi seed BFS
+% ```
+
+Weight: $w_{\text{path}} = \text{resolution} \cdot \text{path\_distance\_bias}$
+
+Goal Costs ($C_{\text{goal}}$)
+
+% ```cpp
+% goal_costs_.setLocalGoal(global_plan)
+% // Hanya titik terakhir yang reachable menjadi seed BFS
+% ```
+
+Weight: $w_{\text{goal}} = \text{resolution} \cdot \text{goal\_distance\_bias}$
+
+Goal Front Costs ($C_{\text{gf}}$)
+
+Menggunakan forward point shift. Menilai apakah **hidung robot** mengarah ke goal.
+
+$$p_{\text{hidung}} = p_{\text{robot}} + d_{\text{forward}} \cdot \hat{v}$$
+
+$$C_{\text{gf}} = \text{target\_dist}(p_{\text{hidung}})$$
+
+% Weight: sama dengan goal costs, tetapi di-nol-kan jika `forward_point_distance <= 0`.
+
+Alignment Costs ($C_{\text{align}}$)
+
+Sama dengan path costs, tetapi dengan forward point shift. Menilai apakah hidung robot sejajar dengan path.
+
+Dinonaktifkan jika robot sudah dekat dengan goal:
+
+$$\text{disabled if } \|p_{\text{robot}} - p_{\text{goal}}\| < d_{\text{forward}} \cdot \text{cheat\_factor}$$
+
+Best Trajectory Selection
+
+% File: `simple_scored_sampling_planner.cpp:81`
+
+\begin{lstlisting}
+1. Prepare semua critics:
+     - MapGridCostFunction::prepare() -> wavefront BFS propagation
+2. Iterate semua trajectory dari generator:
+     a. GenerateTrajectory(pos, vel, sample_vel, &traj)
+     b. scoreTrajectory(traj, best_cost)
+     c. Jika cost >= 0 dan cost < best_cost -> update best trajectory
+3. Jika tidak ada trajectory valid -> gunakan zero velocity
+\end{lstlisting}
+
+\textbf{Early termination}: Jika total cost sudah melebihi \texttt{best\_cost} saat menjumlahkan critics, evaluasi trajectory dihentikan lebih awal.

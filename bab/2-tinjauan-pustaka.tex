@@ -47,7 +47,9 @@ Paper oleh \parencite[]{jung2024munes} mengusulkan skema untuk pemetaan tunggal 
 \section{Teori/Konsep Dasar}
 \label{sec:konsep dasar}
 
-subsection{Layered Costmap}
+\subsection{Occupancy Grid}
+
+\subsection{Layered Costmap}
 Costmap adalah representasi grid dua dimensi dari lingkungan robot yang digunakan dalam sistem navigasi, dengan tiap sel pada grid memiliki harga yang terasosiasi dengannya. Pada \emph{costmap} modern, tiap sel merupakan integer dari 0 hingga 255 yang merepresentasikan biaya navigasi. Secara umum, algoritma perencanaan jalur akan mengutamakan melewati sel dengan harga rendah dan menghindari sel dengan harga tinggi. Metode \emph{costmap} memberikan keseimbangan antara kualitas informasi dan efisiensi algoritma. Sebagai ekstensi dari \emph{costmap}, digunakan konsep \emph{layered costmap}, yaitu struktur costmap yang terbagi menjadi beberapa layer terpisah berdasarkan jenis data atau fungsi spesifik (misalnya static map, obstacle, inflation, proxemic). Setiap layer memodifikasi master costmap secara terstruktur dan independen, memungkinkan sistem navigasi mempertimbangkan konteks yang lebih kompleks dan menghasilkan perilaku pergerakan robot yang lebih cerdas dan adaptif terhadap lingkungan \parencite[]{macenski2023desks}.
 
 \subsection{Lokalisasi Iterative Closest Point (ICP)}
@@ -87,7 +89,7 @@ R = m \begin{bmatrix} \cos(\theta) & -\sin(\theta) \\ \sin(\theta) & \cos(\theta
 t = \bar{b} - R\bar{a}
 \end{equation}
 
-subsection{KNN}
+\subsubsection{KNN}
 
 \subsection{Path Planning A* }
 \emph{Path planning} adalah proses perencanaan jalur geometris yang menghubungkan titik awal ke titik tujuan tanpa menabrak rintangan, biasanya dilakukan dalam ruang konfigurasi (configuration space) dengan mempertimbangkan berbagai batasan lingkungan. Metode \emph{path planning} umum mencakup teknik roadmap, cell decomposition, dan artificial potential field.
