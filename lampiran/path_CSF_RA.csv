@@ -1,0 +1,5 @@
+Cost Scaling Factor,Panjang path (m),Waktu komputasi (ms),min clearance (m),Jumlah waypoint
+10,1.116051,6.666027,0.220000,222
+20,1.114836,6.897399,0.220000,223
+50,1.122597,5.688345,0.219650,225
+100,0.971836,6.484874,0.216470,193

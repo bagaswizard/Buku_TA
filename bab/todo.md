@@ -1,0 +1,10 @@
+-make flowchart and fix icp
+-make flowchart and fix costmap
+-make flowchart and fix dwa
+-make flowchart and import global planner
+-make costmap jumper 
+-make path interceptor 
+-make main sistem
+-fix BAB2
+-do data local plan
+-compare icp and transition layer
