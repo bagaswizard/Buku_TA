@@ -96,29 +96,64 @@ oleh satu \emph{region}. Banyaknya bagian tersebut ditentukan oleh jumlah peta
 \label{fig:transition_map_all}
 \end{figure}
 
-Peta transisi digunakan untuk menandakan perbedaan antara
+Peta transisi digunakan untuk menandakan perbatasan antar \emph{region} dalam peta gabungan. Peta ini dibuat melalui proses anotasi terhadap peta gabungan, dimana pengguna secara manual menandai piksel-piksel yang mewakili perbatasan antar \emph{region}. Proses anotasi ini menghasilkan 'metadata' yang menyimpan informasi sebagai berikut: (1) pasangan \emph{region} yang terhubung, (2) orientasi setiap \emph{region}
+terhadap \emph{global frame of reference} dalam bentuk \emph{quaternion}, serta
+(3) posisi inisial robot pada setiap \emph{region} dalam koordinat piksel.
 
- 
+\begin{table}[H]
+\centering
+\caption{Daftar Koneksi pasangan}
+\label{tab:transitions}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Pasangan} & \textbf{Region} & \textbf{Pixel A $(x, y)$} & \textbf{Pixel B $(x, y)$} \\
+\hline
+0 & A -- B & (354, 206) & (106, 328) \\
+1 & B -- C & (106, 436) & (135, 187) \\
+\hline
+\end{tabular}
+\end{table}
 
-% ```
-% 1. Buka program dengan map YAML
-%    ↓
-% 2. Tekan '1' → Mode Select Region A
-%    ├─ Klik untuk menambah piksel Region A
-%    ├─ Garis preview tampil antara click terakhir dan mouse
-%    └─ Tekan '1' lagi → Selesai Region A
-%    ↓
-% 3. Tekan '2' → Mode Select Region B
-%    ├─ Klik untuk menambah piksel Region B
-%    ├─ Garis preview tampil antara click terakhir dan mouse
-%    └─ Tekan '2' lagi → Selesai Region B
-%    ↓
-% 4. Sistem otomatis membuat pair Region A-B
-%    ↓
-% 5. Ulangi langkah 2-4 untuk wormhole connection lainnya
-%    ↓
-% 6. Tekan 's' → Simpan semua data
-%    ├─ Buat transition_map.pgm
-%    └─ Buat transition_map.yaml
-%    ↓
-% 7. Program selesai
+Koneksi antar \emph{region} bersifat linear, artinya setiap \emph{wormhole}
+hanya menghubungkan dua \emph{region} yang berdekatan secara langsung. Sebagai
+contoh, \emph{region} A hanya dapat terhubung ke \emph{region} B, dan \emph{region}
+B hanya dapat terhubung ke \emph{region} C. Tidak ada koneksi langsung dari
+\emph{region} A ke \emph{region} C. Setiap pasangan direpresentasikan oleh dua
+piksel, yaitu \emph{pixel A} dan \emph{pixel B}, yang menandai lokasi garis
+transisi pada peta transisi. 
+
+\begin{table}[H]
+\centering
+\caption{Orientasi Region terhadap Global Frame}
+\label{tab:orientations}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Region} & \multicolumn{4}{c|}{\textbf{Quaternion}} \\
+\cline{2-5}
+ & $x$ & $y$ & $z$ & $w$ \\
+\hline
+A & 0.0    & 0.0    & 0.0     & 1.0    \\
+\hline
+B & 0.0    & 0.0    & 0.0     & 1.0    \\
+\hline
+C & 0.0    & 0.0    & $-0.7046$ & 0.7096 \\
+\hline
+\end{tabular}
+\end{table}
+
+Orientasi digunakan untuk menyelaraskan arah peta setiap \emph{region} dengan arah yang seragam dalam \emph{global frame of reference}. Dalam kasus ini, \emph{region} A dan B memiliki orientasi yang sama, sedangkan \emph{region} C memiliki rotasi berbeda dengan A dan B.
+
+\begin{table}[H]
+\centering
+\caption{Posisi Inisial Robot}
+\label{tab:initial_pose}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Parameter} & \textbf{Nilai pixel} \\
+\hline
+Posisi inisial & (375, 75) \\
+\hline
+\end{tabular}
+\end{table}
+
+Posisi awal robot ditentukan secara manual dalam koordinat piksel, lalu dikonversi ke koordinat dunia menggunakan informasi orientasi dan resolusi peta. Posisi ini digunakan sebagai titik awal untuk dalam sistem navigasi.

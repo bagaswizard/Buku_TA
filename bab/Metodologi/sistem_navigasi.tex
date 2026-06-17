@@ -1,7 +1,7 @@
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{gambar/draft_navigation_flow.drawio.png}
-\caption{Diagram Navigasi}
+\includegraphics[width=0.7\textwidth]{gambar/main_nav_flow.png}
+\caption{Diagram alur navigasi}
 \label{fig:main_navigation_flow}
 \end{figure}
 
@@ -9,28 +9,33 @@
 
 \subsection{Lokalisasi Iterative Closest Point (ICP)}
 
+Sistem navigasi ini menggunakan algoritma Iterative Closest Point (ICP) yang digunakan untuk memperkirakan koreksi pose robot terhadap static occupancy grid map. ICP bekerja dengan mencocokkan titik-titik dari laser scan dengan titik-titik yang sesuai pada peta, lalu menghitung transformasi optimal yang meminimalkan jarak antara pasangan titik tersebut. Proses ini iteratif, di mana setiap iterasi memperbaiki estimasi pose robot hingga konvergen ke solusi yang stabil. Sebelum ICP, dilakukan prekomputasi KNN untuk mempercepat pencarian pasangan titik selama proses ICP. 
+
 \subsubsection{Prekomputasi KNN}
-Sistem ini melakukan pre-komputasi atas semua korespondensi saat menerima \emph{map} baru lalu menyimpan informasi tersebut di dalam tabel hash. Ini memungkinkan karena \emph{occupancy grid} sudah diketahui dan bersifat diskrit, sehingga dapat diketahui relasi antara sel bebas yang berada di dekat tembok dengan \emph{K nearest} sel rintangan.
 
-Untuk setiap sel rintangan pada indeks $i_{\text{occ}}$:
+Sistem ini melakukan prekomputasi atas semua kemungkinan pasangan titik (sensor point → map point) saat menerima map baru, lalu menyimpan informasi tersebut di dalam hash table. Pendekatan ini dimungkinkan karena occupancy grid bersifat diskrit dan diketahui secara penuh. Setiap sel bebas di dekat tembok dapat diketahui sebelumnya K buah sel rintangan terdekatnya.
+Proses ini disebut interpretasi map dan terjadi sekali saat startup, bukan saat runtime. Hasilnya lookup KNN saat runtime menjadi O(1).
 
+Untuk setiap sel rintangan (occupied) pada indeks $i_{\text{occ}}$:
 \begin{enumerate}
-    \item Cek kejangkauan menggunakan \emph{Moore neighbourhood} 3x3 untuk mengecek keberadaan sel bebas di sekitarnya. Jika tidak ada sel bebas, maka sel rintangan tersebut tidak dapat dijangkau dan diabaikan.
-    \item Disekitar indeks $i_{\text{occ}}$ yang memenuhi syarat sebelumnya, dilakukan iterasi mencari semua sel dengan radius $r$ 
-    \item Untuk setiap cell tersebut pada index $i_{\text{nb}}$:
-   Insert posisi dari $i_{\text{occ}}$ ke dalam daftar KNN milik $i_{\text{nb}}$. Jaga urutan terurut berdasarkan Euclidean distance
+    \item Cek kejangkauan menggunakan Moore neighbourhood 3×3 (8 tetangga terdekat). Jika tidak ada satupun sel bebas di antara tetangganya, maka sel rintangan tersebut berada di dalam tembok (interior) dan tidak akan pernah terdeteksi oleh laser hanya mengenai permukaan tembok, bukan interiornya. Sel seperti ini diabaikan untuk menghemat memori dan komputasi.
+    \item Iterasi area sekitar sel rintangan yang dapat dicapai. Semakin besar $r$, semakin banyak sel yang akan memiliki KNN precomputed, tetapi juga semakin besar ukuran hash table.
+    \item Untuk setiap sel tetangga pada indeks $i_{\text{nb}}$ yang berada dalam radius $r$, \emph{world coordinates} dari sel rintangan $i_{\text{occ}}$ dimasukkan ke dalam daftar KNN milik $i_{\text{nb}}$. Daftar ini dijaga tetap terurut berdasarkan jarak Euclidean  dan dibatasi maksimal $K$ entry. Jika sudah penuh dan jarak lebih besar dari entry terjauh, data diabaikan, namun jika jarak lebih kecil, entry terjauh dihapus dan data baru dimasukkan pada posisi yang tepat.
 \end{enumerate}
 
-\subsubsection{Proses Scan}
-Untuk scan dengan $N$ beams pada sudut $\theta_0, \theta_1, \dots, \theta_{N-1}$:
+\subsubsection{Proses Data LiDAR}
+Data scan dari sensor LiDAR diproses terlebih dahulu dan disimpan dalam format seperti berikut.
+Untuk scan dengan sinar $N$ pada sudut $\theta_0, \theta_1, \dots, \theta_{N-1}$:
 
-$$\mathbf{C} = \begin{bmatrix} \cos\theta_0 & \cos\theta_1 & \cdots & \cos\theta_{N-1} \\ \sin\theta_0 & \sin\theta_1 & \cdots & \sin\theta_{N-1} \end{bmatrix}_{2 \times N}$$
+$$\mathbf{C} = \begin{bmatrix} \cos\theta_0 & \cos\theta_1 & \cdots & \cos\theta_{N-1} \\ \sin\theta_0 & \sin\theta_1 & \cdots & \sin\theta_{N-1} \end{bmatrix}$$
 
-Cache hanya dihitung ulang ketika parameter scan (jumlah beams, rentang sudut, increment) berubah.
+Cache hanya dihitung ulang ketika parameter scan (jumlah sinar, rentang sudut, increment) berubah.
 
-Diberikan range readings $r_0, r_1, \dots, r_{N-1}$:
+Diberikan pembacaan vektor $r_0, r_1, \dots, r_{N-1}$:
 
-$$\mathbf{S} = \begin{bmatrix} r_0 \cos\theta_0 & r_1 \cos\theta_1 & \cdots \\ r_0 \sin\theta_0 & r_1 \sin\theta_1 & \cdots \end{bmatrix}$$
+$$\mathbf{S} = \begin{bmatrix} r_0 \cos\theta_0 & r_1 \cos\theta_1 & \cdots & r_{N-1} \cos\theta_{N-1} \\ r_0 \sin\theta_0 & r_1 \sin\theta_1 & \cdots & r_{N-1} \sin\theta_{N-1} \end{bmatrix}$$
+
+$S$ adalah hasil \emph{scan point cloud} dalam koordinat cartesian, hasil konversi dari data laser mentah ke titik-titik 2D.
 
 \subsubsection{Loop Utama}
 
@@ -55,26 +60,31 @@ $$\mathbf{S} = \begin{bmatrix} r_0 \cos\theta_0 & r_1 \cos\theta_1 & \cdots \\ r
 \end{algorithmic}
 \end{algorithm}
 
+% Kenapa ada transformasi di awal step: Karena KNN disimpan dalam koordinat frame map, bukan frame sensor.
+
 \subsubsection{Correspondence Matching}
+
+Correspondence matching adalah langkah yang memasangkan setiap titik dari laser scan dengan titik terdekat dari map. Proses ini dilakukan dengan memanfaatkan hash table KNN yang sudah diprekomputasi sebelumnya. Hasil akhirnya digunakanuntuk menghitung transformasi optimal melalui SVD solver.
 
 Untuk setiap sensor point $s_j$:
 
 \begin{enumerate}
-  \item Cek apakah $s_j$ berada di dalam map bounds: \texttt{converter\_.valid\_position}($s_j$)
-  \item Konversi posisi ke flat index: $i = \text{converter.to\_index}(s_j)$
-  \item Lookup \texttt{knn\_[i]} --- sebuah sorted vector berisi hingga $K$ occupied map points
-  \item Duplikasi $s_j$ untuk setiap nearest neighbors-nya, menghasilkan $(s_j, m_{j,1}), (s_j, m_{j,2}), \dots, (s_j, m_{j,K})$
+  \item Cek apakah $s_j$ berada di dalam map bounds. Jika tidak, lewati $s_j$.
+  \item melakukan lookup ke hash table untuk mendapatkan daftar hingga $K$ titik map terdekat yang mungkin menjadi pasangan
+  \item Duplikasi $s_j$ untuk setiap nearest neighbors-nya, menghasilkan $(s_j, m_{j,1}), (s_j, m_{j,2}), \dots,\\ (s_j, m_{j,K})$. Ini memperluas $N$ sensor points menjadi hingga $N \times K$ pasangan yang cocok.
 \end{enumerate}
-
-Ini memperluas $N$ sensor points menjadi hingga $N \times K$ pasangan yang cocok.
 
 \subsubsection{Solusi SVD}
 
-Diberikan $M$ pasangan $\{s_i\}$ (sensor) dan $\{m_i\}$ (map) dengan weights $\{w_i\}$, kita mencari rigid transform $T \in SE(2)$ yang meminimalkan:
+Solusi SVD ini digunakan untuk menghitung transformasi yang memetakan titik-titik dari laser scan ke titik-titik yang sesuai di map, berdasarkan pasangan yang ditemukan pada langkah correspondence matching.
+
+Diberikan $M$ pasangan $\{s_i\}$ (sensor) dan $\{m_i\}$ (map) dengan weights $\{w_i\}$, kita mencari rigid transform $T \in SE(2)$ yang meminimalkan transformasi. $SE(2)$ berarti transformasi yang mempertahankan jarak dan orientasi.
+
+% Intinya: $T \in SE(2)$ berarti transformasi yang mempertahankan jarak dan orientasi (tidak ada shearing/scaling) — hanya memutar dan menggeser
 
 $$T^* = \arg\min_{R,\,t} \sum_{i=1}^{M} w_i \, \big\| m_i - (R s_i + t) \big\|^2$$
 
-Langkah 1: Weighted Centroids
+Langkah 1: Kalkulasi \emph{Weighted Centroids}
 
 $$\bar{s} = \frac{\sum_{i=1}^{M} w_i s_i}{\sum_{i=1}^{M} w_i}, \qquad \bar{m} = \frac{\sum_{i=1}^{M} w_i m_i}{\sum_{i=1}^{M} w_i}$$
 
@@ -114,16 +124,33 @@ Setelah iterasi, cek apakah transform update cukup kecil:
 
 $$\text{converged} \iff \|t\| < t_{\text{norm}} \land \big|\arctan2(R_{1,0}, R_{0,0})\big| < r_{\text{norm}}$$
 
-Default: $t_{\text{norm}} = 0.01\,\text{m}$, $r_{\text{norm}} = 0.01\,\text{rad}$ ($\approx 0.57^\circ$).
+% konvergensi terjadi hanya jika kedua kondisi terpenuhi, dan jika kedua kondisi terpenuhi maka konvergensi terjadi.
 
 Untuk mempercepat, hanya $1/s$ dari scan points yang digunakan:
-
-1. Pilih offset acak $o \in [0, s-1]$
-2. Ambil setiap point ke-$s$ mulai dari $o$:
+\begin{enumerate}
+\item Pilih offset acak $o \in [0, s-1]$
+\item Ambil setiap point ke-$s$ mulai dari $o$:
+\end{enumerate}
 
 $$p_k' = p_{o + k \cdot s}, \quad k = 0, 1, \dots, \left\lfloor \frac{N}{s} \right\rfloor - 1$$
 
-Default $s = 3$
+\begin{table}[H]
+\centering
+\caption{Parameter Default ICP}
+\label{tab:icp_defaults}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Parameter} & \textbf{Nilai Default} & \textbf{Keterangan} \\
+\hline
+$\text{max\_iter}$ & 50 & Iterasi maksimum ICP \\
+$s$          & 2            & \emph{Random stride} subsampling \\
+$t_{\text{norm}}$ & $0.01$ m & Batas konvergensi translasi \\
+$r_{\text{norm}}$ & $0.01$ rad ($\approx 0.57^\circ$) & Batas konvergensi rotasi \\
+$k$          & 8            & Jumlah \emph{nearest neighbors} \\
+$r$          & 10           & Radius pencarian \emph{neighbor} \\
+\hline
+\end{tabular}
+\end{table}
 
 \subsection{Costmap}
 
@@ -159,11 +186,11 @@ Koordinat Dunia - Grid
 
 Diberikan origin grid di $(o_x, o_y)$ dan resolusi $r$ (meter per cell):
 
-**World → Grid:**
+World → Grid:
 
 $$m_x = \left\lfloor \frac{w_x - o_x}{r} \right\rfloor, \qquad m_y = \left\lfloor \frac{w_y - o_y}{r} \right\rfloor$$
 
-**Grid → World** :
+Grid → World :
 
 $$w_x = o_x + \left(m_x + \frac{1}{2}\right) \cdot r, \qquad w_y = o_y + \left(m_y + \frac{1}{2}\right) \cdot r$$
 
@@ -208,7 +235,7 @@ Untuk setiap beam laser dengan range $r$ dan sudut $\theta$:
   \item Set cell ke \texttt{LETHAL\_OBSTACLE} (254)
 \end{enumerate}
 
-Gunakan algoritma **Bresenham 2D** untuk menggambar garis dari robot ke endpoint sensor. Semua cell yang dilewati garis (sebelum endpoint) di-clear:
+Gunakan algoritma Bresenham 2D untuk menggambar garis dari robot ke endpoint sensor. Semua cell yang dilewati garis (sebelum endpoint) di-clear:
 
 $$C_{\text{master}}(m_x, m_y) = 0 \quad \forall \text{cell di sepanjang ray} \text{ (kecuali endpoint)}$$
 
@@ -288,38 +315,145 @@ $$C_{\text{internal}} = \begin{cases} 255 & \text{if } OG = -1 \text{ (unknown)}
 
 Lapisan ini juga memperluas area transisi dengan radius tertentu, sehingga robot dapat mendeteksi transisi sebelum benar-benar mencapai garis transisi. Hal ini membuat buffer zona deteksi di sekitar data transisi. 
 
-Tiap region di map memiliki metadata transisi unik yang menyimpan informasi relasi antar peta. Informasi tersebut termasuk orientasi relatif terhadap orientasi global yang dijadikan acuan
+Tiap region di map memiliki metadata transisi unik yang menyimpan informasi relasi antar peta. Informasi tersebut termasuk orientasi relatif terhadap orientasi global yang dijadikan acuan.
 
-\subsection{Local Planner}
+\subsection{Global Planner}
 
-DWA adalah algoritma **local path planning** yang bekerja dengan cara:
+Global planner menggunakan algoritma A* untuk menghitung potential field dari goal menuju start. Setiap sel dalam costmap diberi nilai potensial, yang semakin jauh dari goal, semakin tinggi nilainya. Path kemudian diekstrak dengan gradient descent dari start menuju goal, sebuah proses yang menurunkan nilai potensial.
 
-% 1. **Sample** semua kemungkinan kecepatan $(v_x, v_y, \omega)$ yang **dapat dicapai** dalam satu control cycle (Dynamic Window)
-% 2. **Simulasikan** trajectory untuk setiap sample kecepatan menggunakan model kinematik robot
-% 3. **Skor** setiap trajectory berdasarkan:
-%    - Seberapa dekat ke global plan
-%    - Seberapa dekat ke goal
-%    - Seberapa jauh dari obstacle
-%    - Osilasi yang dicegah
-% 4. **Pilih** trajectory dengan skor terbaik
-% 5. **Kirim** perintah kecepatan dari trajectory terbaik ke motor
 
-**DWA** — Velocity window dibatasi oleh apa yang **dapat dicapai dalam satu control cycle**:
+\subsubsection{Kalkukasi Cost}
 
+Kalkulasi cost di global planner adalah proses transformasi nilai costmap global (0–255) menjadi effective traversal cost yang digunakan dalam wavefront expansion (A*).
+$$c_{\text{eff}} = \text{costmap}[n] \cdot f + c_{\text{neutral}}$$
+
+$$c_{\text{eff}} = \begin{cases} c_{\text{eff}} & \text{if } c_{\text{eff}} < c_{\text{lethal}} \\ c_{\text{lethal}} - 1 & \text{if } c_{\text{eff}} \geq c_{\text{lethal}} \\ c_{\text{lethal}} & \text{if } \text{costmap}[n] \geq c_{\text{lethal}} \text{dan tidak unknown} \end{cases}$$
+
+$f$ adalah cost factor dan $c_{\text{neutral}}$ adalah neutral cost. Jika hasilnya melebihi lethal cost (253), nilai di batasi ke lethal cost - 1 (252) agar tidak sama persis dengan nilai lethal, dan jika nilai costmap mentah sudah mencapai lethal threshold maka $c_{\text{eff}}$ langsung dikembalikan sebagai 253 yaitu obstacle yang tidak bisa dilalui.
+
+\begin{table}[H]
+\centering
+\caption{Parameter Default Cost Function}
+\label{tab:cost_defaults}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Parameter} & \textbf{Nilai Default} & \textbf{Keterangan} \\
+\hline
+$f$          & 0.55   & \emph{Cost factor} \\
+$c_{\text{neutral}}$ & 1 & \emph{Neutral cost} \\
+$c_{\text{lethal}}$  & 253 & \emph{Lethal cost} \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Kalkukasi Potensial Kuadratik}
+
+Kalkulasi potensial kuadratik adalah aproksimasi Euclidean wavefront yang lebih akurat. Diberikan dua neighbor terkecil dari arah horizontal dan vertikal:
+
+$$t_c = \min(P_{\text{left}}, P_{\text{right}}), \quad t_a = \min(P_{\text{up}}, P_{\text{down}})$$
+
+Selisih: $\Delta = |t_c - t_a|$ (jika $t_c < t_a$, tukar).
+
+Jika $\Delta \geq c_{\text{eff}}$:
+
+$$P(n) = t_a + c_{\text{eff}}$$
+
+Jika $\Delta < c_{\text{eff}}$ (interpolasi kuadratik):
+
+$$d = \frac{\Delta}{c_{\text{eff}}}$$
+
+$$v = -0.2301 \cdot d^2 + 0.5307 \cdot d + 0.7040$$
+
+$$P(n) = t_a + c_{\text{eff}} \cdot v$$
+
+Koefisien polinomial `-0.2301, 0.5307, 0.7040` adalah hasil least-squares fit dari fungsi $\sqrt{1 + d^2}$ (jarak Euclidean sebenarnya dari point source). Kurva ini mendekati:
+
+$$v(d) \approx \sqrt{1 + d^2}$$
+
+dengan error minimal.
+
+\subsubsection{A*}
+
+menggunakan heuristic untuk memprioritaskan ekspansi ke arah goal:
+
+$$\text{priority} = P(n) + \text{ManhattanDistance}(n, \text{goal}) \cdot c_{\text{neutral}}$$
+
+$$\text{ManhattanDistance}(x, y) = |x_{\text{goal}} - x| + |y_{\text{goal}} - y|$$
+
+kalkulasi potential linear (Manhattan):
+
+$$P(n) = \min(P_{\text{left}}, P_{\text{right}}, P_{\text{up}}, P_{\text{down}}) + c_{\text{eff}}$$
+
+
+Heuristic ini membuat A* lebih cepat dari Dijkstra karena mengeksplorasi lebih sedikit cell, terutama ketika goal jauh. A* berekspansi seperti ellips yang condong ke start
+
+\subsubsection{Clear Endpoint}
+
+Setelah potential selesai, area 2×2 cell di sekitar goal di-clear:
+
+Ini memastikan gradient path bisa menemukan jalan ke goal area meskipun goal berada di obstacle.
+
+\subsubsection{Ekstraksi Gradient Path}
+
+Gradient path bertujuan menghasilkan path halus dengan interpolasi sub-sel. dengan step = 0.5 sel per langkah.
+
+Komputasi gradient sebagai berikut 
+
+Aproksimasi central difference:
+
+$$g_x = \frac{P(x-1, y) - P(x+1, y)}{2}$$
+
+$$g_y = \frac{P(x, y-1) - P(x, y+1)}{2}$$
+
+Normalisasi:
+
+$$\hat{g}_x = \frac{g_x}{\sqrt{g_x^2 + g_y^2}}, \quad \hat{g}_y = \frac{g_y}{\sqrt{g_x^2 + g_y^2}}$$
+
+Untuk sel yang berada di obstacle (potensial tinggi), gradient dihitung dari tetangga terdekat yang valid.
+
+Perhitungan Path Step:
+
+$$\text{step} = \frac{\text{pathStep}}{\sqrt{g_x(p)^2 + g_y(p)^2}}$$
+
+$$d_x \gets d_x + g_x(p) \cdot \text{step}, \quad d_y \gets d_y + g_y(p) \cdot \text{step}$$
+
+Cell overflow: Ketika $|d_x| \geq 1.0$ atau $|d_y| \geq 1.0$, pindah ke cell tetangga:
+
+\subsubsection{Path Antar Region}
+
+Untuk memungkinkan global planner bekerja antar region, digunakan path interceptor yang memodifikasi planner untuk memungkinkan navigasi multi-region melalui transisi. Jika goal berada di area yang berbeda dari posisi robot saat ini, node ini menyusun plan bertahap melalui serangkaian poin transisi.
+
+Daripada mengirim goal langsung yang mungkin tidak bisa dijangkau karena area berbeda secara topologi, path interceptor melakukan langkah-langkah berikut:
+\begin{enumerate}
+\item Menentukan rute area: region A → region B → region C → ...
+\item Mengirim goal bertahap ke setiap transition point
+\item Menunggu robot melompat (costmap jumper) sebelum melanjutkan ke step berikutnya
+\item Mengirim final goal hanya setelah semua transisi selesai
+\end{enumerate}
+
+Selama proses berjalan, path interceptor melakukan pelacakan posisi robot dan mengupdate region sekarang berdasarkan posisi robot dari ICP:
+
+\subsection{Local Planner DWA}
+
+Algoritma \emph{Dynamic Window Approach} (DWA) bekerja dalam lima langkah
+utama. Pertama, algoritma mengambil sampel semua kemungkinan kecepatan
+$(v_x, v_y, \omega)$ yang dapat dicapai dalam satu siklus kendali berdasarkan
+\emph{dynamic window}. Kedua, setiap sampel kecepatan disimulasikan menjadi
+sebuah \emph{trajectory} menggunakan model kinematik robot. Ketiga, setiap
+\emph{trajectory} diberi skor berdasarkan empat kriteria: jarak terhadap
+\emph{global plan}, jarak terhadap \emph{goal}, jarak terhadap \emph{obstacle},
+serta pencegahan osilasi. Keempat, \emph{trajectory} dengan skor terbaik
+dipilih. Kelima, perintah kecepatan dari \emph{trajectory} terbaik tersebut
+dikirim ke robot.
+
+DWA Velocity window dibatasi oleh apa yang dapat dicapai dalam satu siklus kontrol:
 $$v_{\text{min}} = \max\left(v_{\text{min\_limit}},\; v_{\text{current}} - \dot{v}_{\text{max}} \cdot \Delta t\right)$$
-
 $$v_{\text{max}} = \min\left(v_{\text{max\_limit}},\; v_{\text{current}} + \dot{v}_{\text{max}} \cdot \Delta t\right)$$
 
-dimana $\Delta t$ adalah sim period = 0.05 s (waktu satu siklus kontrol).
+dimana $\Delta t$ adalah waktu satu siklus kontrol.
 
 
-**Trajectory Rollout** — Velocity window dibatasi oleh apa yang dapat dicapai **selama waktu simulasi penuh**:
-
-$$v_{\text{max}} = \min\left(v_{\text{max\_limit}},\; v_{\text{current}} + \dot{v}_{\text{max}} \cdot T_{\text{sim}}\right)$$
-
-dimana $T_{\text{sim}}$ adalah sim time
-
-2.2 Velocity Sampling
+\subsubsection{Velocity Sampling}
 
 Untuk setiap dimensi $(v_x, v_y, \omega)$, rentang dibagi menjadi sample merata:
 
@@ -335,7 +469,7 @@ $$N_{\text{total}} = N_{v_x} \times N_{v_y} \times N_{\omega}$$
 
 Konfigurasi dari yaml: $N_{v_x} = 6$, $N_{v_y} = 6$, $N_{\omega} = 30$ → total 1080 trajectories per evaluasi.
 
-3.1 Model Kinematik
+\subsubsection{Model Kinematik}
 
 Untuk setiap sample kecepatan $(v_x, v_y, \omega)$, trajectory disimulasikan menggunakan model kinematik diferensial:
 
@@ -351,7 +485,7 @@ $$N_{\text{steps}} = \frac{T_{\text{sim}}}{\Delta t}$$
 
 $$\Delta t = \min\left(\frac{\text{sim\_granularity}}{|v|},\; \frac{\text{angular\_sim\_granularity}}{|\omega|}\right)$$
 
-Trajectory Scoring
+\subsubsection{Penilaian Trayektori}
 
 $$C_{\text{total}} = C_{\text{osc}} + w_{\text{obs}} \cdot C_{\text{obs}} + w_{\text{gf}} \cdot C_{\text{gf}} + w_{\text{align}} \cdot C_{\text{align}} + w_{\text{path}} \cdot C_{\text{path}} + w_{\text{goal}} \cdot C_{\text{goal}} + w_{\text{twirl}} \cdot C_{\text{twirl}}$$
 
@@ -365,9 +499,7 @@ $$C_{\text{total}} = C_{\text{osc}} + w_{\text{obs}} \cdot C_{\text{obs}} + w_{\
 
 $$C_{\text{obs}} = \begin{cases} \sum_{k=1}^{N} C_k & \text{if sum\_scores} \\ \max_k C_k & \text{otherwise} \end{cases}$$
 
-5.2.2 Collision Checking
-
-Setiap titik sepanjang trajectory, footprint robot di-rasterize ke costmap:
+Dilakukan juga Collision Checking. Setiap titik sepanjang trajectory, footprint robot di-rasterize ke costmap:
 
 % ```cpp
 % footprintCost(x, y, theta, scaled_footprint)
@@ -375,7 +507,7 @@ Setiap titik sepanjang trajectory, footprint robot di-rasterize ke costmap:
 
 Menggunakan Bresenham line drawing untuk menelusuri setiap tepi footprint polygon di grid costmap.
 
-5.2.3 Agregasi Cost
+Semua nilai di agregasi menjadi satu skor total untuk trajectory tersebut. Trajectory dengan skor terendah dipilih sebagai perintah kecepatan yang akan dieksekusi.
 
 Mode sum scores:
 
@@ -383,34 +515,26 @@ $$C_{\text{obs}} = \begin{cases} \sum_{k=1}^{N} C_k & \text{if sum\_scores} \\ \
 
 % **Collision detection**: Jika ada footprint cell dengan `LETHAL_OBSTACLE` (254), return `-6.0`. Jika off-map, return `-7.0`.
 
-\subsubsection{MapGridCostFunction}
+\subsubsection{kalkulasi Cost}
 
-**Tujuan**: Menilai trajectory berdasarkan jarak ke global plan atau goal
+Tujuan menilai trajectory berdasarkan jarak ke global plan atau goal
 
-.3.1 Wavefront Propagation
+Wavefront Propagation
 
-`MapGrid` menggunakan BFS untuk menyebarkan nilai jarak dari target cells:
+% `MapGrid` menggunakan BFS untuk menyebarkan nilai jarak dari target cells:
 
-```
-1. Reset semua cell ke obstacleCosts()
-2. Set target cells (path waypoints atau goal point) → distance = 0
-3. BFS: setiap tetangga yang bukan obstacle mendapat distance = parent distance + 1
-4. Berhenti di LETHAL OBSTACLE, INSCRIBED INFLATED OBSTACLE, NO INFORMATION
+% ```
+% 1. Reset semua cell ke obstacleCosts()
+% 2. Set target cells (path waypoints atau goal point) → distance = 0
+% 3. BFS: setiap tetangga yang bukan obstacle mendapat distance = parent distance + 1
+% 4. Berhenti di LETHAL OBSTACLE, INSCRIBED INFLATED OBSTACLE, NO INFORMATION
 ```
 
 $$d_{\text{cell}} = \text{number of BFS steps from nearest target cell}$$
 
-5.3.2 Scoring Mode
+Scoring Mode
 
 Untuk setiap titik pada trajectory, nilai `target dist` dari MapGrid dibaca.
-
-**Aggregation type:**
-
-| Mode | Formula | Kegunaan |
-
-| `Last` | $C = d_N$ (jarak di titik terakhir) | Goal cost |
-
-| `Sum` | $C = \sum_{k=1}^{N} d_k$ | Path cost |
 
 Forward Point Shift
 
@@ -454,7 +578,7 @@ Dinonaktifkan jika robot sudah dekat dengan goal:
 
 $$\text{disabled if } \|p_{\text{robot}} - p_{\text{goal}}\| < d_{\text{forward}} \cdot \text{cheat\_factor}$$
 
-Best Trajectory Selection
+Seleksi Trajectory terbaik
 
 % File: `simple_scored_sampling_planner.cpp:81`
 

@@ -1,4 +1,4 @@
--make flowchart and fix icp
+-make flowchart and fix icp (done)
 -make flowchart and fix costmap
 -make flowchart and fix dwa
 -make flowchart and import global planner

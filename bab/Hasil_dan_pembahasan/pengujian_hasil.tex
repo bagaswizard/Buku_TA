@@ -228,3 +228,24 @@
 \caption{Perbandingan path terhadap ground truth di region C}
 \label{tab:path_comparison_rc}
 \end{table}
+
+\subsubsection{Hasil DWA Planner}
+\begin{table}[H]
+\centering
+\csvreader[tabular={|c|c|c|c|},
+           table head={\hline \thead{Region} & \thead{Waktu\\(s)} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} \\ \hline},
+           late after line={\\\hline}]
+  {lampiran/path_track.csv}{1=\a,2=\b,3=\c,4=\d}{\a & \b & \c & \d}
+\caption{Hasil tracking path}
+\label{tab:path_tracking}
+\end{table}
+
+\begin{table}[H]
+\centering
+\csvreader[tabular={|c|c|c|c|},
+           table head={\hline \thead{Region} & \thead{Waktu\\(s)} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} \\ \hline},
+           late after line={\\\hline}]
+  {lampiran/path_track_rough.csv}{1=\a,2=\b,3=\c,4=\d}{\a & \b & \c & \d}
+\caption{Hasil tracking path kondisi gempa}
+\label{tab:path_tracking_rough}
+\end{tab

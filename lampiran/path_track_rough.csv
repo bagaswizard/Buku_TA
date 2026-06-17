@@ -1,0 +1,4 @@
+region,Waktu (s), Mean cross track error (m),Max cross track error (m)
+A,13.144,0.004394,0.026285
+B,7.243,0.013691,0.064845
+C,94.119,0.039834,0.174556
