@@ -1,10 +1,55 @@
+
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{gambar/main_nav_flow.png}
+\includesvg[width=0.7\textwidth]{gambar/navigation_architecture.svg}
+\caption{Arsitektur sistem navigasi}
+\label{fig:arsitektur_navigasi}
+\end{figure}
+
+Sistem navigasi ini berfungsi untuk merencanakan dan mengeksekusi
+pergerakan robot dari satu region ke region lain pada lingkungan yang
+telah diketahui. Sistem dapat dibagi menjadi empat komponen utama,
+yaitu occupancy grid, costmap, lokalisasi, serta path planning dan
+tracking. Occupancy grid menyediakan representasi diskrit dari
+lingkungan. Costmap menyimpan informasi tersebut dalam bentuk peta
+biaya (costmap). Lokalisasi bertugas melacak posisi dan region robot
+secara real-time. Path planning dan tracking bertanggung jawab
+menghasilkan jalur antar region dan menjalankannya. 
+
+Data combined map (peta gabungan) digunakan untuk membangun global
+costmap, dimulai dari pembentukan static layer yang merepresentasikan
+obstacle yang diketahui dari peta. Selain itu, combined map juga
+menjadi basis bagi lokalisasi ICP untuk dikomparasi dengan hasil scan
+LiDAR guna memperkirakan pose robot. Sementara itu, map transisi
+digunakan sebagai sumber data bagi transition costmap, yang menyimpan
+informasi koneksi antar region.
+
+Costmap dalam sistem ini dibagi menjadi tiga lapisan, yaitu global
+costmap, local costmap, dan transition costmap. Global dan local
+costmap sama-sama menggunakan inflation layer, namun dengan sumber
+data yang berbeda. Inflation layer pada global costmap dibangun
+berdasar-kan static layer yang berasal dari obstacle tetap pada peta.
+Inflasi pada local costmap didasarkan pada obstacle layer yang
+diperbarui secara dinamis dari data scan LiDAR.
+
+Global costmap digunakan oleh global planner untuk merencanakan path
+utama menuju tujuan. Untuk navigasi antar region, path router bertugas merutekan ulang jalur menuju
+zona transisi ketika tujuan berada di region yang berbeda. Hasil
+rutekan tersebut kemudian diteruskan ke DWA local planner, yang
+menghasilkan trajectory berupa kecepatan x, y, dan rotasi yang
+diberikan ke kontroler robot untuk dieksekusi.
+
+Untuk memfasilitasi tracking, lokalisasi ICP dan region switcher bekerja sama melacak posisi koordinat
+robot serta region tempat robot berada saat ini. Ketika robot mencapai
+zona transisi, region switcher melakukan perpindahan region dan
+memperbarui posisi awal ICP pada region yang baru.
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.5\textwidth]{gambar/main_nav_flow.svg}
 \caption{Diagram alur navigasi}
 \label{fig:main_navigation_flow}
 \end{figure}
-
 
 
 \subsection{Lokalisasi Iterative Closest Point (ICP)}
@@ -27,13 +72,13 @@ Untuk setiap sel rintangan (occupied) pada indeks $i_{\text{occ}}$:
 Data scan dari sensor LiDAR diproses terlebih dahulu dan disimpan dalam format seperti berikut.
 Untuk scan dengan sinar $N$ pada sudut $\theta_0, \theta_1, \dots, \theta_{N-1}$:
 
-$$\mathbf{C} = \begin{bmatrix} \cos\theta_0 & \cos\theta_1 & \cdots & \cos\theta_{N-1} \\ \sin\theta_0 & \sin\theta_1 & \cdots & \sin\theta_{N-1} \end{bmatrix}$$
+\begin{equation}\mathbf{C} = \begin{bmatrix} \cos\theta_0 & \cos\theta_1 & \cdots & \cos\theta_{N-1} \\ \sin\theta_0 & \sin\theta_1 & \cdots & \sin\theta_{N-1} \end{bmatrix}\end{equation}
 
 Cache hanya dihitung ulang ketika parameter scan (jumlah sinar, rentang sudut, increment) berubah.
 
 Diberikan pembacaan vektor $r_0, r_1, \dots, r_{N-1}$:
 
-$$\mathbf{S} = \begin{bmatrix} r_0 \cos\theta_0 & r_1 \cos\theta_1 & \cdots & r_{N-1} \cos\theta_{N-1} \\ r_0 \sin\theta_0 & r_1 \sin\theta_1 & \cdots & r_{N-1} \sin\theta_{N-1} \end{bmatrix}$$
+\begin{equation}\mathbf{S} = \begin{bmatrix} r_0 \cos\theta_0 & r_1 \cos\theta_1 & \cdots & r_{N-1} \cos\theta_{N-1} \\ r_0 \sin\theta_0 & r_1 \sin\theta_1 & \cdots & r_{N-1} \sin\theta_{N-1} \end{bmatrix}\end{equation}
 
 $S$ adalah hasil \emph{scan point cloud} dalam koordinat cartesian, hasil konversi dari data laser mentah ke titik-titik 2D.
 
@@ -82,47 +127,47 @@ Diberikan $M$ pasangan $\{s_i\}$ (sensor) dan $\{m_i\}$ (map) dengan weights $\{
 
 % Intinya: $T \in SE(2)$ berarti transformasi yang mempertahankan jarak dan orientasi (tidak ada shearing/scaling) — hanya memutar dan menggeser
 
-$$T^* = \arg\min_{R,\,t} \sum_{i=1}^{M} w_i \, \big\| m_i - (R s_i + t) \big\|^2$$
+\begin{equation}T^* = \arg\min_{R,\,t} \sum_{i=1}^{M} w_i \, \big\| m_i - (R s_i + t) \big\|^2\end{equation}
 
 Langkah 1: Kalkulasi \emph{Weighted Centroids}
 
-$$\bar{s} = \frac{\sum_{i=1}^{M} w_i s_i}{\sum_{i=1}^{M} w_i}, \qquad \bar{m} = \frac{\sum_{i=1}^{M} w_i m_i}{\sum_{i=1}^{M} w_i}$$
+\begin{equation}\bar{s} = \frac{\sum_{i=1}^{M} w_i s_i}{\sum_{i=1}^{M} w_i}, \qquad \bar{m} = \frac{\sum_{i=1}^{M} w_i m_i}{\sum_{i=1}^{M} w_i}\end{equation}
 
 Langkah 2: Centering (pindahkan titik ke pusat koordinat)
 
-$$s_i' = s_i - \bar{s}, \qquad m_i' = m_i - \bar{m}$$
+\begin{equation}s_i' = s_i - \bar{s}, \qquad m_i' = m_i - \bar{m}\end{equation}
 
 Langkah 3: Cross-Covariance Matrix
 
-$$H = \sum_{i=1}^{M} w_i \, m_i' (s_i')^\top = M \, W \, S^\top$$
+\begin{equation}H = \sum_{i=1}^{M} w_i \, m_i' (s_i')^\top = M \, W \, S^\top\end{equation}
 
 dimana $S, M \in \mathbb{R}^{2 \times M}$ adalah matriks yang kolomnya berisi titik-titik yang sudah di-center, dan $W = \operatorname{diag}(w_1, \dots, w_M)$.
 
 Langkah 4: Singular Value Decomposition
 
-$$H = U \Sigma V^\top$$
+\begin{equation}H = U \Sigma V^\top\end{equation}
 
 dengan $U, V \in \mathbb{R}^{2 \times 2}$ orthonormal dan $\Sigma = \operatorname{diag}(\sigma_1, \sigma_2)$.
 
 Langkah 5: Rotasi Optimal
 
-$$R = U V^\top$$
+\begin{equation}R = U V^\top\end{equation}
 
 Jika $\det(R) < 0$ (menghasilkan refleksi, bukan rotasi murni), koreksi dengan membalik tanda baris pertama $V^\top$:
 
-$$\text{if } \det(R) < 0: \quad V^\top_{0,:} \gets -V^\top_{0,:}, \quad R = U V^\top$$
+\begin{equation}\text{if } \det(R) < 0: \quad V^\top_{0,:} \gets -V^\top_{0,:}, \quad R = U V^\top\end{equation}
 
 Langkah 6: Translasi Optimal
 
-$$t = \bar{m} - R \bar{s}$$
+\begin{equation}t = \bar{m} - R \bar{s}\end{equation}
 
 Langkah 7: Susun Rigid Transform 2D
 
-$$T_{\text{update}} = \begin{bmatrix} R & t \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} \cos\Delta\theta & -\sin\Delta\theta & t_x \\ \sin\Delta\theta & \cos\Delta\theta & t_y \\ 0 & 0 & 1 \end{bmatrix}$$
+\begin{equation}T_{\text{update}} = \begin{bmatrix} R & t \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} \cos\Delta\theta & -\sin\Delta\theta & t_x \\ \sin\Delta\theta & \cos\Delta\theta & t_y \\ 0 & 0 & 1 \end{bmatrix}\end{equation}
 
 Setelah iterasi, cek apakah transform update cukup kecil:
 
-$$\text{converged} \iff \|t\| < t_{\text{norm}} \land \big|\arctan2(R_{1,0}, R_{0,0})\big| < r_{\text{norm}}$$
+\begin{equation}\text{converged} \iff \|t\| < t_{\text{norm}} \land \big|\arctan2(R_{1,0}, R_{0,0})\big| < r_{\text{norm}}\end{equation}
 
 % konvergensi terjadi hanya jika kedua kondisi terpenuhi, dan jika kedua kondisi terpenuhi maka konvergensi terjadi.
 
@@ -132,7 +177,7 @@ Untuk mempercepat, hanya $1/s$ dari scan points yang digunakan:
 \item Ambil setiap point ke-$s$ mulai dari $o$:
 \end{enumerate}
 
-$$p_k' = p_{o + k \cdot s}, \quad k = 0, 1, \dots, \left\lfloor \frac{N}{s} \right\rfloor - 1$$
+\begin{equation}p_k' = p_{o + k \cdot s}, \quad k = 0, 1, \dots, \left\lfloor \frac{N}{s} \right\rfloor - 1\end{equation}
 
 \begin{table}[H]
 \centering
@@ -178,7 +223,7 @@ Indeks Grid
 
 konversi dari koordinat grid 2D $(m_x, m_y)$ ke flat index 1D:
 
-$$i = m_y \cdot W + m_x$$
+\begin{equation}i = m_y \cdot W + m_x\end{equation}
 
 dimana $W$ adalah lebar grid (jumlah cell per baris).
 
@@ -188,19 +233,19 @@ Diberikan origin grid di $(o_x, o_y)$ dan resolusi $r$ (meter per cell):
 
 World → Grid:
 
-$$m_x = \left\lfloor \frac{w_x - o_x}{r} \right\rfloor, \qquad m_y = \left\lfloor \frac{w_y - o_y}{r} \right\rfloor$$
+\begin{equation}m_x = \left\lfloor \frac{w_x - o_x}{r} \right\rfloor, \qquad m_y = \left\lfloor \frac{w_y - o_y}{r} \right\rfloor\end{equation}
 
 Grid → World :
 
-$$w_x = o_x + \left(m_x + \frac{1}{2}\right) \cdot r, \qquad w_y = o_y + \left(m_y + \frac{1}{2}\right) \cdot r$$
+\begin{equation}w_x = o_x + \left(m_x + \frac{1}{2}\right) \cdot r, \qquad w_y = o_y + \left(m_y + \frac{1}{2}\right) \cdot r\end{equation}
 
 1.4 Rolling Window
 
 Untuk local costmap yang bergerak mengikuti robot, origin grid digeser:
 
-$$\Delta_x = \lfloor \text{new\_origin}_x - \text{old\_origin}_x \rfloor, \quad \Delta_y = \lfloor \text{new\_origin}_y - \text{old\_origin}_y \rfloor$$
+\begin{equation}\Delta_x = \lfloor \text{new\_origin}_x - \text{old\_origin}_x \rfloor, \quad \Delta_y = \lfloor \text{new\_origin}_y - \text{old\_origin}_y \rfloor\end{equation}
 
-Array costmap digeser sebesar $$(\Delta_x, \Delta_y)$$ dan cell baru diisi dengan NO\_INFORMATION.
+Array costmap digeser sebesar $(\Delta_x, \Delta_y)$ dan cell baru diisi dengan NO\_INFORMATION.
 
 % 1. Jika rolling window, geser origin ke pusat robot
 % 2. Reset bounds: min_x = max_x = robot_x, min_y = max_y = robot_y
@@ -221,7 +266,7 @@ Array costmap digeser sebesar $$(\Delta_x, \Delta_y)$$ dan cell baru diisi denga
 % \label{staticlayer}
 Static layer adalah lapisan costmap paling dasar yang menyimpan informasi \emph{known obstacle} atau tembok yang sudah diketahui. Lapisan costmap ini mengkonversi setiap sel dari nilai occupancy grid (0-100) ke nilai biaya costmap internal (0-255). Sel yang tidak diketahui (unknown) diberi biaya tertinggi, sel bebas diberi biaya terendah, dan sel yang terisi (occupied) diberi biaya tinggi. 
 
-$$C_{\text{internal}} = \begin{cases} 255 & \text{if } OG = -1 \text{ (unknown)} \\ 0 & \text{if } OG = 0 \text{ (free)} \\ 254 & \text{if } OG \geq 100 \text{ (occupied)} \\  \end{cases}$$
+\begin{equation}C_{\text{internal}} = \begin{cases} 255 & \text{if } OG = -1 \text{ (unknown)} \\ 0 & \text{if } OG = 0 \text{ (free)} \\ 254 & \text{if } OG \geq 100 \text{ (occupied)} \\  \end{cases}\end{equation}
 
 \subsubsection{Obstacle Layer}
 Obstacle layer dirancang untuk menangani objek-objek dinamis atau rintangan yang baru terdeteksi di lingkungan. Informasi pada lapisan ini diperoleh secara real-time dari sensor LiDAR robot, yang terus-menerus memindai area sekitar dan memperbarui \emph{costmap} sesuai dengan obstacle yang terdeteksi. Lapisan ini memiliki batasan jangkauan observasi maksimum, yang jaraknya disesuaikan berdasarkan jarak \emph{pointcloud} maksimum dari sensor LiDAR, yang berarti hanya rintangan dalam radius pandang sensor yang akan direpresentasikan di lapisan \emph{costmap} ini.
@@ -237,7 +282,7 @@ Untuk setiap beam laser dengan range $r$ dan sudut $\theta$:
 
 Gunakan algoritma Bresenham 2D untuk menggambar garis dari robot ke endpoint sensor. Semua cell yang dilewati garis (sebelum endpoint) di-clear:
 
-$$C_{\text{master}}(m_x, m_y) = 0 \quad \forall \text{cell di sepanjang ray} \text{ (kecuali endpoint)}$$
+\begin{equation}C_{\text{master}}(m_x, m_y) = 0 \quad \forall \text{cell di sepanjang ray} \text{ (kecuali endpoint)}\end{equation}
 
 Bresenham 2D Raytracing
 
@@ -245,9 +290,9 @@ Algoritma Bresenham memilih pixel-pixel yang mendekati garis lurus antara dua ti
 
 Diberikan titik awal $(x_0, y_0)$ dan titik akhir $(x_1, y_1)$:
 
-$$\Delta_x = |x_1 - x_0|, \quad \Delta_y = |y_1 - y_0|$$
+\begin{equation}\Delta_x = |x_1 - x_0|, \quad \Delta_y = |y_1 - y_0|\end{equation}
 
-$$\text{err} = \Delta_x - \Delta_y, \quad s_x = \text{sign}(x_1 - x_0), \quad s_y = \text{sign}(y_1 - y_0)$$
+\begin{equation}\text{err} = \Delta_x - \Delta_y, \quad s_x = \text{sign}(x_1 - x_0), \quad s_y = \text{sign}(y_1 - y_0)\end{equation}
 
 \begin{algorithm}[H]
 \caption{Bresenham Raytracing}
@@ -280,19 +325,17 @@ Untuk setiap obstacle cell, terapkan cost ke semua cell dalam radius inflasi $R$
 
 Cost pada jarak $d$ dari obstacle dihitung dengan fungsi eksponensial:
 
-$$C(d) = \begin{cases} 253 \cdot e^{-\alpha \cdot (d - r_{\text{inscribed}})} & \text{if } d \leq R \\ 0 & \text{otherwise} \end{cases}$$
+\begin{equation}C(d) = \begin{cases} 253 \cdot e^{-\alpha \cdot (d - r_{\text{inscribed}})} & \text{if } d \leq R \\ 0 & \text{otherwise} \end{cases}\end{equation}
 
 Atau dalam bentuk weight:
 
-$$C(d) = 252 \cdot \left( e^{-\alpha \cdot (d - r_{\text{inscribed}})} \right)$$
+\begin{equation}C(d) = 252 \cdot \left( e^{-\alpha \cdot (d - r_{\text{inscribed}})} \right)
+\label{eq:inflation_function}
+\end{equation}
 
-dimana:
-- $d$ = jarak Euclidean dari cell ke obstacle terdekat
-- $R$ = inflation radius (jarak maksimum inflasi)
-- $r_{\text{inscribed}}$ = inscribed radius (radius robot, cost = 253 pada jarak ini)
-- $\alpha$ = scaling factor (mengontrol kecuraman kurva cost)
 
-Cost dibulatkan ke integer 0–252.
+
+dimana: $d$ = jarak Euclidean dari cell ke obstacle terdekat, $R$ = inflation radius (jarak maksimum inflasi), $r_{\text{inscribed}}$ = inscribed radius (radius robot, cost = 253 pada jarak ini), dan $\alpha$ = scaling factor (mengontrol kecuraman kurva cost). Nilai cost dibulatkan ke integer 6–252.
 
 %   ^
 %   | 253 ────────── INSCRIBED_INFLATED_OBSTACLE (d = r_inscribed)
@@ -311,7 +354,7 @@ Cost dibulatkan ke integer 0–252.
 
 Transition layer adalah lapisan yang menambahkan data area transisi ke dalam costmap. Data ini digunakan oleh untuk mendeteksi kapan robot mendekati batas transisi antar region dan melakukan "lompatan" pose antar area.
 
-$$C_{\text{internal}} = \begin{cases} 255 & \text{if } OG = -1 \text{ (unknown)} \\ 0 & \text{if } OG = 0 \text{ (free)} \\ 1 & \text{if } OG \geq 100 \text{ (occupied)} \\  \end{cases}$$
+\begin{equation}C_{\text{internal}} = \begin{cases} 255 & \text{if } OG = -1 \text{ (unknown)} \\ 0 & \text{if } OG = 0 \text{ (free)} \\ 1 & \text{if } OG \geq 100 \text{ (occupied)} \\  \end{cases}\end{equation}
 
 Lapisan ini juga memperluas area transisi dengan radius tertentu, sehingga robot dapat mendeteksi transisi sebelum benar-benar mencapai garis transisi. Hal ini membuat buffer zona deteksi di sekitar data transisi. 
 
@@ -325,9 +368,9 @@ Global planner menggunakan algoritma A* untuk menghitung potential field dari go
 \subsubsection{Kalkukasi Cost}
 
 Kalkulasi cost di global planner adalah proses transformasi nilai costmap global (0–255) menjadi effective traversal cost yang digunakan dalam wavefront expansion (A*).
-$$c_{\text{eff}} = \text{costmap}[n] \cdot f + c_{\text{neutral}}$$
+\begin{equation}c_{\text{eff}} = \text{costmap}[n] \cdot f + c_{\text{neutral}}\end{equation}
 
-$$c_{\text{eff}} = \begin{cases} c_{\text{eff}} & \text{if } c_{\text{eff}} < c_{\text{lethal}} \\ c_{\text{lethal}} - 1 & \text{if } c_{\text{eff}} \geq c_{\text{lethal}} \\ c_{\text{lethal}} & \text{if } \text{costmap}[n] \geq c_{\text{lethal}} \text{dan tidak unknown} \end{cases}$$
+\begin{equation}c_{\text{eff}} = \begin{cases} c_{\text{eff}} & \text{if } c_{\text{eff}} < c_{\text{lethal}} \\ c_{\text{lethal}} - 1 & \text{if } c_{\text{eff}} \geq c_{\text{lethal}} \\ c_{\text{lethal}} & \text{if } \text{costmap}[n] \geq c_{\text{lethal}} \text{dan tidak unknown} \end{cases}\end{equation}
 
 $f$ adalah cost factor dan $c_{\text{neutral}}$ adalah neutral cost. Jika hasilnya melebihi lethal cost (253), nilai di batasi ke lethal cost - 1 (252) agar tidak sama persis dengan nilai lethal, dan jika nilai costmap mentah sudah mencapai lethal threshold maka $c_{\text{eff}}$ langsung dikembalikan sebagai 253 yaitu obstacle yang tidak bisa dilalui.
 
@@ -350,25 +393,25 @@ $c_{\text{lethal}}$  & 253 & \emph{Lethal cost} \\
 
 Kalkulasi potensial kuadratik adalah aproksimasi Euclidean wavefront yang lebih akurat. Diberikan dua neighbor terkecil dari arah horizontal dan vertikal:
 
-$$t_c = \min(P_{\text{left}}, P_{\text{right}}), \quad t_a = \min(P_{\text{up}}, P_{\text{down}})$$
+\begin{equation}t_c = \min(P_{\text{left}}, P_{\text{right}}), \quad t_a = \min(P_{\text{up}}, P_{\text{down}})\end{equation}
 
 Selisih: $\Delta = |t_c - t_a|$ (jika $t_c < t_a$, tukar).
 
 Jika $\Delta \geq c_{\text{eff}}$:
 
-$$P(n) = t_a + c_{\text{eff}}$$
+\begin{equation}P(n) = t_a + c_{\text{eff}}\end{equation}
 
 Jika $\Delta < c_{\text{eff}}$ (interpolasi kuadratik):
 
-$$d = \frac{\Delta}{c_{\text{eff}}}$$
+\begin{equation}d = \frac{\Delta}{c_{\text{eff}}}\end{equation}
 
-$$v = -0.2301 \cdot d^2 + 0.5307 \cdot d + 0.7040$$
+\begin{equation}v = -0.2301 \cdot d^2 + 0.5307 \cdot d + 0.7040\end{equation}
 
-$$P(n) = t_a + c_{\text{eff}} \cdot v$$
+\begin{equation}P(n) = t_a + c_{\text{eff}} \cdot v\end{equation}
 
 Koefisien polinomial `-0.2301, 0.5307, 0.7040` adalah hasil least-squares fit dari fungsi $\sqrt{1 + d^2}$ (jarak Euclidean sebenarnya dari point source). Kurva ini mendekati:
 
-$$v(d) \approx \sqrt{1 + d^2}$$
+\begin{equation}v(d) \approx \sqrt{1 + d^2}\end{equation}
 
 dengan error minimal.
 
@@ -376,13 +419,13 @@ dengan error minimal.
 
 menggunakan heuristic untuk memprioritaskan ekspansi ke arah goal:
 
-$$\text{priority} = P(n) + \text{ManhattanDistance}(n, \text{goal}) \cdot c_{\text{neutral}}$$
+\begin{equation}\text{priority} = P(n) + \text{ManhattanDistance}(n, \text{goal}) \cdot c_{\text{neutral}}\end{equation}
 
-$$\text{ManhattanDistance}(x, y) = |x_{\text{goal}} - x| + |y_{\text{goal}} - y|$$
+\begin{equation}\text{ManhattanDistance}(x, y) = |x_{\text{goal}} - x| + |y_{\text{goal}} - y|\end{equation}
 
 kalkulasi potential linear (Manhattan):
 
-$$P(n) = \min(P_{\text{left}}, P_{\text{right}}, P_{\text{up}}, P_{\text{down}}) + c_{\text{eff}}$$
+\begin{equation}P(n) = \min(P_{\text{left}}, P_{\text{right}}, P_{\text{up}}, P_{\text{down}}) + c_{\text{eff}}\end{equation}
 
 
 Heuristic ini membuat A* lebih cepat dari Dijkstra karena mengeksplorasi lebih sedikit cell, terutama ketika goal jauh. A* berekspansi seperti ellips yang condong ke start
@@ -401,21 +444,21 @@ Komputasi gradient sebagai berikut
 
 Aproksimasi central difference:
 
-$$g_x = \frac{P(x-1, y) - P(x+1, y)}{2}$$
+\begin{equation}g_x = \frac{P(x-1, y) - P(x+1, y)}{2}\end{equation}
 
-$$g_y = \frac{P(x, y-1) - P(x, y+1)}{2}$$
+\begin{equation}g_y = \frac{P(x, y-1) - P(x, y+1)}{2}\end{equation}
 
 Normalisasi:
 
-$$\hat{g}_x = \frac{g_x}{\sqrt{g_x^2 + g_y^2}}, \quad \hat{g}_y = \frac{g_y}{\sqrt{g_x^2 + g_y^2}}$$
+\begin{equation}\hat{g}_x = \frac{g_x}{\sqrt{g_x^2 + g_y^2}}, \quad \hat{g}_y = \frac{g_y}{\sqrt{g_x^2 + g_y^2}}\end{equation}
 
 Untuk sel yang berada di obstacle (potensial tinggi), gradient dihitung dari tetangga terdekat yang valid.
 
 Perhitungan Path Step:
 
-$$\text{step} = \frac{\text{pathStep}}{\sqrt{g_x(p)^2 + g_y(p)^2}}$$
+\begin{equation}\text{step} = \frac{\text{pathStep}}{\sqrt{g_x(p)^2 + g_y(p)^2}}\end{equation}
 
-$$d_x \gets d_x + g_x(p) \cdot \text{step}, \quad d_y \gets d_y + g_y(p) \cdot \text{step}$$
+\begin{equation}d_x \gets d_x + g_x(p) \cdot \text{step}, \quad d_y \gets d_y + g_y(p) \cdot \text{step}\end{equation}
 
 Cell overflow: Ketika $|d_x| \geq 1.0$ atau $|d_y| \geq 1.0$, pindah ke cell tetangga:
 
@@ -447,8 +490,8 @@ dipilih. Kelima, perintah kecepatan dari \emph{trajectory} terbaik tersebut
 dikirim ke robot.
 
 DWA Velocity window dibatasi oleh apa yang dapat dicapai dalam satu siklus kontrol:
-$$v_{\text{min}} = \max\left(v_{\text{min\_limit}},\; v_{\text{current}} - \dot{v}_{\text{max}} \cdot \Delta t\right)$$
-$$v_{\text{max}} = \min\left(v_{\text{max\_limit}},\; v_{\text{current}} + \dot{v}_{\text{max}} \cdot \Delta t\right)$$
+\begin{equation}v_{\text{min}} = \max\left(v_{\text{min\_limit}},\; v_{\text{current}} - \dot{v}_{\text{max}} \cdot \Delta t\right)\end{equation}
+\begin{equation}v_{\text{max}} = \min\left(v_{\text{max\_limit}},\; v_{\text{current}} + \dot{v}_{\text{max}} \cdot \Delta t\right)\end{equation}
 
 dimana $\Delta t$ adalah waktu satu siklus kontrol.
 
@@ -457,15 +500,15 @@ dimana $\Delta t$ adalah waktu satu siklus kontrol.
 
 Untuk setiap dimensi $(v_x, v_y, \omega)$, rentang dibagi menjadi sample merata:
 
-$$\Delta v_x = \frac{v_{x,\text{max}} - v_{x,\text{min}}}{N_{v_x} - 1}$$
+\begin{equation}\Delta v_x = \frac{v_{x,\text{max}} - v_{x,\text{min}}}{N_{v_x} - 1}\end{equation}
 
-$$\Delta v_y = \frac{v_{y,\text{max}} - v_{y,\text{min}}}{N_{v_y} - 1}$$
+\begin{equation}\Delta v_y = \frac{v_{y,\text{max}} - v_{y,\text{min}}}{N_{v_y} - 1}\end{equation}
 
-$$\Delta \omega = \frac{\omega_{\text{max}} - \omega_{\text{min}}}{N_{\omega} - 1}$$
+\begin{equation}\Delta \omega = \frac{\omega_{\text{max}} - \omega_{\text{min}}}{N_{\omega} - 1}\end{equation}
 
 Total trajectory yang di-sample:
 
-$$N_{\text{total}} = N_{v_x} \times N_{v_y} \times N_{\omega}$$
+\begin{equation}N_{\text{total}} = N_{v_x} \times N_{v_y} \times N_{\omega}\end{equation}
 
 Konfigurasi dari yaml: $N_{v_x} = 6$, $N_{v_y} = 6$, $N_{\omega} = 30$ → total 1080 trajectories per evaluasi.
 
@@ -473,21 +516,21 @@ Konfigurasi dari yaml: $N_{v_x} = 6$, $N_{v_y} = 6$, $N_{\omega} = 30$ → total
 
 Untuk setiap sample kecepatan $(v_x, v_y, \omega)$, trajectory disimulasikan menggunakan model kinematik diferensial:
 
-$$x_{t+1} = x_t + \left(v_x \cos\theta_t + v_y \cos\left(\frac{\pi}{2} + \theta_t\right)\right) \cdot \Delta t$$
+\begin{equation}x_{t+1} = x_t + \left(v_x \cos\theta_t + v_y \cos\left(\frac{\pi}{2} + \theta_t\right)\right) \cdot \Delta t\end{equation}
 
-$$y_{t+1} = y_t + \left(v_x \sin\theta_t + v_y \sin\left(\frac{\pi}{2} + \theta_t\right)\right) \cdot \Delta t$$
+\begin{equation}y_{t+1} = y_t + \left(v_x \sin\theta_t + v_y \sin\left(\frac{\pi}{2} + \theta_t\right)\right) \cdot \Delta t\end{equation}
 
-$$\theta_{t+1} = \theta_t + \omega \cdot \Delta t$$
+\begin{equation}\theta_{t+1} = \theta_t + \omega \cdot \Delta t\end{equation}
 
 Jumlah langkah simulasi ditentukan oleh granularity:
 
-$$N_{\text{steps}} = \frac{T_{\text{sim}}}{\Delta t}$$
+\begin{equation}N_{\text{steps}} = \frac{T_{\text{sim}}}{\Delta t}\end{equation}
 
-$$\Delta t = \min\left(\frac{\text{sim\_granularity}}{|v|},\; \frac{\text{angular\_sim\_granularity}}{|\omega|}\right)$$
+\begin{equation}\Delta t = \min\left(\frac{\text{sim\_granularity}}{|v|},\; \frac{\text{angular\_sim\_granularity}}{|\omega|}\right)\end{equation}
 
 \subsubsection{Penilaian Trayektori}
 
-$$C_{\text{total}} = C_{\text{osc}} + w_{\text{obs}} \cdot C_{\text{obs}} + w_{\text{gf}} \cdot C_{\text{gf}} + w_{\text{align}} \cdot C_{\text{align}} + w_{\text{path}} \cdot C_{\text{path}} + w_{\text{goal}} \cdot C_{\text{goal}} + w_{\text{twirl}} \cdot C_{\text{twirl}}$$
+\begin{equation}C_{\text{total}} = C_{\text{osc}} + w_{\text{obs}} \cdot C_{\text{obs}} + w_{\text{gf}} \cdot C_{\text{gf}} + w_{\text{align}} \cdot C_{\text{align}} + w_{\text{path}} \cdot C_{\text{path}} + w_{\text{goal}} \cdot C_{\text{goal}} + w_{\text{twirl}} \cdot C_{\text{twirl}}\end{equation}
 
 % critics[0] = oscillation_costs_      // Mencegah osilasi
 % critics[1] = obstacle_costs_         // Menghindari obstacle
@@ -497,7 +540,7 @@ $$C_{\text{total}} = C_{\text{osc}} + w_{\text{obs}} \cdot C_{\text{obs}} + w_{\
 % critics[5] = goal_costs_             // Robot menuju goal
 % critics[6] = twirling_costs_         // Penalti rotasi berlebih
 
-$$C_{\text{obs}} = \begin{cases} \sum_{k=1}^{N} C_k & \text{if sum\_scores} \\ \max_k C_k & \text{otherwise} \end{cases}$$
+\begin{equation}C_{\text{obs}} = \begin{cases} \sum_{k=1}^{N} C_k & \text{if sum\_scores} \\ \max_k C_k & \text{otherwise} \end{cases}\end{equation}
 
 Dilakukan juga Collision Checking. Setiap titik sepanjang trajectory, footprint robot di-rasterize ke costmap:
 
@@ -511,7 +554,7 @@ Semua nilai di agregasi menjadi satu skor total untuk trajectory tersebut. Traje
 
 Mode sum scores:
 
-$$C_{\text{obs}} = \begin{cases} \sum_{k=1}^{N} C_k & \text{if sum\_scores} \\ \max_k C_k & \text{otherwise} \end{cases}$$
+\begin{equation}C_{\text{obs}} = \begin{cases} \sum_{k=1}^{N} C_k & \text{if sum\_scores} \\ \max_k C_k & \text{otherwise} \end{cases}\end{equation}
 
 % **Collision detection**: Jika ada footprint cell dengan `LETHAL_OBSTACLE` (254), return `-6.0`. Jika off-map, return `-7.0`.
 
@@ -530,7 +573,7 @@ Wavefront Propagation
 % 4. Berhenti di LETHAL OBSTACLE, INSCRIBED INFLATED OBSTACLE, NO INFORMATION
 ```
 
-$$d_{\text{cell}} = \text{number of BFS steps from nearest target cell}$$
+\begin{equation}d_{\text{cell}} = \text{number of BFS steps from nearest target cell}\end{equation}
 
 Scoring Mode
 
@@ -540,7 +583,7 @@ Forward Point Shift
 
 % Untuk `goal_front_costs_` dan `alignment_costs_`, titik scoring digeser ke depan sejauh `forward_point_distance_`:
 
-$$p_{\text{score}} = p_{\text{robot}} + d_{\text{forward}} \cdot \begin{pmatrix} \cos\theta \\ \sin\theta \end{pmatrix}$$
+\begin{equation}p_{\text{score}} = p_{\text{robot}} + d_{\text{forward}} \cdot \begin{pmatrix} \cos\theta \\ \sin\theta \end{pmatrix}\end{equation}
 
 Path Costs ($C_{\text{path}}$)
 
@@ -564,9 +607,9 @@ Goal Front Costs ($C_{\text{gf}}$)
 
 Menggunakan forward point shift. Menilai apakah **hidung robot** mengarah ke goal.
 
-$$p_{\text{hidung}} = p_{\text{robot}} + d_{\text{forward}} \cdot \hat{v}$$
+\begin{equation}p_{\text{hidung}} = p_{\text{robot}} + d_{\text{forward}} \cdot \hat{v}\end{equation}
 
-$$C_{\text{gf}} = \text{target\_dist}(p_{\text{hidung}})$$
+\begin{equation}C_{\text{gf}} = \text{target\_dist}(p_{\text{hidung}})\end{equation}
 
 % Weight: sama dengan goal costs, tetapi di-nol-kan jika `forward_point_distance <= 0`.
 
@@ -576,7 +619,7 @@ Sama dengan path costs, tetapi dengan forward point shift. Menilai apakah hidung
 
 Dinonaktifkan jika robot sudah dekat dengan goal:
 
-$$\text{disabled if } \|p_{\text{robot}} - p_{\text{goal}}\| < d_{\text{forward}} \cdot \text{cheat\_factor}$$
+\begin{equation*}\text{disabled if } \|p_{\text{robot}} - p_{\text{goal}}\| < d_{\text{forward}} \cdot \text{cheat\_factor}\end{equation*}
 
 Seleksi Trajectory terbaik
 

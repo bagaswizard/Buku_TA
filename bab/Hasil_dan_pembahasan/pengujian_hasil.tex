@@ -14,6 +14,15 @@
 \label{fig:icp_errors_ra}
 \end{figure}
 
+Grafik pada Gambar~\ref{fig:icp_errors_ra} menunjukkan error ICP pada sumbu $x$,
+$y$, dan $\theta$ (yaw) saat robot melintasi Region A. Secara umum, performa ICP
+stabil dengan tingkat error yang rendah sepanjang lintasan. Namun, terjadi lonjakan
+error yang signifikan pada sekitar $t = 50$ detik. Lonjakan ini disebabkan oleh
+posisi robot yang berada di zona transisi antara dua \emph{region}, di mana
+lingkungan yang dapat terdeteksi oleh sensor LiDAR sangat terbatas. Akibatnya,
+kualitas \emph{scan matching} menurun dan menghasilkan akumulasi error yang lebih
+besar pada estimasi transformasi.
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.7\textwidth]{gambar/sim_RA_rough.png}
@@ -28,6 +37,18 @@
 \label{fig:icp_errors_ra_rough}
 \end{figure}
 
+Selanjutnya, performa ICP diuji pada region A dengan kondisi lantai yang tidak
+rata untuk mensimulasikan skenario lantai yang rusak akibat gempa bumi.
+Gambar~\ref{fig:icp_errors_ra_rough} menunjukkan error ICP pada sumbu $x$, $y$,
+dan $\theta$ (yaw) untuk skenario ini. Dibandingkan dengan kasus sebelumnya,
+terjadi peningkatan osilasi yang signifikan, terutama pada sumbu $x$ dan yaw.
+Hal ini disebabkan oleh permukaan lantai yang tidak rata sehingga menghasilkan
+titik-titik \emph{scan} LiDAR yang lebih bervariasi secara vertikal, yang
+menurunkan kualitas \emph{scan matching} pada proses ICP. Akibatnya, estimasi
+transformasi menjadi kurang stabil dan menghasilkan fluktuasi error yang lebih
+besar. Lonjakan error di sekitar $t = 55$ detik tetap terjadi karena faktor
+zona transisi antar \emph{region}.
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.7\textwidth]{gambar/sim_RC2.png}
@@ -37,10 +58,46 @@
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{gambar/icp_errors_RC.png}
+\includesvg[width=0.9\textwidth]{gambar/icp_errors_RC2}
 \caption{Error ICP di Region C}
 \label{fig:icp_errors_rc}
 \end{figure}
+
+Selanjutnya, performa ICP diuji pada Region C. Gambar~\ref{fig:icp_errors_rc}
+menunjukkan error ICP pada sumbu $x$, $y$, dan $\theta$ (yaw) untuk skenario ini.
+Hasilnya menunjukkan bahwa error maksimum pada ketiga sumbu lebih tinggi
+dibandingkan dengan performa di Region A, dan secara umum error yang dihasilkan
+lebih tidak stabil. Hal ini disebabkan oleh dua faktor. Pertama, Region C memiliki
+jumlah sel \emph{obstacle} yang lebih banyak, sehingga tabel \emph{hash} KNN yang
+perlu dicari lebih besar dan berpotensi memperlambat serta menurunkan kualitas
+\emph{scan matching}. Kedua, \emph{trajectory} robot di Region C lebih kompleks
+dengan banyak rotasi, yang mengakibatkan akumulasi error yang lebih besar pada
+estimasi \emph{yaw}.
+
+\subsection{Hasil Zona Transisi}
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.9\textwidth]{gambar/icp_position_x10}
+\caption{Error ICP di Region A dengan data posisi}
+\label{fig:icp_errors_ra_posy}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includesvg[width=0.7\textwidth]{gambar/map_A}
+\caption{Radius zona transisi}
+\label{fig:radius_transition}
+\end{figure}
+
+Pada data pada grafik \ref{fig:icp_errors_ra}, bisa juga diketahui posisi robot saat kualitas ICP menurun. dari data tersebut dapat dilihat bahwa kualitas ICP turun mulai saat robot posisi y=0.729 m, atau saat robot berada 0.24 dari ujung map. Nilai tersebut menunjukan bahwa zona transisi cocok untuk diberi nilai radius minimal 0.24, untuk bisa transisi dengan aman
+
+Berdasarkan Gambar~\ref{fig:icp_errors_ra}, dapat pula diidentifikasi posisi robot
+saat kualitas ICP mulai menurun. Dari data tersebut, penurunan kualitas ICP mulai
+terjadi ketika robot berada pada posisi $y = 0.729$ m, atau sekitar $0.24$ m dari
+ujung \emph{map}. Hal ini menunjukkan bahwa zona transisi perlu dirancang dengan
+radius minimal $0.24$ m agar robot dapat melakukan transisi antar \emph{region}
+dengan aman sebelum kualitas lokalisasi mengalami penurunan signifikan.
 
 \subsection{Hasil Global Planner}
 \subsubsection{Hasil Path di Region A}
@@ -93,6 +150,26 @@
 \label{fig:path_all_ra}
 \end{figure}
 
+\emph{Global path} adalah jalur yang direncanakan dari posisi robot menuju suatu
+tujuan. Pada pengujian di Region A, tujuan yang diberikan adalah titik tengah
+zona transisi yang ditandai dengan area biru di sebelah kiri peta, yang berfungsi
+sebagai gerbang menuju \emph{region} berikutnya. Pengujian dilakukan dengan
+berbagai nilai \emph{Cost Scaling Factor} (CSF) untuk melihat pengaruhnya terhadap
+bentuk \emph{path} yang dihasilkan. Pengaruh CSF terhadap
+\emph{global costmap} dijelaskan pada persamaan~\eqref{eq:inflation_function},
+yakni semakin tinggi nilai CSF, semakin curam penurunan nilai biaya terhadap
+jarak dari \emph{obstacle}.
+
+Hasil \emph{path} untuk setiap nilai CSF ditunjukkan pada
+Gambar~\ref{fig:path4_RA} dan karakteristiknya dirangkum pada
+Tabel~\ref{tab:path_csf_ra}. Pada CSF 10, \emph{path} cenderung mengikuti titik
+tengah di antara dua \emph{obstacle}. Hal ini menghasilkan
+\emph{path} yang tidak optimal karena melakukan belokan yang tidak diperlukan
+dan memiliki panjang yang bukan terpendek. Sebaliknya, pada CSF 100,
+\emph{path} bergerak lebih mepet ke \emph{obstacle}, memanfaatkan area biaya
+rendah yang lebih luas di dekat dinding. Hasilnya adalah \emph{path} yang
+lebih lurus dan lebih pendek.
+
 \subsubsection{Hasil Path di Region B}
 
 \begin{figure}[H]
@@ -142,6 +219,19 @@
 \caption{Semua path di region B. \\ \textcolor{green}{$\bullet$} CSF 10,\textcolor{yellow}{$\bullet$} CSF 20, \textcolor{red}{$\bullet$} CSF 50, \textcolor{orange}{$\bullet$} CSF 100}
 \label{fig:path_all_rb}
 \end{figure}
+
+Hasil \emph{path} untuk setiap nilai CSF di Region B ditunjukkan pada
+Gambar~\ref{fig:path4_RB} dan dilengkapi data kuantitatif pada
+Tabel~\ref{tab:path_csf_rb}. Seluruh \emph{path} dimulai dari posisi
+robot setelah bertransisi dari Region A ke Region B dan berakhir di
+zona transisi menuju Region C. Perbedaan nilai CSF tidak memberikan
+pengaruh yang signifikan terhadap bentuk \emph{path} yang dihasilkan.
+Hal ini disebabkan oleh \emph{layout} Region B yang hanya berupa
+lorong sempit, sehingga tidak terdapat ruang terbuka yang cukup bagi
+variasi \emph{cost gradient} untuk mengubah lintasan \emph{path}
+secara berarti. Akibatnya, semua \emph{path} dari keempat nilai CSF
+hampir identik satu sama lain, sebagaimana terlihat pada
+Gambar~\ref{fig:path_all_rb}.
 
 \subsubsection{Hasil Path di Region C}
 
@@ -193,6 +283,20 @@
 \label{fig:path_all_rc}
 \end{figure}
 
+Hasil \emph{path} untuk setiap nilai CSF di Region C ditunjukkan pada
+Gambar~\ref{fig:path4_RC} dan dilengka-pi data kuantitatif pada
+Tabel~\ref{tab:path_csf_rc}. Pada CSF 10, \emph{path} cenderung
+mempertahankan posisi di tengah lorong pada semua kondisi, yang menghasilkan
+jalur yang lebih aman namun lebih panjang. Sebaliknya, pada CSF 100,
+\emph{path} tidak terikat pada posisi tengah, sehingga mampu memanfaatkan
+ruang area terbuka, dan menghasilkan
+\emph{path} yang lebih pendek dan lurus. \emph{Path} pada CSF 20 dan CSF 50
+menunjukkan karakteristik peralihan di antara kedua ekstrem tersebut. Dari
+keseluruhan hasil, CSF 100 menghasilkan \emph{path} yang paling sesuai untuk
+navigasi di Region C karena memberikan keseimbangan terbaik antara efisiensi
+jalur (lebih pendek) dan \emph{clearance} terhadap \emph{obstacle} yang
+masih memadai.
+
 \begin{table}[H]
 \centering
 \csvreader[tabular={|c|c|c|c|c|c|},
@@ -229,7 +333,7 @@
 \label{tab:path_comparison_rc}
 \end{table}
 
-\subsubsection{Hasil DWA Planner}
+\subsection{Hasil DWA Planner}
 \begin{table}[H]
 \centering
 \csvreader[tabular={|c|c|c|c|},
@@ -248,4 +352,20 @@
   {lampiran/path_track_rough.csv}{1=\a,2=\b,3=\c,4=\d}{\a & \b & \c & \d}
 \caption{Hasil tracking path kondisi gempa}
 \label{tab:path_tracking_rough}
-\end{tab
+\end{table}
+
+Pengujian \emph{DWA planner} bertujuan untuk mengevaluasi kemampuannya dalam
+mengikuti \emph{global path} yang telah direncanakan sebelumnya. Hasil
+\emph{tracking} untuk kondisi normal dan kondisi gempa masing-masing
+dirangkum pada Tabel~\ref{tab:path_tracking} dan
+Tabel~\ref{tab:path_tracking_rough}. Pada kondisi normal, \emph{DWA planner}
+dapat mengikuti \emph{global path} dengan baik, tercermin dari nilai
+\emph{mean cross track error} dan \emph{max cross track error} yang relatif
+rendah. Sebaliknya, pada kondisi gempa, nilai \emph{max cross track error}
+meningkat secara signifikan. Hal ini terjadi karena terdapat
+\emph{obstacle} yang tidak diketahui oleh \emph{global path}, namun terdeteksi oleh sensor LiDAR saat navigasi
+berlangsung. Ketika \emph{obstacle} tersebut berada tepat pada lintasan
+\emph{global path}, \emph{DWA planner} terpaksa menghasilkan
+\emph{trajectory} yang menyimpang menjauhi \emph{global path} untuk
+menghindari tabrakan. Simpangan inilah yang tercermin sebagai nilai
+\emph{max cross track error} yang lebih besar.
