@@ -299,36 +299,36 @@ masih memadai.
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={|c|c|c|c|c|c|},
-           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Rata-rata\\panjang Path (m)} & \thead{Jumlah\\waypoint}  & \thead{Mean cross\\track error (m)} & \thead{Standard\\Deviation (m)} & \thead{Max Cross\\track Error (m)} \\ \hline},
+\csvreader[tabular={|c|c|c|c|},
+           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \hline},
            late after line={\\\hline}]
-  {lampiran/path_comparison_RA.csv}
-  {1=\a,2=\b,3=\c,4=\d,5=\e,6=\f}
-  {\a & \b & \c & \d & \e & \f}
+  {lampiran/path_stats_RA.csv}
+  {1=\a,2=\b,3=\c,4=\d}
+  {\a & \b & \c & \d}
 \caption{Perbandingan path terhadap ground truth di region A}
 \label{tab:path_comparison_ra}
 \end{table}
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={|c|c|c|c|c|c|},
-           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Rata-rata\\panjang Path (m)} & \thead{Jumlah\\waypoint}  & \thead{Mean cross\\track error (m)} & \thead{Standard\\Deviation (m)} & \thead{Max Cross\\track Error (m)} \\ \hline},
+\csvreader[tabular={|c|c|c|c|},
+           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \hline},
            late after line={\\\hline}]
-  {lampiran/path_comparison_RB.csv}
-  {1=\a,2=\b,3=\c,4=\d,5=\e,6=\f}
-  {\a & \b & \c & \d & \e & \f}
+  {lampiran/path_stats_RB.csv}
+  {1=\a,2=\b,3=\c,4=\d}
+  {\a & \b & \c & \d}
 \caption{Perbandingan path terhadap ground truth di region B}
 \label{tab:path_comparison_rb}
 \end{table}
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={|c|c|c|c|c|c|},
-           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Rata-rata\\panjang Path (m)} & \thead{Jumlah\\waypoint}  & \thead{Mean cross\\track error (m)} & \thead{Standard\\Deviation (m)} & \thead{Max Cross\\track Error (m)} \\ \hline},
+\csvreader[tabular={|c|c|c|c|},
+           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \hline},
            late after line={\\\hline}]
-  {lampiran/path_comparison_RC.csv}
-  {1=\a,2=\b,3=\c,4=\d,5=\e,6=\f}
-  {\a & \b & \c & \d & \e & \f}
+  {lampiran/path_stats_RC.csv}
+  {1=\a,2=\b,3=\c,4=\d}
+  {\a & \b & \c & \d}
 \caption{Perbandingan path terhadap ground truth di region C}
 \label{tab:path_comparison_rc}
 \end{table}
