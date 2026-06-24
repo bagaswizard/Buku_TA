@@ -90,8 +90,6 @@ estimasi \emph{yaw}.
 \label{fig:radius_transition}
 \end{figure}
 
-Pada data pada grafik \ref{fig:icp_errors_ra}, bisa juga diketahui posisi robot saat kualitas ICP menurun. dari data tersebut dapat dilihat bahwa kualitas ICP turun mulai saat robot posisi y=0.729 m, atau saat robot berada 0.24 dari ujung map. Nilai tersebut menunjukan bahwa zona transisi cocok untuk diberi nilai radius minimal 0.24, untuk bisa transisi dengan aman
-
 Berdasarkan Gambar~\ref{fig:icp_errors_ra}, dapat pula diidentifikasi posisi robot
 saat kualitas ICP mulai menurun. Dari data tersebut, penurunan kualitas ICP mulai
 terjadi ketika robot berada pada posisi $y = 0.729$ m, atau sekitar $0.24$ m dari
@@ -133,8 +131,8 @@ dengan aman sebelum kualitas lokalisasi mengalami penurunan signifikan.
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={|c|c|c|c|c|},
-           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Panjang\\path (m)} & \thead{Waktu\\komputasi (ms)} & \thead{Min\\clearance (m)} & \thead{Jumlah\\waypoint} \\ \hline},
+\csvreader[tabular={ccccc},
+           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Panjang\\path (m)} & \thead{Waktu\\komputasi (ms)} & \thead{Min\\clearance (m)} & \thead{Jumlah\\waypoint} \\ \midrule},
            late after line={\\\hline}]
   {lampiran/path_CSF_RA.csv}
   {1=\a,2=\b,3=\c,4=\d,5=\e}
@@ -203,8 +201,8 @@ lebih lurus dan lebih pendek.
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={|c|c|c|c|c|},
-           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Panjang\\path (m)} & \thead{Waktu\\komputasi (ms)} & \thead{Min\\clearance (m)} & \thead{Jumlah\\waypoint} \\ \hline},
+\csvreader[tabular={ccccc},
+           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Panjang\\path (m)} & \thead{Waktu\\komputasi (ms)} & \thead{Min\\clearance (m)} & \thead{Jumlah\\waypoint} \\ \midrule},
            late after line={\\\hline}]
   {lampiran/path_CSF_RB.csv}
   {1=\a,2=\b,3=\c,4=\d,5=\e}
@@ -266,8 +264,8 @@ Gambar~\ref{fig:path_all_rb}.
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={|c|c|c|c|c|},
-           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Panjang\\path (m)} & \thead{Waktu\\komputasi (ms)} & \thead{Min\\clearance (m)} & \thead{Jumlah\\waypoint} \\ \hline},
+\csvreader[tabular={ccccc},
+           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Panjang\\path (m)} & \thead{Waktu\\komputasi (ms)} & \thead{Min\\clearance (m)} & \thead{Jumlah\\waypoint} \\ \midrule},
            late after line={\\\hline}]
   {lampiran/path_CSF_RC.csv}
   {1=\a,2=\b,3=\c,4=\d,5=\e}
@@ -299,8 +297,8 @@ masih memadai.
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={|c|c|c|c|},
-           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \hline},
+\csvreader[tabular={cccc},
+           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \midrule},
            late after line={\\\hline}]
   {lampiran/path_stats_RA.csv}
   {1=\a,2=\b,3=\c,4=\d}
@@ -311,8 +309,8 @@ masih memadai.
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={|c|c|c|c|},
-           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \hline},
+\csvreader[tabular={cccc},
+           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \midrule},
            late after line={\\\hline}]
   {lampiran/path_stats_RB.csv}
   {1=\a,2=\b,3=\c,4=\d}
@@ -323,8 +321,8 @@ masih memadai.
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={|c|c|c|c|},
-           table head={\hline \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \hline},
+\csvreader[tabular={cccc},
+           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \midrule},
            late after line={\\\hline}]
   {lampiran/path_stats_RC.csv}
   {1=\a,2=\b,3=\c,4=\d}
@@ -333,11 +331,39 @@ masih memadai.
 \label{tab:path_comparison_rc}
 \end{table}
 
+Ketiga tabel di atas menunjukkan deviasi \emph{path} yang dihasilkan oleh \emph{global planner}
+terhadap \emph{ground truth} pada masing-masing \emph{region}. \emph{Ground truth}
+di sini merupakan \emph{path} rancangan jalur awal, sedangkan \emph{path} hasil
+perencanaan mengikuti distribusi biaya pada \emph{costmap} yang dipengaruhi
+oleh nilai CSF
+
+Pada Region A, CSF 10 menghasilkan deviasi yang lebih besar karena
+\emph{path} cenderung mengikuti jalur tengah di antara \emph{obstacle},
+sehingga menyimpang dari \emph{ground truth}. Sebaliknya, CSF 100
+menghasilkan \emph{path} yang lebih mendekati \emph{ground truth} dengan
+deviasi yang lebih rendah pada semua metrik, baik \emph{mean cross track},
+\emph{max cross track}, maupun \emph{standard deviation}.
+
+Pada Region B, seluruh nilai CSF menghasilkan \emph{path} yang hampir
+identik satu sama lain, sehingga deviasi terhadap \emph{ground truth}
+juga relatif seragam. Hal ini disebabkan oleh \emph{layout} Region B yang
+hanya berupa lorong sempit, di mana variasi CSF tidak cukup untuk mengubah
+lintasan \emph{path} secara signifikan.
+
+Pada Region C, CSF 100 menghasilkan \emph{path} yang lebih pendek dan
+efisien, namun deviasinya terhadap \emph{ground truth} justru paling
+tinggi dibandingkan nilai CSF lainnya. Hal ini menunjukkan adanya
+\emph{trade-off}: \emph{path} yang lebih pendek belum tentu memiliki
+deviasi lebih rendah terhadap referensi, karena \emph{ground truth} itu
+sendiri dirancang berdasarkan jalur yang lebih konservatif. Meskipun
+demikian, dalam konteks navigasi, panjang \emph{path} yang lebih pendek
+sering kali lebih diutamakan selama deviasi masih dalam batas aman.
+
 \subsection{Hasil DWA Planner}
 \begin{table}[H]
 \centering
-\csvreader[tabular={|c|c|c|c|},
-           table head={\hline \thead{Region} & \thead{Waktu\\(s)} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} \\ \hline},
+\csvreader[tabular={cccc},
+           table head={\toprule \thead{Region} & \thead{Waktu\\(s)} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} \\ \midrule},
            late after line={\\\hline}]
   {lampiran/path_track.csv}{1=\a,2=\b,3=\c,4=\d}{\a & \b & \c & \d}
 \caption{Hasil tracking path}
@@ -346,8 +372,8 @@ masih memadai.
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={|c|c|c|c|},
-           table head={\hline \thead{Region} & \thead{Waktu\\(s)} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} \\ \hline},
+\csvreader[tabular={cccc},
+           table head={\toprule \thead{Region} & \thead{Waktu\\(s)} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} \\ \midrule},
            late after line={\\\hline}]
   {lampiran/path_track_rough.csv}{1=\a,2=\b,3=\c,4=\d}{\a & \b & \c & \d}
 \caption{Hasil tracking path kondisi gempa}

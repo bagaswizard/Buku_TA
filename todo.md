@@ -1,0 +1,6 @@
+-mengubah latar belakang
+-mengubah rumusan masalah
+-tambah rumus di ppt
+-tambah proses pembuatan map
+-tambah proses transisi
+-cara kerja inflasi dan footprint

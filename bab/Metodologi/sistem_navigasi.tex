@@ -183,17 +183,17 @@ Untuk mempercepat, hanya $1/s$ dari scan points yang digunakan:
 \centering
 \caption{Parameter Default ICP}
 \label{tab:icp_defaults}
-\begin{tabular}{|c|c|c|}
-\hline
+\begin{tabular}{ccc}
+\toprule
 \textbf{Parameter} & \textbf{Nilai Default} & \textbf{Keterangan} \\
-\hline
+\midrule
 $\text{max\_iter}$ & 50 & Iterasi maksimum ICP \\
 $s$          & 2            & \emph{Random stride} subsampling \\
 $t_{\text{norm}}$ & $0.01$ m & Batas konvergensi translasi \\
 $r_{\text{norm}}$ & $0.01$ rad ($\approx 0.57^\circ$) & Batas konvergensi rotasi \\
 $k$          & 8            & Jumlah \emph{nearest neighbors} \\
 $r$          & 10           & Radius pencarian \emph{neighbor} \\
-\hline
+\bottomrule
 \end{tabular}
 \end{table}
 
@@ -378,14 +378,14 @@ $f$ adalah cost factor dan $c_{\text{neutral}}$ adalah neutral cost. Jika hasiln
 \centering
 \caption{Parameter Default Cost Function}
 \label{tab:cost_defaults}
-\begin{tabular}{|c|c|c|}
-\hline
+\begin{tabular}{ccc}
+\toprule
 \textbf{Parameter} & \textbf{Nilai Default} & \textbf{Keterangan} \\
-\hline
+\midrule
 $f$          & 0.55   & \emph{Cost factor} \\
 $c_{\text{neutral}}$ & 1 & \emph{Neutral cost} \\
 $c_{\text{lethal}}$  & 253 & \emph{Lethal cost} \\
-\hline
+\bottomrule
 \end{tabular}
 \end{table}
 

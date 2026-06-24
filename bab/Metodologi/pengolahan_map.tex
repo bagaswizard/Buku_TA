@@ -104,13 +104,13 @@ terhadap \emph{global frame of reference} dalam bentuk \emph{quaternion}, serta
 \centering
 \caption{Daftar Koneksi pasangan}
 \label{tab:transitions}
-\begin{tabular}{|c|c|c|c|}
-\hline
+\begin{tabular}{cccc}
+\toprule
 \textbf{Pasangan} & \textbf{Region} & \textbf{Pixel A $(x, y)$} & \textbf{Pixel B $(x, y)$} \\
-\hline
+\midrule
 0 & A -- B & (354, 206) & (106, 328) \\
 1 & B -- C & (106, 436) & (135, 187) \\
-\hline
+\bottomrule
 \end{tabular}
 \end{table}
 
@@ -126,18 +126,16 @@ transisi pada peta transisi.
 \centering
 \caption{Orientasi Region terhadap Global Frame}
 \label{tab:orientations}
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-\textbf{Region} & \multicolumn{4}{c|}{\textbf{Quaternion}} \\
-\cline{2-5}
+\begin{tabular}{ccccc}
+\toprule
+\textbf{Region} & \multicolumn{4}{c}{\textbf{Quaternion}} \\
+\cmidrule{2-5}
  & $x$ & $y$ & $z$ & $w$ \\
-\hline
+\midrule
 A & 0.0    & 0.0    & 0.0     & 1.0    \\
-\hline
 B & 0.0    & 0.0    & 0.0     & 1.0    \\
-\hline
 C & 0.0    & 0.0    & $-0.7046$ & 0.7096 \\
-\hline
+\bottomrule
 \end{tabular}
 \end{table}
 
@@ -147,12 +145,12 @@ Orientasi digunakan untuk menyelaraskan arah peta setiap \emph{region} dengan ar
 \centering
 \caption{Posisi Inisial Robot}
 \label{tab:initial_pose}
-\begin{tabular}{|l|c|}
-\hline
+\begin{tabular}{lc}
+\toprule
 \textbf{Parameter} & \textbf{Nilai pixel} \\
-\hline
+\midrule
 Posisi inisial & (375, 75) \\
-\hline
+\bottomrule
 \end{tabular}
 \end{table}
 

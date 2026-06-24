@@ -6,11 +6,11 @@
 
 Indonesia adalah negara yang sering sekali mengalami bencana gempa bumi. Secara geografis, Indonesia terletak di antara 4 lempeng tektonik, yaitu Lempeng Pasifik, Lempeng Eurasia, Lempeng Indo-Australia, dan Lempeng Laut Filipina. Lokasi Indonesia di antara 4 lempeng ini menyebabkan frekuensi terjadinya gempa bumi cukup tinggi. Berdasarkan data dari BMKG, rata-rata Indonesia mengalami 18 gempa bumi tiap hari \parencite[]{sabtaji2020statistik}. Pasca gempa bumi, operasi \emph{search and rescue} (SAR) akan dilakukan di daerah yang terdampak gempa bumi untuk menolong korban dan menanggulangi kerusakan. Seringkali petugas SAR mengalami ancaman terhadap keselamatannya dalam melaksanakan operasi SAR. 
 
-Robot bisa ikut berperan dalam membantu petugas SAR melaksanakan tugasnya. Robot UAV mampu memberi gambaran medan pada daerah terjadinya bencana, sedangkan robot darat yang \emph{track} atau \emph{quadruped} dapat membantu membawa barang berat dan membantu dalam hal lainnya pada saat area bencana tidak dapat dilewati kendaraan besar.  Robot juga dapat melakukan misi yang terlalu berbahaya untuk dilakukan oleh manusia. Sebagai contoh, sebuah robot darat pernah digunakan pasca gempa di Jepang untuk menginspeksi bangunan yang mengalami kerusakan. Mengirim petugas manusia dinilai terlalu berbahaya karena atap bangunan yang hampir roboh, sehingga digunakan robot yang dikendalikan dari jarak jauh \parencite[]{lin2022integrated}.
+Robot bisa ikut berperan dalam membantu petugas SAR melaksanakan tugasnya. Robot UAV mampu memberi gambaran medan pada daerah terjadinya bencana, sedangkan robot darat yang \emph{track} atau \emph{quadruped} dapat membantu membawa barang berat dan membantu dalam hal lainnya pada saat area bencana tidak dapat dilewati kendaraan besar. Robot juga dapat melakukan misi yang terlalu berbahaya untuk dilakukan oleh manusia. Sebagai contoh, sebuah robot darat pernah digunakan pasca gempa di Jepang untuk menginspeksi bangunan yang mengalami kerusakan. Mengirim petugas manusia dinilai terlalu berbahaya karena atap bangunan yang hampir roboh, sehingga digunakan robot yang dikendalikan dari jarak jauh \parencite[]{lin2022integrated}.
 
 Dalam implementasinya, robot darat SAR dapat dikendalikan manual oleh operator atau bisa otonom. Walaupun robot yang dikendalikan operator memiliki algoritma yang lebih sederhana, robot otonom juga memiliki peran pada operasi SAR, terutama pada daerah di mana infrastruktur komunikasinya rusak \parencite[]{zhang2023earthshaker}. Untuk bisa melakukan misi otonom di dalam bangunan, robot darat perlu bisa melakukan lokalisasi, menemukan jalur navigasi yang aman, dan mencapai posisi tujuan, pada lingkungan tidak terstruktur, seperti pada lingkungan indoor dengan banyak puing yang disebabkan oleh gempa. Meskipun beberapa robot mampu bernavigasi pada lingkungan tidak terstruktur, navigasi robot darat pada area indoor masih menjadi permasalahan untuk robot otonom.
 
-Di dalam proposal tugas akhir ini, diusulkan sebuah metode untuk mencoba menjawab permasalahan tersebut. Pada implementasi navigasi untuk robot darat otonom, umum digunakan \emph{costmap} 2D untuk menyimpan informasi lingkungan. Metode ini terbatas saat robot perlu mencapai lokasi yang tidak terletak pada bidang yang sama. Untuk membenahi ini, sebuah metode untuk menyederhanakan informasi lingkungan 3D menjadi direpresentasikan oleh beberapa bidang \emph{costmap} 2D atau \emph{layered} \emph{costmap}. Tiap \emph{map} dapat mewakili sebuah lantai di dalam bangunan atau lingkungan indoor. Sebuah layer dapat juga menunjukan tangga penghubung antar lantai. Lalu, robot darat otonom dapat bergerak pada salah satu \emph{map} tertentu, kemudian berpindah ke \emph{map} lain sesuai posisinya di bangunan.
+Di dalam tugas akhir ini, diusulkan sebuah metode untuk mencoba menjawab permasalahan tersebut. Pada implementasi navigasi untuk robot darat otonom, umum digunakan \emph{costmap} 2D untuk menyimpan informasi lingkungan. Metode ini terbatas saat robot perlu mencapai lokasi yang tidak terletak pada bidang yang sama. Untuk membenahi ini, sebuah metode untuk menyederhanakan informasi lingkungan 3D menjadi direpresentasikan oleh beberapa bidang \emph{costmap} 2D atau \emph{layered} \emph{costmap}. Tiap \emph{map} dapat mewakili sebuah lantai di dalam bangunan atau lingkungan indoor. Sebuah layer dapat juga menunjukan tangga penghubung antar lantai. Lalu, robot darat otonom dapat bergerak pada salah satu \emph{map} tertentu, kemudian berpindah ke \emph{map} lain sesuai posisinya di bangunan.
 \par\vspace{1.2cm}
 
 \section{Rumusan Masalah}
@@ -19,9 +19,9 @@ Di dalam proposal tugas akhir ini, diusulkan sebuah metode untuk mencoba menjawa
 % Ubah paragraf berikut sesuai dengan rumusan masalah dari tugas akhir
 Berdasarkan latar belakang pada bagian sebelumnya, terdapat beberapa inti masalah yang perlu dibahas. Permasalahan tersebut dijabarkan sebagai berikut:
 \begin{enumerate}
-  \item Bagaimana cara untuk merepresentasikan informasi lingkungan yang terdiri dari beberapa lantai menjadi \emph{layered} \emph{costmap} untuk bisa digunakan pada algoritma navigasi antar lantai?
+  \item Bagaimana cara untuk merepresentasikan informasi lingkungan yang terdiri dari beberapa lantai menggunakan \emph{layered} \emph{costmap} untuk bisa digunakan pada algoritma navigasi antar lantai?
   \item Bagaimana cara membuat algoritma lokalisasi, \emph{path planning}, dan \emph{path tracking} yang bisa bekerja pada algoritma navigasi yang menggunakan \emph{layered} \emph{costmap}?
-  \item Apakah dengan menggunakan metode navigasi antarlantai, robot darat otonom dapat melakukan navigasi hingga mencapai tujuan pada arena lab?
+  \item Apakah dengan menggunakan metode navigasi antar lantai, robot darat otonom dapat melakukan navigasi hingga mencapai tujuan pada arena lab?
 \end{enumerate}
 
 \section{Batasan Masalah}
@@ -29,9 +29,9 @@ Berdasarkan latar belakang pada bagian sebelumnya, terdapat beberapa inti masala
 
 Dalam tugas akhir ini, metode multilayer \emph{costmap} yang dikembangkan tidak dirancang untuk langsung digunakan di kondisi pasca gempa. Hal ini disebabkan oleh beberapa faktor berikut:
 \begin{enumerate}
-  \item Pengujian dilakukan pada arena laboratorium yang didesain untuk merekayasa kondisi pasca gempa. Arena dilengkapi dengan rekayasa medan reruntuhan, tanjakan, dan permukaan tidak rata, yang dibuat pada skala lebih kecil. 
+  \item Pengujian dilakukan pada simulasi yang didesain untuk merekayasa kondisi pasca gempa. Arena dilengkapi dengan rekayasa rintangan tidak diketahui, tanjakan, dan permukaan tidak rata, yang dibuat pada skala lebih kecil. 
   \item Navigasi dilakukan oleh robot darat hexapod yang melakukan navigasi secara otonom, dengan bergerak dari titik awal menuju tujuan yang telah ditentukan. 
-  \item Algoritma navigasi yang digunakan digunakan pada kondisi arena laboratorium yang sudah dimapping sebelumnya sehingga lokasi rintangan statis sudah diketahui.
+  \item Algoritma navigasi yang digunakan digunakan pada kondisi lingkungan yang rintangan statis sudah diketahui.
 \end{enumerate}
 
 
@@ -42,7 +42,7 @@ Tugas akhir ini bertujuan untuk:
 \begin{enumerate}
     \item Mengembangkan metode representasi lingkungan menggunakan \emph{layered} \emph{costmap} untuk menyederhanakan informasi lingkungan yang terdiri dari beberapa lantai, yang dapat digunakan oleh robot otonom untuk navigasi antar lantai.
     \item Merancang dan mengimplementasikan algoritma lokalisasi, \emph{path planning}, dan \emph{path tracking}, yang menggunakan \emph{layered} \emph{costmap} agar robot dapat bernavigasi antar lantai.
-    \item Melakukan pengujian sistem navigasi berbasis \emph{layered} \emph{costmap} di lingkungan laboratorium, untuk mengevaluasi efektivitas dan keterbatasan dari pendekatan yang diusulkan sebelum diterapkan pada skenario nyata.
+    \item Melakukan pengujian sistem navigasi berbasis \emph{layered} \emph{costmap} di lingkungan simulasi, untuk mengevaluasi efektivitas dan keterbatasan dari pendekatan yang diusulkan sebelum diterapkan pada skenario nyata.
 \end{enumerate}
 
 Tugas akhir ini diharapkan dapat memberikan manfaat sebagai berikut:
