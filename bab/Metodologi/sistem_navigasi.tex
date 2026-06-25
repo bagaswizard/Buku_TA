@@ -464,9 +464,9 @@ Cell overflow: Ketika $|d_x| \geq 1.0$ atau $|d_y| \geq 1.0$, pindah ke cell tet
 
 \subsubsection{Path Antar Region}
 
-Untuk memungkinkan global planner bekerja antar region, digunakan path interceptor yang memodifikasi planner untuk memungkinkan navigasi multi-region melalui transisi. Jika goal berada di area yang berbeda dari posisi robot saat ini, node ini menyusun plan bertahap melalui serangkaian poin transisi.
+Untuk memungkinkan global planner bekerja antar region, digunakan path router yang memodifikasi planner untuk memungkinkan navigasi multi-region melalui transisi. Jika goal berada di area yang berbeda dari posisi robot saat ini, node ini menyusun plan bertahap melalui serangkaian poin transisi.
 
-Daripada mengirim goal langsung yang mungkin tidak bisa dijangkau karena area berbeda secara topologi, path interceptor melakukan langkah-langkah berikut:
+Daripada mengirim goal langsung yang mungkin tidak bisa dijangkau karena area berbeda secara topologi, path router melakukan langkah-langkah berikut:
 \begin{enumerate}
 \item Menentukan rute area: region A → region B → region C → ...
 \item Mengirim goal bertahap ke setiap transition point
@@ -474,7 +474,7 @@ Daripada mengirim goal langsung yang mungkin tidak bisa dijangkau karena area be
 \item Mengirim final goal hanya setelah semua transisi selesai
 \end{enumerate}
 
-Selama proses berjalan, path interceptor melakukan pelacakan posisi robot dan mengupdate region sekarang berdasarkan posisi robot dari ICP:
+Selama proses berjalan, path router melakukan pelacakan posisi robot dan mengupdate region sekarang berdasarkan posisi robot dari ICP:
 
 \subsection{Local Planner DWA}
 
