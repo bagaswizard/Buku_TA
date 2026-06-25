@@ -3,6 +3,7 @@
 
 import os
 import copy
+import csv
 
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu, Cm
@@ -252,6 +253,70 @@ def add_icon_bullet(slide, left, top, width, height, icon_char, title, body_text
 # =============================================================================
 # SLIDE FUNCTIONS
 # =============================================================================
+
+
+def _add_csv_table(slide, left, top, col_widths, csv_rel_path, title=None):
+    """Read CSV from lampiran/ directory and add a table shape to the slide.
+    Returns (table_shape, total_height_inches)."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(base_dir, "lampiran", csv_rel_path)
+
+    with open(csv_path, newline='') as f:
+        reader = csv.DictReader(f)
+        headers = reader.fieldnames
+        rows = list(reader)
+
+    n_rows = 1 + len(rows)   # header + data
+    n_cols = len(headers)
+
+    row_h = Inches(0.28)
+    tbl_w = sum(col_widths)
+    tbl_h = n_rows * row_h
+
+    table_shape = slide.shapes.add_table(n_rows, n_cols, left, top, tbl_w, tbl_h)
+    table = table_shape.table
+
+    # Set column widths
+    for ci, w in enumerate(col_widths):
+        table.columns[ci].width = w
+
+    # Header row
+    for ci, h in enumerate(headers):
+        cell = table.cell(0, ci)
+        cell.text = h
+        for p in cell.text_frame.paragraphs:
+            p.font.name = FONT_TITLE
+            p.font.size = Pt(8)
+            p.font.color.rgb = WHITE
+            p.font.bold = True
+            p.alignment = PP_ALIGN.CENTER
+        cell.fill.solid()
+        cell.fill.fore_color.rgb = PRIMARY
+
+    # Data rows
+    for ri, row in enumerate(rows):
+        for ci, h in enumerate(headers):
+            cell = table.cell(ri + 1, ci)
+            cell.text = row[h]
+            for p in cell.text_frame.paragraphs:
+                p.font.name = FONT_BODY
+                p.font.size = Pt(8)
+                p.font.color.rgb = BODY
+                p.alignment = PP_ALIGN.CENTER
+            if ri % 2 == 1:
+                cell.fill.solid()
+                cell.fill.fore_color.rgb = BOX_FILL
+
+    # Title above table
+    actual_top = top
+    if title:
+        add_text_box(slide, left, top - Inches(0.25), tbl_w, Inches(0.22),
+                     title, font_name=FONT_TITLE, font_size=Pt(9),
+                     color=HEADING, bold=True)
+        actual_top = top
+
+    return table_shape, tbl_h + (Inches(0.25) if title else 0), actual_top
+
 
 def slide_title(prs):
     """Slide 1: Title slide — overhang logo bar with clean layered layout."""
@@ -946,8 +1011,32 @@ def slide_system_overview(prs):
     add_slide_number(slide, 8)
 
 
+def slide_nav_flow(prs):
+    """Slide 9: Detail Alur Navigasi."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
+
+    add_text_box(slide, MARGIN, Inches(0.35), Inches(7), Inches(0.55),
+                 "DETAIL ALUR NAVIGASI", font_name=FONT_TITLE, font_size=Pt(26),
+                 color=HEADING, bold=True)
+    add_divider(slide, MARGIN, Inches(0.85), Inches(2.5))
+
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    flow_path = os.path.join(base_dir, "gambar", "main_nav_flow_split.png")
+    flow_h = Inches(5.5)
+    flow_w = flow_h * (752.0 / 542.0)
+    flow_left = (SLIDE_W - flow_w) / 2
+    flow_top = Inches(1.2)
+
+    add_rect(slide, flow_left, flow_top, flow_w, flow_h,
+             fill_color=None, border_color=PRIMARY, border_width=Pt(3))
+    slide.shapes.add_picture(flow_path, flow_left, flow_top, flow_w, flow_h)
+
+    add_slide_number(slide, 9)
+
+
 def slide_map_processing(prs):
-    """Slide 9: Pengolahan Data Map (Multi-Region)."""
+    """Slide 10: Pengolahan Data Map (Multi-Region)."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -1005,7 +1094,7 @@ def slide_map_processing(prs):
                  "Transition Map menyimpan koneksi spasial (A↔B, B↔C), orientasi region, dan pose awal robot",
                  font_size=Pt(10), color=BODY, alignment=PP_ALIGN.CENTER)
 
-    add_slide_number(slide, 9)
+    add_slide_number(slide, 10)
 
 
 def slide_costmap_structure(prs):
@@ -1090,7 +1179,7 @@ def slide_costmap_structure(prs):
                      desc, font_size=Pt(9), color=SUBTLE_TEXT)
         vy += Inches(0.28)
 
-    add_slide_number(slide, 10)
+    add_slide_number(slide, 11)
 
 
 def slide_icp(prs):
@@ -1214,24 +1303,11 @@ def slide_icp(prs):
                  "dengan aman sebelum kualitas lokalisasi ICP menurun signifikan.",
                  font_size=Pt(11), color=BODY, line_spacing=1.3)
 
-    # Arena screenshot — sim_RA below Region Switcher on right side
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    sim_path = os.path.join(base_dir, "gambar", "sim_RA.png")
-    sim_h = Inches(1.85)
-    sim_w = sim_h * (1847.0 / 1051.0)
-    sim_left = Inches(7.5)
-    sim_top = Inches(3.85)
-    slide.shapes.add_picture(sim_path, sim_left, sim_top, sim_w, sim_h)
-    add_text_box(slide, sim_left, sim_top - Inches(0.22),
-                 sim_w, Inches(0.20),
-                 "Arena Pengujian — Region A",
-                 font_size=Pt(9), color=PRIMARY, bold=True, alignment=PP_ALIGN.CENTER)
-
-    add_slide_number(slide, 11)
+    add_slide_number(slide, 12)
 
 
 def slide_path_planning(prs):
-    """Slide 12: Path Planning (A* Global Planner)."""
+    """Slide 13: Path Planning (A* Global Planner)."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -1240,7 +1316,7 @@ def slide_path_planning(prs):
                  color=HEADING, bold=True)
     add_divider(slide, MARGIN, Inches(0.85), Inches(2.5))
 
-    # Left section: A* description
+    # --- A* Algorithm ---
     add_text_box(slide, MARGIN, Inches(1.1), Inches(3), Inches(0.3),
                  "Algoritma A*", font_name=FONT_TITLE, font_size=Pt(18),
                  color=PRIMARY, bold=True)
@@ -1255,76 +1331,90 @@ def slide_path_planning(prs):
         "  node secara optimal"
     )
     add_rect(slide, MARGIN - Inches(0.10), Inches(1.45),
-             Inches(5.2), Inches(2.1),
+             Inches(5.5), Inches(2.1),
              fill_color=BOX_FILL, corner_radius=Cm(0.10))
-    add_text_box(slide, MARGIN, Inches(1.5), Inches(5.0), Inches(2.0),
+    add_text_box(slide, MARGIN, Inches(1.5), Inches(5.3), Inches(2.0),
                  astar_content, font_size=Pt(12), color=BODY, line_spacing=1.4)
 
-    # Path Interceptor
-    add_text_box(slide, MARGIN, Inches(3.6), Inches(5), Inches(0.3),
-                 "Path Interceptor (Multi-Region)", font_name=FONT_TITLE,
-                 font_size=Pt(14), color=ORANGE, bold=True)
+    # --- Global Costmap Integration ---
+    add_text_box(slide, MARGIN, Inches(3.65), Inches(5), Inches(0.3),
+                 "Integrasi dengan Global Costmap", font_name=FONT_TITLE,
+                 font_size=Pt(14), color=PRIMARY, bold=True)
 
-    interceptor_content = (
-        "Memecah path multi-region menjadi segmen per region:\n\n"
-        "Region A  →  Titik Transisi A-B  →  Region B  →\n"
-        "Titik Transisi B-C  →  Region C  →  Goal"
+    global_content = (
+        "Global planner menggunakan static layer dari global\n"
+        "costmap untuk membangun cost gradient pada occupancy\n"
+        "grid. Setiap sel memiliki biaya navigasi berdasarkan\n"
+        "jarak ke obstacle terdekat dan Cost Scaling Factor.\n\n"
+        "Inflasi obstacle menghasilkan gradien biaya halus yang\n"
+        "mendorong path menjauhi rintangan. Fungsi biaya:\n"
+        "  C(d) = 253 · e^(−α · (d − r))  untuk d ≤ R"
     )
-    add_rect(slide, MARGIN - Inches(0.10), Inches(3.85),
-             Inches(5.2), Inches(1.7),
+    add_rect(slide, MARGIN - Inches(0.10), Inches(3.95),
+             Inches(5.5), Inches(2.7),
              fill_color=BOX_FILL, corner_radius=Cm(0.10))
-    add_text_box(slide, MARGIN, Inches(3.95), Inches(5.0), Inches(1.5),
-                 interceptor_content, font_size=Pt(12), color=BODY, line_spacing=1.4)
+    add_text_box(slide, MARGIN, Inches(4.05), Inches(5.3), Inches(2.5),
+                 global_content, font_size=Pt(11), color=BODY, line_spacing=1.35)
 
-    # Right section: Cost Scaling Factor
+    # --- Right side: Path Interceptor + Multi-Region diagram ---
     right_x = Inches(7.0)
-    add_text_box(slide, right_x, Inches(1.1), Inches(5), Inches(0.3),
-                 "Cost Scaling Factor (CSF)", font_name=FONT_TITLE,
-                 font_size=Pt(18), color=PRIMARY, bold=True)
 
-    csf_data = [
-        ("CSF = 10", "Path di tengah,\nkonservatif, lebih\naman tapi lebih\npanjang", PRIMARY),
-        ("CSF = 50", "Path transisi antara\nkonservatif dan\nagresif", SECONDARY),
-        ("CSF = 100", "Path dekat obstacle,\nlebih pendek &\nlurus (OPTIMAL)", ORANGE),
-    ]
+    add_text_box(slide, right_x, Inches(1.1), Inches(5.5), Inches(0.3),
+                 "Path Interceptor (Multi-Region)", font_name=FONT_TITLE,
+                 font_size=Pt(18), color=ORANGE, bold=True)
 
-    csy = Inches(1.55)
-    for title, desc, color in csf_data:
-        cscard = add_rect(slide, right_x, csy, Inches(5.5), Inches(0.85),
-                          fill_color=BOX_FILL, corner_radius=Cm(0.1))
-        add_rect(slide, right_x, csy, Pt(4), Inches(0.85), fill_color=color)
-        add_text_box(slide, right_x + Inches(0.15), csy + Inches(0.05),
-                     Inches(2.0), Inches(0.25),
-                     title, font_name=FONT_TITLE, font_size=Pt(13),
-                     color=color, bold=True)
-        add_text_box(slide, right_x + Inches(2.2), csy + Inches(0.05),
-                     Inches(3.1), Inches(0.75),
-                     desc, font_size=Pt(10), color=BODY, line_spacing=1.35)
-        csy += Inches(0.95)
+    # Diagram: 3 region boxes connected by transition arrows
+    regions = ["Region A", "Region B", "Region C"]
+    rx = right_x + Inches(0.3)
+    ry = Inches(1.65)
+    rw = Inches(2.0)
+    rh = Inches(0.9)
 
-    # Key finding
-    key_box = add_rect(slide, right_x, Inches(4.55), Inches(5.5), Inches(0.75),
-                       fill_color=RGBColor(0xFF, 0xF3, 0xE0), corner_radius=Cm(0.1))
-    add_text_box(slide, right_x + Inches(0.15), Inches(4.6), Inches(5.2), Inches(0.65),
-                 "CSF 100 menghasilkan path terpendek dengan\n"
-                 "clearance obstacle yang masih memadai.\n"
-                 "Region B (lorong sempit): CSF tidak signifikan berpengaruh.",
+    for i, rname in enumerate(regions):
+        # Vertical stacking with transition in between
+        rcard = add_rect(slide, rx, ry + i * (rh + Inches(0.6)),
+                         rw, rh, fill_color=BOX_FILL, corner_radius=Cm(0.10))
+        add_rect(slide, rx, ry + i * (rh + Inches(0.6)), rw, Pt(3), fill_color=PRIMARY)
+        add_text_box(slide, rx + Inches(0.05), ry + i * (rh + Inches(0.6)) + Inches(0.05),
+                     rw - Inches(0.1), Inches(0.35),
+                     rname, font_name=FONT_TITLE, font_size=Pt(13),
+                     color=PRIMARY, bold=True, alignment=PP_ALIGN.CENTER)
+        add_text_box(slide, rx + Inches(0.05),
+                     ry + i * (rh + Inches(0.6)) + Inches(0.4),
+                     rw - Inches(0.1), Inches(0.4),
+                     "A* planning pada\ncostmap region",
+                     font_size=Pt(9), color=SUBTLE_TEXT,
+                     alignment=PP_ALIGN.CENTER, line_spacing=1.25)
+
+        if i < 2:
+            # Arrow between regions
+            arr = slide.shapes.add_shape(
+                MSO_SHAPE.DOWN_ARROW,
+                rx + rw / 2 - Inches(0.15),
+                ry + (i + 0.5) * (rh + Inches(0.6)) - Inches(0.05),
+                Inches(0.3), Inches(0.35)
+            )
+            arr.fill.solid()
+            arr.fill.fore_color.rgb = ORANGE
+            arr.line.fill.background()
+
+    # Right side bottom: Path Interceptor explanation
+    add_rect(slide, right_x, Inches(4.6), Inches(5.5), Inches(2.3),
+             fill_color=BOX_FILL, corner_radius=Cm(0.10))
+    add_rect(slide, right_x, Inches(4.6), Pt(4), Inches(2.3), fill_color=ORANGE)
+    add_text_box(slide, right_x + Inches(0.15), Inches(4.7), Inches(5.2), Inches(2.1),
+                 "Path interceptor memecah rute global multi-region\n"
+                 "menjadi segmen per region yang di-plan secara\n"
+                 "independen oleh A*:\n\n"
+                 "  Region A  →  Titik Transisi A-B  →\n"
+                 "  Region B  →  Titik Transisi B-C  →\n"
+                 "  Region C  →  Goal\n\n"
+                 "Setiap segmen menggunakan costmap region masing-\n"
+                 "masing. Transition costmap menyediakan informasi\n"
+                 "konektor untuk perpindahan mulus antar region.",
                  font_size=Pt(11), color=BODY, line_spacing=1.35)
 
-    # CSF path comparison image
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    path_img_path = os.path.join(base_dir, "gambar", "path_all_RA.png")
-    path_h = Inches(1.55)
-    path_w = path_h * (547.0 / 692.0)
-    path_x = right_x + Inches(0.5)
-    path_top = Inches(5.50)
-    slide.shapes.add_picture(path_img_path, path_x, path_top, path_w, path_h)
-    add_text_box(slide, path_x, path_top - Inches(0.20),
-                 path_w, Inches(0.18),
-                 "CSF 10/20/50/100 — Region A",
-                 font_size=Pt(8), color=SUBTLE_TEXT, alignment=PP_ALIGN.CENTER)
-
-    add_slide_number(slide, 12)
+    add_slide_number(slide, 13)
 
 
 def slide_dwa(prs):
@@ -1431,7 +1521,7 @@ def slide_dwa(prs):
                  "tercermin dari peningkatan max cross track error pada kondisi gempa.",
                  font_size=Pt(11), color=BODY, line_spacing=1.3)
 
-    add_slide_number(slide, 13)
+    add_slide_number(slide, 14)
 
 
 def slide_arena(prs):
@@ -1473,7 +1563,7 @@ def slide_arena(prs):
                  "Sensor: LiDAR 2D  ·  Peta: Known Map",
                  font_size=Pt(11), color=BODY, bold=False)
 
-    add_slide_number(slide, 14)
+    add_slide_number(slide, 15)
 
 
 def slide_results_icp(prs):
@@ -1516,231 +1606,189 @@ def slide_results_icp(prs):
                  "signifikan pada sumbu x dan yaw akibat variasi vertikal scan LiDAR.",
                  font_size=Pt(11), color=BODY, line_spacing=1.3)
 
-    add_slide_number(slide, 15)
-
-
-def slide_results_path(prs):
-    """Slide 16: Hasil Pengujian — Path Planning."""
-    slide = prs.slides.add_slide(prs.slide_layouts[6])
-    set_gradient_bg(slide, GRAD_RESULTS_S, GRAD_RESULTS_E)
-
-    add_text_box(slide, MARGIN, Inches(0.35), Inches(7), Inches(0.55),
-                 "HASIL PENGUJIAN: PATH PLANNING", font_name=FONT_TITLE, font_size=Pt(26),
-                 color=HEADING, bold=True)
-    add_divider(slide, MARGIN, Inches(0.85), Inches(2.5))
-
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Main path comparison image
-    path_img = os.path.join(base_dir, "gambar", "path_all_RA.png")
-    img_h = Inches(4.0)
-    img_w = img_h * (547.0 / 692.0)
-    img_left = Inches(1.5)
-    img_top = Inches(1.15)
-    slide.shapes.add_picture(path_img, img_left, img_top, img_w, img_h)
-
-    # Right side: key findings
-    right_x = Inches(5.5)
-    add_text_box(slide, right_x, Inches(1.3), Inches(7.0), Inches(0.3),
-                 "Cost Scaling Factor (CSF) — Region A",
-                 font_name=FONT_TITLE, font_size=Pt(16), color=HEADING, bold=True)
-
-    findings = [
-        ("CSF = 10", "Path di tengah (konservatif),\nlebih panjang, clearance besar", PRIMARY),
-        ("CSF = 50", "Path transisi antara\nkonservatif dan agresif", SECONDARY),
-        ("CSF = 100", "Path terpendek & paling lurus,\noptimal untuk efisiensi navigasi", ORANGE),
-    ]
-
-    fy = Inches(1.85)
-    for title, desc, color in findings:
-        add_rect(slide, right_x, fy, Inches(7.0), Inches(0.95),
-                 fill_color=BOX_FILL, corner_radius=Cm(0.1))
-        add_rect(slide, right_x, fy, Pt(4), Inches(0.95), fill_color=color)
-        add_text_box(slide, right_x + Inches(0.15), fy + Inches(0.08),
-                     Inches(2.0), Inches(0.25),
-                     title, font_name=FONT_TITLE, font_size=Pt(13),
-                     color=color, bold=True)
-        add_text_box(slide, right_x + Inches(2.2), fy + Inches(0.08),
-                     Inches(4.6), Inches(0.8),
-                     desc, font_size=Pt(11), color=BODY, line_spacing=1.35)
-        fy += Inches(1.08)
-
-    # Bottom note
-    add_rect(slide, right_x, Inches(5.30), Inches(7.0), Inches(0.55),
-             fill_color=RGBColor(0xFF, 0xF3, 0xE0), corner_radius=Cm(0.1))
-    add_rect(slide, right_x, Inches(5.30), Pt(4), Inches(0.55), fill_color=ORANGE)
-    add_text_box(slide, right_x + Inches(0.15), Inches(5.35), Inches(6.7), Inches(0.45),
-                 "CSF 100 = path terpendek. Semua CSF efektif menghindari obstacle.\n"
-                 "Region B (lorong sempit): CSF tidak signifikan berpengaruh.",
-                 font_size=Pt(11), color=BODY, line_spacing=1.25)
-
     add_slide_number(slide, 16)
 
 
-def slide_results_icp_costmap(prs):
-    """Slide 15: Hasil Pengujian — ICP & Costmap."""
+def _make_path_result_slide(prs, region_label, map_png, csf_csv, stats_csv, slide_num,
+                             key_finding, key_color=ORANGE):
+    """Generic path planning result slide for a single region."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_RESULTS_S, GRAD_RESULTS_E)
 
-    add_text_box(slide, MARGIN, Inches(0.35), Inches(7), Inches(0.55),
-                 "HASIL PENGUJIAN: ICP & COSTMAP", font_name=FONT_TITLE, font_size=Pt(26),
-                 color=HEADING, bold=True)
-    add_divider(slide, MARGIN, Inches(0.85), Inches(2.5))
+    add_text_box(slide, MARGIN, Inches(0.3), Inches(10), Inches(0.5),
+                 f"HASIL PATH PLANNING — REGION {region_label}", font_name=FONT_TITLE,
+                 font_size=Pt(24), color=HEADING, bold=True)
+    add_divider(slide, MARGIN, Inches(0.75), Inches(2.5))
 
-    # Left column: ICP results
-    add_text_box(slide, MARGIN, Inches(1.1), Inches(5.5), Inches(0.3),
-                 "Hasil ICP Localization", font_name=FONT_TITLE,
-                 font_size=Pt(16), color=PRIMARY, bold=True)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    icp_results = [
-        ("Region A (Rata)", "Error rendah & stabil. Lonjakan\nerror di t ≈ 50 detik (zona transisi)\nkarena fitur LiDAR terbatas.",
-         RGBColor(0x2E, 0x7D, 0x32)),
-        ("Region A (Rough)", "Osilasi signifikan pada sumbu x\ndan yaw. Permukaan tidak rata →\nvariasi vertikal scan LiDAR ↑.",
-         RGBColor(0xF5, 0x7F, 0x17)),
-        ("Region C (Kompleks)", "Error lebih tinggi. Lebih banyak\nobstacle → KNN lookup lebih\nbesar. Trajectory banyak rotasi.",
-         ORANGE),
-        ("Zona Transisi", "Diameter minimal: 0.26 m.\nKualitas ICP menurun saat robot\n< 0.24 m dari ujung map.",
-         RGBColor(0x7B, 0x1F, 0xA2)),
-    ]
+    # --- Left side: map image ---
+    img_path = os.path.join(base_dir, "gambar", map_png)
+    img_h = Inches(4.5)
+    img_w = img_h  # square-ish fallback
+    try:
+        from PIL import Image
+        im = Image.open(img_path)
+        img_w = img_h * (im.width / im.height)
+    except Exception:
+        pass
+    img_left = MARGIN
+    img_top = Inches(1.05)
+    slide.shapes.add_picture(img_path, img_left, img_top, img_w, img_h)
 
-    iy = Inches(1.5)
-    for title, desc, color in icp_results:
-        icard = add_rect(slide, MARGIN, iy, Inches(5.5), Inches(0.9),
-                         fill_color=BOX_FILL, corner_radius=Cm(0.1))
-        add_rect(slide, MARGIN, iy, Pt(4), Inches(0.9), fill_color=color)
-        add_text_box(slide, MARGIN + Inches(0.15), iy + Inches(0.05),
-                     Inches(5.2), Inches(0.2),
-                     title, font_name=FONT_TITLE, font_size=Pt(11),
-                     color=color, bold=True)
-        add_text_box(slide, MARGIN + Inches(0.15), iy + Inches(0.28),
-                     Inches(5.2), Inches(0.55),
-                     desc, font_size=Pt(9), color=BODY, line_spacing=1.35)
-        iy += Inches(0.98)
+    # --- Right side: tables + key finding ---
+    right_x = img_left + img_w + Inches(0.4)
+    tbl_left = right_x
+    tbl_top = Inches(1.05)
 
-    # Right column: Costmap results
-    right_x = Inches(7.0)
-    add_text_box(slide, right_x, Inches(1.1), Inches(5.5), Inches(0.3),
-                 "Hasil Costmap", font_name=FONT_TITLE,
-                 font_size=Pt(16), color=ORANGE, bold=True)
+    csf_widths = [Inches(0.6), Inches(1.0), Inches(1.0), Inches(1.0), Inches(1.0)]
+    _add_csv_table(slide, tbl_left, tbl_top, csf_widths, csf_csv,
+                   title="Tabel CSF — Panjang, Waktu, Clearance, Waypoint")
 
-    costmap_results = [
-        ("Region A — CSF 100",
-         "Path terpendek dan lurus.\nCSF 10: path di tengah (konservatif),\nlebih panjang.",
-         PRIMARY),
-        ("Region B — CSF tidak signifikan",
-         "Layout lorong sempit → semua CSF\nmenghasilkan path hampir identik.",
-         SECONDARY),
-        ("Region C — CSF 100 optimal",
-         "CSF 100: path pendek & lurus.\nCSF 10: di tengah, lebih panjang.\n\n"
-         "Trade-off: path pendek vs deviasi\nground truth. CSF 100 deviasi\ntertinggi tapi paling efisien.",
-         ORANGE),
-    ]
+    stats_top = tbl_top + Inches(1.7)
+    stats_widths = [Inches(0.6), Inches(1.0), Inches(1.0), Inches(1.0)]
+    _add_csv_table(slide, tbl_left, stats_top, stats_widths, stats_csv,
+                   title="Tabel Deviasi — Mean/Max Cross Track & SD")
 
-    cy = Inches(1.5)
-    for title, desc, color in costmap_results:
-        ch = Inches(1.4) if "CSF 100 optimal" in title else Inches(1.0)
-        ccard = add_rect(slide, right_x, cy, Inches(5.5), ch,
-                         fill_color=BOX_FILL, corner_radius=Cm(0.1))
-        add_rect(slide, right_x, cy, Pt(4), ch, fill_color=color)
-        add_text_box(slide, right_x + Inches(0.15), cy + Inches(0.05),
-                     Inches(5.2), Inches(0.2),
-                     title, font_name=FONT_TITLE, font_size=Pt(11),
-                     color=color, bold=True)
-        add_text_box(slide, right_x + Inches(0.15), cy + Inches(0.3),
-                     Inches(5.2), ch - Inches(0.35),
-                     desc, font_size=Pt(9), color=BODY, line_spacing=1.35)
-        cy += ch + Inches(0.1)
+    key_y = stats_top + Inches(1.8)
+    add_rect(slide, right_x, key_y, Inches(4.6), Inches(1.0),
+             fill_color=RGBColor(0xFF, 0xF3, 0xE0), corner_radius=Cm(0.1))
+    add_rect(slide, right_x, key_y, Pt(4), Inches(1.0), fill_color=key_color)
+    add_text_box(slide, right_x + Inches(0.15), key_y + Inches(0.05),
+                 Inches(4.3), Inches(0.9),
+                 key_finding, font_size=Pt(10), color=BODY, line_spacing=1.35)
 
-    add_slide_number(slide, 15)
+    add_slide_number(slide, slide_num)
+    return slide
 
+
+def slide_results_path_RA(prs):
+    """Slide 17: Hasil Path Planning — Region A."""
+    _make_path_result_slide(prs, "A", "map_with_paths_RA.png",
+                            "path_CSF_RA.csv", "path_stats_RA.csv", 17,
+                            "CSF 100 = path terpendek (0.97 m) & paling efisien.\n"
+                            "CSF 10/20/50 = path lebih panjang, di tengah lorong.\n"
+                            "SD CSF 100 paling rendah (0.002 m) -> konsistensi tinggi.",
+                            key_color=RGBColor(0x2E, 0x7D, 0x32))
+
+
+def slide_results_path_RB(prs):
+    """Slide 18: Hasil Path Planning — Region B."""
+    _make_path_result_slide(prs, "B", "map_with_paths_RB.png",
+                            "path_CSF_RB.csv", "path_stats_RB.csv", 18,
+                            "CSF tidak signifikan: layout lorong sempit -> semua\n"
+                            "CSF menghasilkan path hampir identik (~0.59 m).\n"
+                            "SD sangat kecil (< 0.004 m) untuk semua CSF.",
+                            key_color=RGBColor(0x2E, 0x7D, 0x32))
+
+
+def slide_results_path_RC(prs):
+    """Slide 19: Hasil Path Planning — Region C."""
+    _make_path_result_slide(prs, "C", "map_with_paths_RC.png",
+                            "path_CSF_RC.csv", "path_stats_RC.csv", 19,
+                            "CSF 100 = path terpendek (2.52 m).\n"
+                            "CSF 10 lebih aman di tengah lorong, lebih panjang.\n"
+                            "Trade-off: path pendek vs deviasi ground truth.",
+                            key_color=RGBColor(0x2E, 0x7D, 0x32))
 
 def slide_results_navigation(prs):
-    """Slide 17: Hasil Pengujian — DWA & Navigasi Penuh."""
+    """Slide 20: Hasil Pengujian — Navigasi Penuh."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_RESULTS_S, GRAD_RESULTS_E)
 
-    add_text_box(slide, MARGIN, Inches(0.35), Inches(7), Inches(0.55),
-                 "HASIL PENGUJIAN: DWA & NAVIGASI PENUH", font_name=FONT_TITLE, font_size=Pt(24),
+    add_text_box(slide, MARGIN, Inches(0.3), Inches(10), Inches(0.5),
+                 "HASIL PENGUJIAN: NAVIGASI PENUH", font_name=FONT_TITLE, font_size=Pt(24),
                  color=HEADING, bold=True)
-    add_divider(slide, MARGIN, Inches(0.85), Inches(2.5))
+    add_divider(slide, MARGIN, Inches(0.72), Inches(2.5))
 
-    # DWA results
-    add_text_box(slide, MARGIN, Inches(1.1), Inches(5.5), Inches(0.3),
-                 "Hasil DWA Planner", font_name=FONT_TITLE,
-                 font_size=Pt(16), color=PRIMARY, bold=True)
+    # --- Left side: DWA tracking tables ---
+    tbl_left = MARGIN
+    tbl_top = Inches(1.0)
 
+    track_widths = [Inches(0.9), Inches(1.15), Inches(1.55), Inches(1.55)]
+    tbl1, h1, _ = _add_csv_table(slide, tbl_left, tbl_top, track_widths,
+                                  "path_track.csv",
+                                  title="Cross Track Error — Kondisi Normal")
+
+    tbl2_top = tbl_top + h1 + Inches(0.25)
+    _add_csv_table(slide, tbl_left, tbl2_top, track_widths,
+                   "path_track_rough.csv",
+                   title="Cross Track Error — Kondisi Rough Floor")
+
+    # --- Right side: DWA summary + navigation highlight ---
+    right_x = Inches(6.7)
+
+    # DWA summary cards
     dwa_results = [
         ("Kondisi Normal", "Mean & max cross track error rendah.\nDWA mengikuti global path dengan baik.",
-         RGBColor(0x2E, 0x7D, 0x32), "✓"),
-        ("Kondisi Gempa", "Max cross track error meningkat signifikan.\nObstacle tidak diketahui di global path →\nDWA menyimpang untuk menghindari tabrakan.",
-         ORANGE, "⚠"),
+         RGBColor(0x2E, 0x7D, 0x32), "\u2713"),
+        ("Kondisi Gempa", "Max cross track error meningkat signifikan.\nObstacle tidak diketahui di global path \u2192\nDWA menyimpang untuk menghindari tabrakan.",
+         ORANGE, "\u26A0"),
     ]
 
-    dry = Inches(1.55)
+    dry = Inches(1.0)
     for title, desc, color, status in dwa_results:
-        drcard = add_rect(slide, MARGIN, dry, Inches(5.8), Inches(1.15),
+        drcard = add_rect(slide, right_x, dry, Inches(5.9), Inches(1.0),
                           fill_color=BOX_FILL, corner_radius=Cm(0.1))
-        add_rect(slide, MARGIN, dry, Pt(4), Inches(1.15), fill_color=color)
-        add_text_box(slide, MARGIN + Inches(0.15), dry + Inches(0.05),
-                     Inches(4.5), Inches(0.25),
-                     f"{status}  {title}", font_name=FONT_TITLE, font_size=Pt(13),
+        add_rect(slide, right_x, dry, Pt(4), Inches(1.0), fill_color=color)
+        add_text_box(slide, right_x + Inches(0.12), dry + Inches(0.04),
+                     Inches(2.0), Inches(0.22),
+                     f"{status}  {title}", font_name=FONT_TITLE, font_size=Pt(12),
                      color=color, bold=True)
-        add_text_box(slide, MARGIN + Inches(0.15), dry + Inches(0.35),
-                     Inches(5.5), Inches(0.7),
-                     desc, font_size=Pt(10), color=BODY, line_spacing=1.4)
-        dry += Inches(1.25)
+        add_text_box(slide, right_x + Inches(0.12), dry + Inches(0.28),
+                     Inches(5.6), Inches(0.65),
+                     desc, font_size=Pt(9), color=BODY, line_spacing=1.35)
+        dry += Inches(1.1)
 
-    # Navigation result highlight
-    right_x = Inches(7.2)
-
-    # Big result box
-    result_box = add_rect(slide, right_x, Inches(1.1), Inches(5.5), Inches(2.3),
+    # Navigation highlight box
+    hl_top = Inches(3.25)
+    result_box = add_rect(slide, right_x, hl_top, Inches(5.9), Inches(1.6),
                           fill_color=RGBColor(0xE3, 0xF0, 0xFD), corner_radius=Cm(0.2))
-    add_rect(slide, right_x, Inches(1.1), Inches(5.5), Pt(4), fill_color=PRIMARY)
+    add_rect(slide, right_x, hl_top, Inches(5.9), Pt(4), fill_color=PRIMARY)
 
-    add_text_box(slide, right_x + Inches(0.2), Inches(1.2), Inches(5.1), Inches(0.35),
-                 "NAVIGASI PENUH (Region A → C)",
-                 font_name=FONT_TITLE, font_size=Pt(16), color=PRIMARY, bold=True,
+    add_text_box(slide, right_x, hl_top + Inches(0.05), Inches(5.9), Inches(0.28),
+                 "NAVIGASI PENUH (Region A \u2192 C)",
+                 font_name=FONT_TITLE, font_size=Pt(14), color=PRIMARY, bold=True,
                  alignment=PP_ALIGN.CENTER)
 
-    add_text_box(slide, right_x + Inches(0.2), Inches(1.65), Inches(5.1), Inches(0.7),
+    add_text_box(slide, right_x, hl_top + Inches(0.35), Inches(5.9), Inches(0.5),
                  "127.26",
-                 font_name=FONT_TITLE, font_size=Pt(52), color=PRIMARY, bold=True,
+                 font_name=FONT_TITLE, font_size=Pt(42), color=PRIMARY, bold=True,
                  alignment=PP_ALIGN.CENTER)
 
-    add_text_box(slide, right_x + Inches(0.2), Inches(2.25), Inches(5.1), Inches(0.25),
+    add_text_box(slide, right_x, hl_top + Inches(0.85), Inches(5.9), Inches(0.2),
                  "DETIK",
-                 font_name=FONT_TITLE, font_size=Pt(18), color=PRIMARY, bold=True,
+                 font_name=FONT_TITLE, font_size=Pt(14), color=PRIMARY, bold=True,
                  alignment=PP_ALIGN.CENTER)
 
-    add_text_box(slide, right_x + Inches(0.2), Inches(2.6), Inches(5.1), Inches(0.3),
-                 "Robot berhasil menavigasi dari Region A ke Region C\n"
-                 "melalui Region B secara otonom penuh.",
-                 font_size=Pt(11), color=BODY, alignment=PP_ALIGN.CENTER,
-                 line_spacing=1.3)
+    add_text_box(slide, right_x, hl_top + Inches(1.1), Inches(5.9), Inches(0.35),
+                 "Robot berhasil menavigasi Region A \u2192 C secara otonom penuh.",
+                 font_size=Pt(10), color=BODY, alignment=PP_ALIGN.CENTER)
 
     # Component integration box
-    int_box = add_rect(slide, right_x, Inches(3.65), Inches(5.5), Inches(1.4),
+    int_top = Inches(5.0)
+    int_box = add_rect(slide, right_x, int_top, Inches(5.9), Inches(1.35),
                        fill_color=BOX_FILL, corner_radius=Cm(0.15))
-    add_text_box(slide, right_x + Inches(0.2), Inches(3.7), Inches(5.1), Inches(0.25),
+    add_text_box(slide, right_x + Inches(0.15), int_top + Inches(0.05),
+                 Inches(5.6), Inches(0.2),
                  "Semua Komponen Bekerja Terintegrasi",
-                 font_name=FONT_TITLE, font_size=Pt(13), color=HEADING, bold=True,
+                 font_name=FONT_TITLE, font_size=Pt(11), color=HEADING, bold=True,
                  alignment=PP_ALIGN.CENTER)
 
     integrations = [
-        "✓  ICP Localization → estimasi pose real-time",
-        "✓  Costmap Transisi → perpindahan antar region",
-        "✓  A* Global Planner → rute multi-region",
-        "✓  DWA Local Planner → trajectory + obstacle avoidance",
+        "\u2713  ICP Localization \u2192 estimasi pose real-time",
+        "\u2713  Costmap Transisi \u2192 perpindahan antar region",
+        "\u2713  A* Global Planner \u2192 rute multi-region",
+        "\u2713  DWA Local Planner \u2192 trajectory + obstacle avoidance",
     ]
 
-    inty = Inches(4.0)
+    inty = int_top + Inches(0.3)
     for item in integrations:
-        add_text_box(slide, right_x + Inches(0.3), inty, Inches(5.0), Inches(0.22),
-                     item, font_size=Pt(10), color=BODY, line_spacing=1.2)
-        inty += Inches(0.24)
+        add_text_box(slide, right_x + Inches(0.2), inty, Inches(5.5), Inches(0.2),
+                     item, font_size=Pt(9), color=BODY, line_spacing=1.1)
+        inty += Inches(0.22)
 
-    add_slide_number(slide, 17)
+    add_slide_number(slide, 20)
 
 
 def slide_conclusion(prs):
@@ -1784,7 +1832,7 @@ def slide_conclusion(prs):
                      card_w - Inches(0.4), Inches(1.2),
                      desc, font_size=Pt(12), color=BODY, line_spacing=1.45)
 
-    add_slide_number(slide, 18)
+    add_slide_number(slide, 21)
 
 
 def slide_future_work(prs):
@@ -1837,7 +1885,7 @@ def slide_future_work(prs):
                      card_w - Inches(0.4), Inches(1.3),
                      desc, font_size=Pt(11), color=BODY, line_spacing=1.5)
 
-    add_slide_number(slide, 19)
+    add_slide_number(slide, 22)
 
 
 def slide_thanks(prs):
@@ -1900,6 +1948,7 @@ def main():
     slide_literature(prs)
     slide_prior_research(prs)
     slide_system_overview(prs)
+    slide_nav_flow(prs)
     slide_map_processing(prs)
     slide_costmap_structure(prs)
     slide_icp(prs)
@@ -1907,7 +1956,9 @@ def main():
     slide_dwa(prs)
     slide_arena(prs)
     slide_results_icp(prs)
-    slide_results_path(prs)
+    slide_results_path_RA(prs)
+    slide_results_path_RB(prs)
+    slide_results_path_RC(prs)
     slide_results_navigation(prs)
     slide_conclusion(prs)
     slide_future_work(prs)
