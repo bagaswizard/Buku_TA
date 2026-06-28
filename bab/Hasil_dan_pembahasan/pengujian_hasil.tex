@@ -2,19 +2,19 @@
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{gambar/sim_RA.png}
-\caption{Simulasi di Region A}
-\label{fig:sim_ra}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{gambar/icp_errors_RA.png}
+\includegraphics[width=0.6\textwidth]{gambar/icp_errors_RA.png}
 \caption{Error ICP di Region A}
 \label{fig:icp_errors_ra}
 \end{figure}
 
-Grafik pada Gambar~\ref{fig:icp_errors_ra} menunjukkan error ICP pada sumbu $x$,
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{gambar/icp_errors_RA_rough.png}
+\caption{Error ICP di Region A pada lantai tidak rata}
+\label{fig:icp_errors_ra_rough}
+\end{figure}
+
+Grafik pada Gambar~\ref{fig:icp_errors_ra_rough} menunjukkan error ICP pada sumbu $x$,
 $y$, dan $\theta$ (yaw) saat robot melintasi Region A. Secara umum, performa ICP
 stabil dengan tingkat error yang rendah sepanjang lintasan. Namun, terjadi lonjakan
 error yang signifikan pada sekitar $t = 50$ detik. Lonjakan ini disebabkan oleh
@@ -22,20 +22,6 @@ posisi robot yang berada di zona transisi antara dua \emph{region}, di mana
 lingkungan yang dapat terdeteksi oleh sensor LiDAR sangat terbatas. Akibatnya,
 kualitas \emph{scan matching} menurun dan menghasilkan akumulasi error yang lebih
 besar pada estimasi transformasi.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.7\textwidth]{gambar/sim_RA_rough.png}
-\caption{Simulasi di Region A dengan rintangan lantai}
-\label{fig:sim_ra_rough}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{gambar/icp_errors_RA_rough.png}
-\caption{Error ICP di Region A dengan rintangan lantai}
-\label{fig:icp_errors_ra_rough}
-\end{figure}
 
 Selanjutnya, performa ICP diuji pada region A dengan kondisi lantai yang tidak
 rata untuk mensimulasikan skenario lantai yang rusak akibat gempa bumi.
@@ -51,14 +37,7 @@ zona transisi antar \emph{region}.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{gambar/sim_RC2.png}
-\caption{Simulasi di Region C}
-\label{fig:sim_rc2}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includesvg[width=0.9\textwidth]{gambar/icp_errors_RC2}
+\includesvg[width=0.6\textwidth]{gambar/icp_errors_RC2}
 \caption{Error ICP di Region C}
 \label{fig:icp_errors_rc}
 \end{figure}
@@ -78,14 +57,14 @@ estimasi \emph{yaw}.
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.9\textwidth]{gambar/icp_position_x10}
+\includesvg[width=0.6\textwidth]{gambar/icp_position_x10}
 \caption{Error ICP di Region A dengan data posisi}
 \label{fig:icp_errors_ra_posy}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.7\textwidth]{gambar/map_A}
+\includesvg[width=0.6\textwidth]{gambar/map_A}
 \caption{Radius zona transisi}
 \label{fig:radius_transition}
 \end{figure}

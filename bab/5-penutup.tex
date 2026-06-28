@@ -7,13 +7,13 @@
 \label{sec:kesimpulan}
 
 Berdasarkan eksperimen yang dilakukan pada simulasi, robot dapat berhasil menavigasi dari \emph{region} A ke \emph{region} C dengan waktu tempuh 127.26 detik. Hasil pengujian \emph{costmap} menunjukan bahwa \emph{cost scaling factor} sebesar 100 paling sesuai untuk menghasilkan jalur terpendek. Hasil ICP menunjukkan error yang wajar dan cukup akurat untuk digunakan dalam navigasi, serta dapat bekerja dengan \emph{costmap} transisi untuk menggabungkan tiap \emph{region}. Untuk lebih spesifiknya:
-\begin{itemize}
+\begin{enumerate}
     \item Pengujian ICP pada lantai tidak rata menunjukan error lebih tinggi pada sumbu tegak lurus arah gerak dan yaw dibanding pada permukaan rate, yang disebabkan oleh perbedaan ketinggian lantai. 
     \item Obstacle lebih kompleks dan trajectory rumit di region C menghasilkan error lebih tinggi pada ICP karena robot harus menyesuaikan posisi dan orientasi lebih sering untuk menghindari rintangan.
     \item Costmap transisi dapat menggabungkan tiap \emph{region} dengan baik pada radius transisi minimal 0.26 meter.
     \item Costmap inflasi dengan \emph{cost scaling factor} 100 dapat menghasilkan jalur terpendek dengan tetap menghindari obstacle.
     \item DWA Planner dapat menghasilkan trajectory yang diikuti robot saat ada obstacle unknown
-\end{itemize}
+\end{enumerate}
 
 Dengan demikian, dapat disimpulkan bahwa metode navigasi berbasis \emph{layered costmap} yang dikembangkan dalam tugas akhir ini dapat digunakan untuk menavigasi robot pada lingkungan indoor bertingkat pasca gempa bumi.
 

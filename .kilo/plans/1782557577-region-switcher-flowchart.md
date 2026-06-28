@@ -1,76 +1,74 @@
-# Plan: Topological Graph Representation untuk Map Transisi
+# Plan: Rapikan `\subsection{Local Planner DWA}`
 
 ## Objective
-Tambahkan penjelasan konsep topological graph (node dan edge) pada map transisi, lengkap dengan formulasi matematis dan visual TikZ.
+Perbaiki tata bahasa, struktur, dan konsistensi pada section Local Planner DWA (baris 901–1061 di `sistem_navigasi.tex`). Hapus komentar pseudocode yang tidak terpakai, ganti judul campuran Inggris-Indonesia, dan tambah paragraf penjelas.
 
-## File yang Dimodifikasi
+## File
+`bab/Metodologi/sistem_navigasi.tex` — baris 901–1061
 
-### Edit: `bab/Metodologi/pengolahan_map.tex`
-- Tambah `\subsection{Representasi Topologi Graph}` **setelah** seluruh isi `\subsection{Map Transisi}` (setelah tabel posisi inisial, line 157).
+## Current Issues
+| Baris | Masalah |
+|-------|---------|
+| 955 | Rumus total cost terlalu panjang dalam satu baris |
+| 957–963 | 7 critic weights dalam komentar |
+| 965 & 979 | Rumus `C_obs` duplikasi |
+| 977 | `Mode sum scores` judul Inggris |
+| 983 | `\subsubsection{kalkulasi Cost}` — huruf kecil, campuran Inggris-Indonesia |
+| 985 | Paragraf fragment satu kalimat |
+| 987–996 | `Wavefront Propagation` — komentar pseudocode |
+| 1000–1045 | 6 judul (Scoring Mode, dst) sebagai teks biasa tanpa format |
+| 1046 | `Seleksi Trajectory terbaik` tanpa subbab |
+| spread | Komentar `%` pseudocode tak terpakai di banyak tempat |
 
-### Buat (opsional): `bab/Metodologi/tikz_topologi_graph.tex`
-- TikZ figure dapat ditulis inline di `pengolahan_map.tex` dalam `figure` environment, atau di file terpisah. Pilih pendekatan inline untuk konsistensi dengan gaya existing.
+## Restructured Plan
 
-## Konten Subbab Baru
+Replace lines 901–1061 with:
 
-### 1. Paragraf Pembuka
-Jelaskan bahwa map transisi direpresentasikan sebagai graph tak-berarah G = (V, E) untuk memodelkan hubungan spasial antar region secara formal dan memungkinkan path planning multi-region.
+### 1. Paragraf pembuka (baris 900–912 diganti)
+Penjelasan singkat DWA sebagai local planner, peran dalam navigasi. Pertahankan 5 langkah utama dengan bahasa yang lebih lancar.
 
-### 2. Tabel Node (6 nodes)
-| Node | Label | Deskripsi | Region |
-|------|-------|-----------|--------|
-| v₀ | Init | Posisi awal robot | A |
-| v₁ | Entry_AB | Titik transisi sisi A (pair 0) | A |
-| v₂ | Exit_AB | Titik transisi sisi B (pair 0) | B |
-| v₃ | Entry_BC | Titik transisi sisi B (pair 1) | B |
-| v₄ | Exit_BC | Titik transisi sisi C (pair 1) | C |
-| v₅ | Goal | Posisi tujuan | C |
+### 2. `\subsubsection{Velocity Window}` (existing, perbaiki)
+- Rapikan penjelasan dynamic window
+- Rumus `v_min`, `v_max` dipisah per baris
 
-### 3. Definisi Matematis
-- V = {v₀, v₁, v₂, v₃, v₄, v₅}
-- E = {(v₀,v₁), (v₁,v₂), (v₂,v₃), (v₃,v₄), (v₄,v₅)}
-- Klasifikasi edge:
-  - Intra-region (solid): (v₀,v₁) di A, (v₂,v₃) di B, (v₄,v₅) di C — dapat dilalui global planner standar
-  - Inter-region (dashed): (v₁,v₂) pair 0, (v₃,v₄) pair 1 — memerlukan region switcher (jump)
-- Region partitioning: R_A={v₀,v₁}, R_B={v₂,v₃}, R_C={v₄,v₅}
-- Adjacency matrix A (6×6, symmetric, tridiagonal):
-  ```
-  A_ij = 1 untuk |i-j| = 1, 0 lainnya
-  ```
-- Path: untuk graph linear, path dari v_s ke v_t adalah unik dan merupakan sub-barisan kontinu dari indeks node
+### 3. `\subsubsection{Velocity Sampling}` (existing, biarkan)
+Sudah cukup rapi.
 
-### 4. TikZ Figure
-Desain visual:
-```
-┌────────────┐  ┌────────────┐  ┌────────────┐
-│  Region A  │  │  Region B  │  │  Region C  │
-│            │  │            │  │            │
-│  (v₀)─→(v₁)│  │(v₂)─→(v₃) │  │(v₄)─→(v₅) │
-│ Init Entry │  │Exit Entry  │  │ Exit Goal  │
-└─────╖──────┘  └─────╖──────┘  └─────╖──────┘
-      ║ pair 0       ║ pair 1        ║
-      ╚══════════════╝                ╚══════════════
-```
+### 4. `\subsubsection{Model Kinematik}` (existing, biarkan)
+Sudah cukup rapi.
 
-- 3 kotak region dengan fill color berbeda (gunakan warna dari skema tikz_arsitektur.tex: colMultiMap, colLokalisasi, colGlobalPlan atau variasi)
-- 6 node circular (minimum size 0.7cm), fill white
-- Intra-region edges: `\draw[->, thick]` warna solid
-- Inter-region edges: `\draw[->, thick, dashed]` dengan label "pair 0", "pair 1"
-- Label "Init", "Entry_AB", "Exit_AB", "Entry_BC", "Exit_BC", "Goal" di bawah masing-masing node
-- Label region "A", "B", "C" di bagian atas setiap kotak
+### 5. `\subsubsection{Penilaian Trajectory}` (baru — ganti "Penilaian Trayektori")
+- Rumus total cost dipecah per komponen (multi-line)
+- Tabel 7 critics dengan bobot default (ganti komentar lines 957–963)
+- Rumus `C_obs` (satu saja, hapus duplikasi)
+- Collision checking diintegrasikan ke paragraf
+- Hapus komentar `%` pseudocode
 
-### 5. Kaitan dengan Path Antar Region
-Jelaskan bahwa path_interceptor::buildPath('A','C') menghasilkan dua step transisi sesuai jalur graph:
-P = (v₀, v₁, v₂, v₃, v₄, v₅)
+### 6. `\subsubsection{Kalkulasi Biaya dengan MapGrid}` (baru — ganti "kalkulasi Cost")
+- Judul Indonesia konsisten
+- BFS wavefront propagation: komentar `%` diintegrasikan ke paragraf
+- Path costs, goal costs, forward point shift, goal front, alignment costs sebagai sub-paragraf dengan `\textbf{bold}`
+- Hapus komentar `%` pseudocode
 
-Sebutkan bahwa untuk arah sebaliknya (C→A), graph yang sama berlaku karena edge tak-berarah.
+### 7. `\subsubsection{Seleksi Trajectory}` (baru)
+- Paragraf pembuka singkat
+- Listing pseudocode tetap dipertahankan
+- Early termination sebagai paragraf
 
-## Tidak Diubah
-- `main.tex` — semua TikZ library sudah di-load
-- `sistem_navigasi.tex` — tidak ada perubahan
-- Tabel-tabel existing di pengolahan_map.tex tetap utuh
+## Changes Summary
+| Perubahan | Detail |
+|-----------|--------|
+| Hapus | Duplikasi rumus `C_obs` (baris 979) |
+| Hapus | Semua komentar `%` pseudocode (lines 957–963, 969–971, 989–995, 1012–1024, 1036, 1048) |
+| Ganti | `Penilaian Trayektori` → `Penilaian Trajectory` (konsisten) |
+| Ganti | `kalkulasi Cost` → `Kalkulasi Biaya dengan MapGrid` |
+| Ganti | `Wavefront Propagation` → diintegrasi ke paragraf |
+| Ganti | `Scoring Mode`, `Forward Point Shift`, dll → sub-paragraf dalam subbab |
+| Tambah | Tabel 7 critics (ganti komentar) |
+| Tambah | Paragraf penjelas untuk setiap subbab |
+| Biarkan | Rumus, listing pseudocode, konten teknis yang valid |
 
-## Validasi
-- Kompilasi dengan `latexmk` — pastikan tidak ada error
-- Verifikasi TikZ figure tidak tumpang tindih
-- Verifikasi cross-references (jika ada)
+## Validation
+- Kompilasi `latexmk -pdf` — pastikan tidak ada error
+- Verifikasi semua `\label` dan `\ref` masih valid
+- Pastikan tidak ada duplikasi konten

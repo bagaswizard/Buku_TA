@@ -1,0 +1,61 @@
+\subsection{Pembahasan Costmap}
+
+Pemisahan \emph{costmap} menjadi global, lokal, dan
+transisi memungkinkan sistem navigasi menyesuaikan representasi
+lingkungan sesuai kebutuhan setiap komponen. \emph{Global costmap}
+memberikan informasi peta keseluruhan yang digunakan oleh
+\emph{global planner} untuk perencanaan jalur jarak jauh.
+\emph{Local costmap} memberikan informasi lingkungan sekitar robot
+secara \emph{real-time} yang digunakan oleh DWA \emph{local planner},
+sehingga robot dapat mengantisipasi rintangan baru yang terdeteksi
+oleh LiDAR. \emph{Transition costmap} memberikan informasi area
+transisi antar \emph{region} yang dipakai untuk berpindah antar
+\emph{region}, tetapi tidak mengganggu proses A* kecuali saat
+berhubungan dengan \emph{node graph}.
+
+\subsection{Pembahasan Lokalisasi ICP}
+
+Sistem lokalisasi menggunakan tabel \emph{hash} untuk prekomputasi
+KNN tanpa algoritma pencarian spasial seperti KD-tree. Artinya,
+semakin besar ukuran peta, semakin besar tabel \emph{hash} yang perlu
+dicari, yang berpotensi memperlambat proses ICP. Meskipun demikian,
+risiko kehilangan lokalisasi dapat dimitigasi dengan mengurangi
+kecepatan robot saat mendekati area kritis.
+
+Proses pelompatan \emph{region} menggunakan mekanisme \emph{waiting
+mode} yang hanya memprediksi waktu tunggu, sehingga tidak
+benar-benar akurat. Namun, mekanisme ini bersama dengan
+\emph{transition costmap} mampu mengatasi dampak dari hilangnya
+lokalisasi yang terjadi pada perbatasan \emph{region}. Ketika robot
+memasuki zona buffer, lompatan dihitung berdasarkan posisi relatif
+terhadap \emph{centroid} node entry, bukan berdasarkan estimasi
+ICP saat itu, sehingga akurasi lokalisasi yang menurun tidak
+memengaruhi keberhasilan transisi.
+
+\subsection{Pembahasan Global Planner}
+
+Dalam proses navigasi, \emph{global planner} seharusnya hanya perlu
+melakukan kalkulasi \emph{path} sekali, yang kemudian \emph{path}
+tersebut diikuti oleh \emph{local planner}. Namun dalam praktiknya,
+ada kemungkinan \emph{path} yang dihasilkan \emph{global planner}
+tidak sesuai dengan kondisi lingkungan terkini, sehingga \emph{global
+planner} perlu mengkalkulasi ulang secara periodik. Dalam sistem ini,
+setiap kali robot melompat ke \emph{node} baru, \emph{global planner}
+juga membuat \emph{path} baru untuk segmen selanjutnya. Bentuk
+\emph{path} yang dihasilkan dapat diubah dari parameter
+\emph{planner} itu sendiri, tidak hanya dari \emph{costmap}.
+Parameter seperti \emph{cost factor}, \emph{neutral cost}, dan
+\emph{Cost Scaling Factor} memengaruhi bagaimana \emph{planner}
+menyeimbangkan antara jarak tempuh dan jarak aman terhadap
+\emph{obstacle}.
+
+\subsection{Pembahasan Local Planner (DWA)}
+
+Pergerakan robot di lingkungan simulasi menghadapi beberapa lorong
+sempit di Region C. Penggunaan radius \emph{footprint} robot yang
+tepat dapat menghindari tabrakan dengan tembok, meskipun robot
+hexapod cukup kuat untuk tidak mudah tersangkut. Parameter DWA
+memungkinkan robot bergerak secara \emph{omnidirectional}, yang
+sangat membantu dalam melewati lorong-lorong sempit. Untuk melewati
+lorong tertentu, robot perlu berada dalam orientasi tertentu, sehingga
+DWA melakukan gerak rotasi terlebih dahulu sebelum bergerak maju.

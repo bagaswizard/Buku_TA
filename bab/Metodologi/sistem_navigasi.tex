@@ -1,4 +1,4 @@
-
+﻿
 \begin{figure}[H]
 \centering
 \includesvg[width=0.7\textwidth]{gambar/navigation_architecture.svg}
@@ -199,7 +199,15 @@ $r$          & 10           & Radius pencarian \emph{neighbor} \\
 
 \subsection{Costmap}
 
-Costmap adalah representasi grid yang menyimpan informasi biaya untuk navigasi. Setiap sel dalam costmap memiliki nilai biaya yang mencerminkan kesulitan atau risiko melewati area tersebut. Nilai biaya ini dapat dipengaruhi oleh berbagai faktor seperti keberadaan rintangan. Costmap menyimpan informasi map grid 2D dalam bentuk array 1D 
+Costmap adalah representasi grid 2D yang menyimpan informasi biaya
+navigasi. Setiap sel dalam \emph{costmap} memiliki nilai numerik yang
+mencerminkan tingkat kesulitan atau risiko untuk dilalui. Nilai biaya
+yang rendah menandakan area yang aman untuk dilalui, sedangkan nilai
+biaya yang tinggi menandakan area yang berbahaya atau terlarang. Nilai
+biaya ini dipengaruhi oleh berbagai faktor, seperti keberadaan
+rintangan statis, rintangan dinamis, dan zona transisi antar region.
+Nilai konstanta \emph{costmap} yang digunakan dalam sistem ini
+ditunjukkan pada Tabel~\ref{tab:costmap_constants}.
 
 \begin{table}[H]
 \centering
@@ -212,55 +220,119 @@ Costmap adalah representasi grid yang menyimpan informasi biaya untuk navigasi. 
 \texttt{NO\_INFORMATION}                & 255 & Tidak diketahui (\emph{unknown}) \\
 \texttt{LETHAL\_OBSTACLE}               & 254 & Obstacle mematikan  \\
 \texttt{INSCRIBED\_INFLATED\_OBSTACLE}  & 253 & Batas terluar inflasi obstacle \\
-\texttt{INFLATED\_OBSTACLE}              & 6-252 & Inflasi obstacle \\
+\texttt{INFLATED\_OBSTACLE}              & 1-252 & Inflasi obstacle \\
 \texttt{TRANSITION\_CELL}                 & 1-5 & Area transisi antar region \\
 \texttt{FREE\_SPACE}                    & 0   & Ruang bebas  \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Indeks Grid
+Setiap sel dalam \emph{costmap} disimpan dalam bentuk array 1D agar
+memudahkan akses dan pemrosesan. Konversi dari koordinat grid 2D
+$(m_x, m_y)$ ke indeks array 1D dilakukan dengan persamaan berikut:
 
-konversi dari koordinat grid 2D $(m_x, m_y)$ ke flat index 1D:
+\begin{equation}
+i = m_y \cdot W + m_x
+\end{equation}
 
-\begin{equation}i = m_y \cdot W + m_x\end{equation}
+dengan $W$ adalah lebar grid dalam jumlah sel, $m_x$ adalah kolom,
+dan $m_y$ adalah baris.
 
-dimana $W$ adalah lebar grid (jumlah cell per baris).
+Untuk menghubungkan koordinat dunia (dalam meter) dengan koordinat
+grid (dalam sel), digunakan parameter origin grid $(o_x, o_y)$ dan
+resolusi $r$ yang menyatakan panjang satu sisi sel dalam meter.
+Konversi dari koordinat dunia $(w_x, w_y)$ ke koordinat grid:
 
-Koordinat Dunia - Grid
+\begin{equation}
+\label{eq:worldtogrid}
+m_x = \left\lfloor \frac{w_x - o_x}{r} \right\rfloor, \qquad
+m_y = \left\lfloor \frac{w_y - o_y}{r} \right\rfloor
+\end{equation}
 
-Diberikan origin grid di $(o_x, o_y)$ dan resolusi $r$ (meter per cell):
+Konversi dari koordinat grid ke koordinat dunia:
 
-World → Grid:
+\begin{equation}
+w_x = o_x + \left(m_x + \frac{1}{2}\right) \cdot r, \qquad
+w_y = o_y + \left(m_y + \frac{1}{2}\right) \cdot r
+\end{equation}
 
-\begin{equation}m_x = \left\lfloor \frac{w_x - o_x}{r} \right\rfloor, \qquad m_y = \left\lfloor \frac{w_y - o_y}{r} \right\rfloor\end{equation}
+Dalam sistem ini, terdapat tiga jenis \emph{costmap} yang masing-masing
+memiliki komposisi \emph{layer} berbeda sesuai dengan fungsinya.
+Komposisi tersebut dirangkum pada Tabel~\ref{tab:costmap_layers}.
 
-Grid → World :
+\begin{table}[H]
+\centering
+\caption{Komposisi layer pada masing-masing costmap}
+\label{tab:costmap_layers}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Lapisan Costmap} & \textbf{Tipe Layer} & \textbf{Fungsi} \\
+\midrule
+\multirow{2}{*}{Global Costmap}
+ & Static Layer & Menyimpan obstacle tetap dari peta \\
+ & Inflation Layer & Memperluas obstacle dengan gradient cost \\
+\cmidrule{2-3}
+\multirow{2}{*}{Local Costmap}
+ & Obstacle Layer & Mendeteksi rintangan dinamis dari scan LiDAR \\
+ & Inflation Layer & Memperluas obstacle dengan gradient cost \\
+\cmidrule{2-3}
+\multirow{2}{*}{Transition Costmap}
+ & Static Layer & Menyimpan obstacle tetap dari peta \\
+ & Transition Layer & Menyimpan area transisi antar region \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\begin{equation}w_x = o_x + \left(m_x + \frac{1}{2}\right) \cdot r, \qquad w_y = o_y + \left(m_y + \frac{1}{2}\right) \cdot r\end{equation}
+\begin{figure}[H]
+\centering
+\input{bab/Metodologi/tikz_costmap_layers.tex}
+\caption{Visualisasi grid masing-masing costmap}
+\label{fig:costmap_layers}
+\end{figure}
 
-1.4 Rolling Window
+\emph{Global costmap} adalah \emph{costmap} yang mencakup seluruh area
+yang diketahui dari peta. \emph{Costmap} ini digunakan oleh \emph{global
+planner} untuk merencanakan jalur dari posisi robot menuju tujuan dalam
+skala luas. \emph{Global costmap} terdiri dari \emph{static layer} yang
+menyimpan informasi rintangan tetap dari peta, serta \emph{inflation
+layer} yang memperluas area rintangan dengan \emph{gradient cost} untuk
+menghindari tabrakan. \emph{Costmap} ini tidak berubah secara dinamis
+selama navigasi berlangsung, kecuali jika terdapat pembaruan peta dari
+luar.
 
-Untuk local costmap yang bergerak mengikuti robot, origin grid digeser:
+\emph{Local costmap} adalah \emph{costmap} yang mencakup area di sekitar
+robot dalam radius tertentu. \emph{Costmap} ini digunakan oleh
+\emph{local planner} untuk perencanaan gerak jangka pendek, seperti
+menghindari rintangan yang baru terdeteksi. \emph{Local costmap} terdiri
+dari \emph{obstacle layer} yang mendeteksi rintangan dinamis dari data
+\emph{scan} LiDAR secara \emph{real-time}, serta \emph{inflation layer}
+untuk menjaga jarak aman dari rintangan tersebut. Berbeda dengan
+\emph{global costmap}, \emph{local costmap} bergerak mengikuti posisi
+robot (\emph{rolling window}) sehingga area yang dicakup selalu
+berpusat di sekitar robot.
 
-\begin{equation}\Delta_x = \lfloor \text{new\_origin}_x - \text{old\_origin}_x \rfloor, \quad \Delta_y = \lfloor \text{new\_origin}_y - \text{old\_origin}_y \rfloor\end{equation}
+\emph{Transition costmap} adalah \emph{costmap} yang menggabungkan
+data transisi dengan peta statis. \emph{Transition costmap} memiliki
+\emph{static layer} yang menyimpan informasi rintangan tetap dari peta,
+serta \emph{transition layer} yang memberikan nilai biaya khusus pada
+sel-sel yang berada di zona transisi. Nilai biaya ini digunakan oleh
+\emph{region switcher} untuk mendeteksi kapan robot memasuki area
+perbatasan antar \emph{region} sehingga dapat melakukan lompatan pose
+ke \emph{region} tujuan.
 
-Array costmap digeser sebesar $(\Delta_x, \Delta_y)$ dan cell baru diisi dengan NO\_INFORMATION.
+\emph{Local costmap} menggunakan mekanisme \emph{rolling window},
+yaitu grid bergerak mengikuti posisi robot. Ketika robot berpindah,
+origin grid digeser sehingga robot selalu berada di dekat pusat
+\emph{costmap}. Pergeseran origin dihitung dengan:
 
-% 1. Jika rolling window, geser origin ke pusat robot
-% 2. Reset bounds: min_x = max_x = robot_x, min_y = max_y = robot_y
-% 3. Untuk setiap layer (urut):
-%      layer->updateBounds(robot_x, robot_y, robot_yaw, &min_x, &min_y, &max_x, &max_y)
-%      → perluas bounds sesuai kebutuhan layer
-% 4. Konversi bounds ke cell coordinates:
-%      worldToMapEnforceBounds(min_x, min_y, &cell_min_x, &cell_min_y)
-%      worldToMapEnforceBounds(max_x, max_y, &cell_max_x, &cell_max_y)
-% 5. Reset region [cell_min..cell_max] ke nilai default
-% 6. Untuk setiap layer (urut):
-%      layer->updateCosts(master, cell_min_x, cell_min_y, cell_max_x, cell_max_y)
-%      → layer menulis cost ke master
+\begin{equation}
+\Delta_x = \lfloor \text{new\_origin}_x - \text{old\_origin}_x \rfloor, \quad
+\Delta_y = \lfloor \text{new\_origin}_y - \text{old\_origin}_y \rfloor
+\end{equation}
 
-
+Setelah origin digeser, array \emph{costmap} digeser sebesar
+$(\Delta_x, \Delta_y)$ dan sel-sel baru yang muncul di area yang
+sebelumnya belum tercakup diisi dengan informasi.
 
 \subsubsection{Static Layer}
 % \label{staticlayer}
@@ -269,30 +341,55 @@ Static layer adalah lapisan costmap paling dasar yang menyimpan informasi \emph{
 \begin{equation}C_{\text{internal}} = \begin{cases} 255 & \text{if } OG = -1 \text{ (unknown)} \\ 0 & \text{if } OG = 0 \text{ (free)} \\ 254 & \text{if } OG \geq 100 \text{ (occupied)} \\  \end{cases}\end{equation}
 
 \subsubsection{Obstacle Layer}
-Obstacle layer dirancang untuk menangani objek-objek dinamis atau rintangan yang baru terdeteksi di lingkungan. Informasi pada lapisan ini diperoleh secara real-time dari sensor LiDAR robot, yang terus-menerus memindai area sekitar dan memperbarui \emph{costmap} sesuai dengan obstacle yang terdeteksi. Lapisan ini memiliki batasan jangkauan observasi maksimum, yang jaraknya disesuaikan berdasarkan jarak \emph{pointcloud} maksimum dari sensor LiDAR, yang berarti hanya rintangan dalam radius pandang sensor yang akan direpresentasikan di lapisan \emph{costmap} ini.
 
-Untuk setiap beam laser dengan range $r$ dan sudut $\theta$:
+Obstacle layer adalah lapisan yang menangani rintangan dinamis atau
+rintangan yang baru terdeteksi selama navigasi. Berbeda dengan
+\emph{static layer} yang bersumber dari peta tetap, informasi pada
+lapisan ini diperoleh secara \emph{real-time} dari data \emph{scan}
+sensor LiDAR. Lapisan ini memiliki batas jangkauan maksimum yang
+disesuaikan dengan spesifikasi sensor, sehingga hanya rintangan dalam
+radius pandang yang direpresentasikan.
+
+Proses pembaruan \emph{obstacle layer} dilakukan dalam beberapa
+langkah berikut:
 
 \begin{enumerate}
-  \item Hitung endpoint dalam frame sensor: $(r\cos\theta,\; r\sin\theta)$
-  \item Transform ke frame map via TF
-  \item Konversi ke cell: $(m_x, m_y) = \text{worldToMap}(x, y)$
-  \item Set cell ke \texttt{LETHAL\_OBSTACLE} (254)
+  \item \textbf{Konversi endpoint.} Untuk setiap berkas sinar laser
+  dengan jarak $r$ dan sudut $\theta$, hitung posisi ujung sinar
+  (\emph{endpoint}) dalam koordinat sensor:
+  \[
+  (x_{\text{sensor}},\; y_{\text{sensor}}) = (r\cos\theta,\; r\sin\theta)
+  \]
+  \item \textbf{Transformasi koordinat.} Endpoint ditransformasikan
+  dari \emph{frame} sensor ke \emph{frame} peta menggunakan TF.
+  \item \textbf{Konversi ke grid.} Koordinat dunia $(x, y)$ hasil
+  transformasi dikonversi ke indeks sel \emph{costmap} menggunakan persamaan \ref{eq:worldtogrid}.
+  \item \textbf{Markasi obstacle.} Sel yang ditempati oleh endpoint
+  diberi nilai lethal obstacle (254), menandakan bahwa
+  area tersebut tidak dapat dilalui.
 \end{enumerate}
 
-Gunakan algoritma Bresenham 2D untuk menggambar garis dari robot ke endpoint sensor. Semua cell yang dilewati garis (sebelum endpoint) di-clear:
+Selain memarkir \emph{endpoint} sebagai obstacle, sistem juga perlu
+memastikan bahwa area antara robot dan \emph{endpoint} tidak terdeteksi
+sebagai rintangan. Untuk itu digunakan algoritma \emph{ray tracing}
+Bresenham 2D. Algoritma ini menelusuri garis lurus dari posisi robot
+ke setiap \emph{endpoint} dan membersihkan (\emph{clear}) semua sel
+yang dilewati:
 
-\begin{equation}C_{\text{master}}(m_x, m_y) = 0 \quad \forall \text{cell di sepanjang ray} \text{ (kecuali endpoint)}\end{equation}
+\begin{equation}
+C_{\text{local}}(m_x, m_y) = 0
+\quad \forall\; \text{sel di sepanjang ray, kecuali endpoint}
+\end{equation}
 
-Bresenham 2D Raytracing
+Algoritma Bresenham menentukan sel-sel yang mendekati garis lurus
+antara dua titik grid. Diberikan titik awal $(x_0, y_0)$ dan titik
+akhir $(x_1, y_1)$, parameter inisialisasi:
 
-Algoritma Bresenham memilih pixel-pixel yang mendekati garis lurus antara dua titik grid. Untuk setiap langkah, algoritma memutuskan apakah akan bergerak di sumbu x, y, atau keduanya berdasarkan error accumulator:
-
-Diberikan titik awal $(x_0, y_0)$ dan titik akhir $(x_1, y_1)$:
-
-\begin{equation}\Delta_x = |x_1 - x_0|, \quad \Delta_y = |y_1 - y_0|\end{equation}
-
-\begin{equation}\text{err} = \Delta_x - \Delta_y, \quad s_x = \text{sign}(x_1 - x_0), \quad s_y = \text{sign}(y_1 - y_0)\end{equation}
+\begin{equation}
+\Delta_x = |x_1 - x_0|,\quad
+\Delta_y = |y_1 - y_0|,\quad
+\text{err} = \Delta_x - \Delta_y
+\end{equation}
 
 \begin{algorithm}[H]
 \caption{Bresenham Raytracing}
@@ -312,30 +409,28 @@ Diberikan titik awal $(x_0, y_0)$ dan titik akhir $(x_1, y_1)$:
 \end{algorithmic}
 \end{algorithm}
 
+Setelah proses \emph{ray tracing} selesai, \emph{costmap} lokal
+memiliki informasi terkini tentang area yang aman dan area yang
+terhalang rintangan.
+
 \subsubsection{Inflation Layer}
 Inflation layer berperan penting dalam memastikan pergerakan robot dapat menghindari berhimpitan dengan rintangan. Lapisan ini menciptakan zona inflasi di sekitar setiap rintangan yang terdeteksi dan memiliki nilai harga navigasi yang tinggi. Radius zona inflasi ini variabel yang ditentukan berdasarkan dimensi fisik atau \emph{footprint} robot sehingga mencegah robot terlalu dekat dengan rintangan dan berpotensi menabrak. Lapisan ini secara efektif "memperbesar" rintangan di \emph{costmap}, sehingga algoritma perencanaan jalur akan menjaga jarak aman dari objek-objek tersebut dari robot. 
 
 Lapisan inflasi berfungsi seperti safe distance minimum robot dari rintangan, namun dapat bekerja lebih dinamis karena memperhitungkan orientasi dan bentuk badan robot. Dengan bentuk robot yang unik, radius zona inflasi dapat berubah secara adaptif sesuai orientasi robot terhadap rintangan.
 
-Layer ini memperluas obstacle dengan gradient cost, sehingga perencana path dapat menjaga jarak dari obstacle.
+Layer ini memperluas obstacle dengan gradient cost, sehingga perencana path dapat menjaga jarak dari obstacle. Untuk setiap obstacle cell, terapkan cost ke semua cell dalam radius inflasi $R$. Cost pada jarak $d$ dari obstacle dihitung dengan fungsi eksponensial:
 
-Algoritma Inflasi
-
-Untuk setiap obstacle cell, terapkan cost ke semua cell dalam radius inflasi $R$.
-
-Cost pada jarak $d$ dari obstacle dihitung dengan fungsi eksponensial:
-
-\begin{equation}C(d) = \begin{cases} 253 \cdot e^{-\alpha \cdot (d - r_{\text{inscribed}})} & \text{if } d \leq R \\ 0 & \text{otherwise} \end{cases}\end{equation}
-
-Atau dalam bentuk weight:
-
-\begin{equation}C(d) = 252 \cdot \left( e^{-\alpha \cdot (d - r_{\text{inscribed}})} \right)
+\begin{equation}
+C(d) =
+\begin{cases}
+253, & \text{jika } d \leq r_{\text{inscribed}} \\[4pt]
+252 \cdot e^{-\alpha \cdot (d - r_{\text{inscribed}})}, & \text{jika } r_{\text{inscribed}} < d \leq R \\[4pt]
+0, & \text{jika } d > R
+\end{cases}
 \label{eq:inflation_function}
 \end{equation}
 
-
-
-dimana: $d$ = jarak Euclidean dari cell ke obstacle terdekat, $R$ = inflation radius (jarak maksimum inflasi), $r_{\text{inscribed}}$ = inscribed radius (radius robot, cost = 253 pada jarak ini), dan $\alpha$ = scaling factor (mengontrol kecuraman kurva cost). Nilai cost dibulatkan ke integer 6–252.
+dimana: $d$ = jarak Euclidean dari cell ke obstacle terdekat, $R$ = inflation radius (jarak maksimum inflasi), $r_{\text{inscribed}}$ = inscribed radius (radius footprint robot, cost = 253 pada jarak ini), dan $\alpha$ = scaling factor (mengontrol kecuraman kurva cost). Nilai cost dibulatkan ke integer 1–252.
 
 %   ^
 %   | 253 ────────── INSCRIBED_INFLATED_OBSTACLE (d = r_inscribed)
@@ -352,19 +447,107 @@ dimana: $d$ = jarak Euclidean dari cell ke obstacle terdekat, $R$ = inflation ra
 
 \subsubsection{Transition Layer}
 
-Transition layer adalah lapisan yang menambahkan data area transisi ke dalam costmap. Data ini digunakan oleh untuk mendeteksi kapan robot mendekati batas transisi antar region dan melakukan "lompatan" pose antar area.
+Transition layer adalah lapisan yang menambahkan data area transisi
+antar \emph{region} ke dalam \emph{costmap}. Lapisan ini memiliki dua
+jenis nilai \emph{cost} yang saling melengkapi. Nilai $T = 1$
+menandai garis transisi utama tempat robot akan melakukan lompatan
+pose. Nilai $E = 5$ membentuk zona buffer di sekitar garis transisi,
+sehingga robot dapat mendeteksi bahwa ia sedang mendekati batas
+\emph{region} sebelum benar-benar mencapai garis transisi. 
 
-\begin{equation}C_{\text{internal}} = \begin{cases} 255 & \text{if } OG = -1 \text{ (unknown)} \\ 0 & \text{if } OG = 0 \text{ (free)} \\ 1 & \text{if } OG \geq 100 \text{ (occupied)} \\  \end{cases}\end{equation}
+Nilai $T = 1$ berasal dari peta transisi yang dimuat melalui
+\emph{topic} terpisah. Data ini berupa file PGM dengan nilai piksel
+0--255 yang dikonversi ke \emph{cost} internal:
 
-Lapisan ini juga memperluas area transisi dengan radius tertentu, sehingga robot dapat mendeteksi transisi sebelum benar-benar mencapai garis transisi. Hal ini membuat buffer zona deteksi di sekitar data transisi. 
+\begin{equation}
+C_{\text{internal}} = \begin{cases}
+255 & \text{if } OG = -1 \text{ (unknown)} \\
+0   & \text{if } OG = 0 \text{ (free)} \\
+1   & \text{if } OG \geq 100 \text{ (occupied)}
+\end{cases}
+\end{equation}
 
-Tiap region di map memiliki metadata transisi unik yang menyimpan informasi relasi antar peta. Informasi tersebut termasuk orientasi relatif terhadap orientasi global yang dijadikan acuan.
+Nilai $E = 5$ dihasilkan melalui ekspansi dari sel-sel transisi
+menggunakan algoritma \emph{Breadth-First Search} (BFS). Seluruh sel
+dengan nilai $T = 1$ digunakan sebagai \emph{seed} awal. BFS
+menelusuri tetangga dalam arah 4-\emph{way} hingga radius $R$ sel.
+Setiap sel yang dikunjungi dan bukan merupakan \emph{seed} diberi
+nilai $E = 5$. Ekspansi berhenti jika bertemu sel dengan \emph{cost}
+254 (LETHAL\_OBSTACLE), sehingga area transisi tidak meluas ke dalam
+rintangan. Pseudocode algoritma ini ditunjukkan pada
+Algorithm~\ref{alg:bfs_expansion}.
+
+\begin{algorithm}[H]
+\caption{BFS Expansion untuk Transition Layer}
+\label{alg:bfs_expansion}
+\begin{algorithmic}[1]
+\Require $map$ (grid transisi), $R$ (radius ekspansi dalam sel)
+\Ensure $cost$ terisi dengan nilai $E = 5$ pada sel buffer
+\State $q \gets \text{antrian kosong}$
+\For{setiap sel $(x, y)$ dengan $map(x, y) = T$}
+    \State $q.\text{push}((x, y))$
+    \State $distance[x][y] \gets 0$
+\EndFor
+\While{$q$ tidak kosong}
+    \State $(x, y) \gets q.\text{front}()$
+    \State $q.\text{pop}()$
+    \State $d \gets distance[x][y]$
+    \If{$d \ge R$}
+        \State \textbf{continue}
+    \EndIf
+    \For{setiap tetangga $(nx, ny)$ dalam arah 4-way}
+        \If{$(nx, ny)$ di luar batas grid}
+            \State \textbf{continue}
+        \EndIf
+        \If{$cost[nx][ny] = 254$}
+            \State \textbf{continue}
+        \EndIf
+        \If{$distance[nx][ny]$ sudah terdefinisi}
+            \State \textbf{continue}
+        \EndIf
+        \State $distance[nx][ny] \gets d + 1$
+        \If{$map(nx, ny) \neq T$}
+            \State $cost[nx][ny] \gets E$
+        \EndIf
+        \State $q.\text{push}((nx, ny))$
+    \EndFor
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+Ilustrasi ekspansi transisi dengan radius $R = 2$ sel:
+
+\begin{equation}
+\begin{array}{c@{\qquad}c}
+\text{Sebelum ekspansi} & \text{Setelah ekspansi} \\[4pt]
+\begin{array}{ccccc}
+. & . & . & . & . \\
+. & . & T & . & . \\
+. & T & T & T & . \\
+. & . & T & . & . \\
+. & . & . & . & .
+\end{array}
+&
+\begin{array}{ccccc}
+. & E & E & E & . \\
+E & E & T & E & E \\
+E & T & T & T & E \\
+E & E & T & E & E \\
+. & E & E & E & .
+\end{array}
+\end{array}
+\end{equation}
+
+dengan $T = 1$ (garis transisi) dan $E = 5$ (buffer deteksi). Kedua
+nilai ini dideteksi oleh \emph{region switcher} untuk menentukan kapan
+robot harus bersiap (memasuki zona buffer, $E = 5$) dan kapan lompatan
+dieksekusi (mencapai garis transisi, $T = 1$).
+
+Tiap \emph{region} dalam peta memiliki metadata transisi yang menyimpan
+informasi relasi antar peta. Informasi tersebut mencakup orientasi
+relatif terhadap orientasi global yang dijadikan acuan.
 
 \subsection{Region Switcher}
-
-Region switcher bertugas mendeteksi kapan robot memasuki zona transisi
-dan melakukan perpindahan region beserta lompatan pose robot. Diagram
-alirnya ditunjukkan pada Gambar~\ref{fig:region_switcher_flow}.
 
 \begin{figure}[H]
 \centering
@@ -373,21 +556,164 @@ alirnya ditunjukkan pada Gambar~\ref{fig:region_switcher_flow}.
 \label{fig:region_switcher_flow}
 \end{figure}
 
-Centroid Calculation
+Region switcher bertugas mendeteksi kapan robot memasuki zona transisi, menghitung parameter lompatan, dan melakukan perpindahan \emph{region}
+beserta pembaruan pose robot. Mekanisme ini berkaitan langsung dengan
+\emph{topological graph} yang telah dijelaskan pada
+Subbab~\ref{sec:topologi_graph}. Pada graph $G = (V, E)$,
+\emph{region switcher} menangani \emph{edge} inter-region
+$(v_1, v_2)$ (pasangan 0, A--B) dan $(v_3, v_4)$ (pasangan 1, B--C).
+Setiap \emph{edge} ini menghubungkan dua \emph{region} berbeda dan
+tidak dapat dilalui oleh \emph{global planner} biasa sehingga lompatan pose harus dilakukan secara eksplisit.
+
+\subsubsection{Deteksi Zona Transisi}
+
+Region switcher membaca \emph{costmap} global secara periodik untuk
+mendeteksi nilai \emph{cost} pada posisi robot saat ini. Jika robot
+berada pada sel dengan \emph{cost} 5 (zona buffer, $E$), sistem
+memasuki \emph{waiting mode} untuk mempersiapkan lompatan. Jika robot
+
+
+\subsubsection{Waiting Mode}
+
+Ketika robot memasuki zona buffer ($E = 5$), region switcher
+mengaktifkan \emph{waiting mode} sebelum lompatan dieksekusi. Tujuan
+dari mekanisme ini adalah memberi waktu agar robot benar-benar
+mendekati garis transisi sebelum pose diubah. Durasi tunggu dihitung
+berdasarkan radius ekspansi dan kecepatan robot saat itu:
+
+\begin{equation}
+t_{\text{wait}} = \frac{r_{\text{expansion}}}{\lvert\vec{v}\rvert}
+\end{equation}
+
+dengan $r_{\text{expansion}}$ adalah radius ekspansi dalam meter
+dan $\lvert\vec{v}\rvert$ adalah besar kecepatan resultan robot:
+
+\begin{equation}
+\lvert\vec{v}\rvert = \max\left(\sqrt{v_x^2 + v_y^2},\; \varepsilon\right)
+\end{equation}
+
+Nilai $\varepsilon$ mencegah pembagian dengan nol saat robot berhenti.
+Selama \emph{waiting mode}, lokalisasi ICP dinonaktifkan sementara
+agar pose robot tidak berubah akibat koreksi ICP selama proses
+transisi.
+
+\subsubsection{Eksekusi Lompatan}
+
+Saat robot mencapai garis transisi ($T = 1$), region switcher
+mengeksekusi lompatan dalam beberapa langkah berikut:
+
+\begin{enumerate}
+  \item \textbf{Posisi node transisi.} Setiap node pada pasangan
+  transisi (Entry$_{AB}$, Exit$_{AB}$, Entry$_{BC}$, Exit$_{BC}$)
+  memiliki posisi yang dihitung sebagai \emph{centroid} dari seluruh
+  sel yang membentuk area transisi pada sisi tersebut. Diberikan
+  himpunan sel transisi $S = \{(x_i, y_i)\}_{i=1}^N$, posisi node
+  dihitung dengan:
+  \[
+  \mathbf{c} = \frac{1}{N} \sum_{i=1}^{N} (x_i, y_i)
+  \]
+  Centroid ini merepresentasikan titik pusat area transisi pada suatu
+  sisi dan digunakan sebagai acuan dalam perhitungan lompatan.
+
+  \item \textbf{Pencarian pasangan terdekat.} Posisi robot
+  $(x_r, y_r)$ dicocokkan ke pasangan transisi dengan menghitung
+  jarak kuadrat ke centroid setiap node:
+  \[
+  p^* = \arg\min_{p \in \text{pairs}} \min\left(
+  \|(x_r, y_r) - \mathbf{c}_{\text{entry}}^p\|^2,\;
+  \|(x_r, y_r) - \mathbf{c}_{\text{exit}}^p\|^2
+  \right)
+  \]
+  Pasangan $p^*$ menentukan pasangan transisi yang akan digunakan,
+  serta sisi asal robot (\emph{entry} atau \emph{exit}).
+
+  \item \textbf{Perhitungan pose lompatan.} Vektor offset robot
+  terhadap node entry dihitung sebagai selisih posisi:
+  \[
+  \mathbf{d} = (x_r, y_r) - \mathbf{c}_{\text{entry}}
+  \]
+  Vektor ini kemudian diterapkan ke sisi exit dengan menyesuaikan
+  orientasi antar \emph{region}. Jika $\theta$ adalah sudut rotasi
+  dari \emph{region} asal ke \emph{region} tujuan, maka posisi
+  lompatan adalah:
+  \[
+  \mathbf{p}_{\text{jump}} = \mathbf{c}_{\text{exit}} +
+  \mathbf{R}(\theta) \cdot \mathbf{d}
+  \]
+  dengan $\mathbf{R}(\theta)$ adalah matriks rotasi 2D:
+  \[
+  \mathbf{R}(\theta) =
+  \begin{bmatrix}
+  \cos\theta & -\sin\theta \\
+  \sin\theta & \cos\theta
+  \end{bmatrix}
+  \]
+  Dengan demikian, posisi relatif robot terhadap node entry
+  dipertahankan dan diterapkan pada node exit setelah disesuaikan
+  dengan orientasi \emph{region} tujuan.
+
+  \item \textbf{Orientasi lompatan.} Selain posisi, orientasi robot
+  juga disesuaikan dengan orientasi \emph{region} tujuan. Sudut
+  $\theta$ yang digunakan pada matriks rotasi $\mathbf{R}(\theta)$
+  di langkah sebelumnya berasal dari orientasi \emph{region} tujuan
+  yang disimpan dalam \emph{metadata} transisi. Orientasi ini
+  dinyatakan dalam bentuk \emph{quaternion}
+  $\mathbf{q}_{\text{region}}$. Orientasi robot setelah lompatan
+  dihitung dengan:
+  \[
+  \mathbf{q}_{\text{new}} = \mathbf{q}_{\text{region}} \cdot
+  \mathbf{q}_{\text{current}}
+  \]
+  Persamaan ini menerapkan orientasi \emph{region} tujuan terhadap
+  orientasi robot saat ini, sehingga robot memiliki arah yang
+  konsisten terhadap \emph{global frame of reference} setelah
+  berpindah region.
+
+  \item \textbf{Publikasi dan pembaruan state.} Pose baru
+  $(\mathbf{p}_{\text{jump}}, \mathbf{q}_{\text{new}})$
+  dipublikasikan ke \emph{topic} \texttt{/initialpose} sehingga
+  lokalisasi ICP memperbarui estimasi pose robot. Region switcher
+  juga memperbarui \emph{region} aktif dan mengirim sinyal
+  \texttt{/transition\_jumped} agar \emph{path router} dapat
+  melanjutkan navigasi ke tahap berikutnya.
+\end{enumerate}
+
+
 
 \subsection{Global Planner}
 
-Global planner menggunakan algoritma A* untuk menghitung potential field dari goal menuju start. Setiap sel dalam costmap diberi nilai potensial, yang semakin jauh dari goal, semakin tinggi nilainya. Path kemudian diekstrak dengan gradient descent dari start menuju goal, sebuah proses yang menurunkan nilai potensial.
+Global planner bertugas merencanakan jalur dari posisi robot menuju
+tujuan dalam skala luas menggunakan peta global. Algoritma yang
+digunakan adalah A* dengan \emph{wavefront expansion} pada
+\emph{potential field} yang dihitung dari \emph{costmap} global.
+Proses perencanaan dimulai dengan kalkulasi biaya traversal,
+dilanjutkan dengan ekspansi potensial, ekstraksi gradien, dan
+pembentukan jalur akhir.
 
+\subsubsection{Kalkulasi Cost}
 
-\subsubsection{Kalkukasi Cost}
+Kalkulasi \emph{cost} di \emph{global planner} adalah proses
+transformasi nilai \emph{costmap} global (0--255) menjadi
+\emph{effective traversal cost} yang digunakan dalam ekspansi
+\emph{wavefront} (A*):
 
-Kalkulasi cost di global planner adalah proses transformasi nilai costmap global (0–255) menjadi effective traversal cost yang digunakan dalam wavefront expansion (A*).
-\begin{equation}c_{\text{eff}} = \text{costmap}[n] \cdot f + c_{\text{neutral}}\end{equation}
+\begin{equation}
+c_{\text{eff}} = \text{costmap}[n] \cdot f + c_{\text{neutral}}
+\end{equation}
 
-\begin{equation}c_{\text{eff}} = \begin{cases} c_{\text{eff}} & \text{if } c_{\text{eff}} < c_{\text{lethal}} \\ c_{\text{lethal}} - 1 & \text{if } c_{\text{eff}} \geq c_{\text{lethal}} \\ c_{\text{lethal}} & \text{if } \text{costmap}[n] \geq c_{\text{lethal}} \text{dan tidak unknown} \end{cases}\end{equation}
+dengan batasan berikut:
 
-$f$ adalah cost factor dan $c_{\text{neutral}}$ adalah neutral cost. Jika hasilnya melebihi lethal cost (253), nilai di batasi ke lethal cost - 1 (252) agar tidak sama persis dengan nilai lethal, dan jika nilai costmap mentah sudah mencapai lethal threshold maka $c_{\text{eff}}$ langsung dikembalikan sebagai 253 yaitu obstacle yang tidak bisa dilalui.
+\begin{equation}
+c_{\text{eff}} = \begin{cases}
+c_{\text{eff}} & \text{if } c_{\text{eff}} < c_{\text{lethal}} \\
+c_{\text{lethal}} - 1 & \text{if } c_{\text{eff}} \geq c_{\text{lethal}} \\
+c_{\text{lethal}} & \text{if } \text{costmap}[n] \geq c_{\text{lethal}}
+\text{ dan tidak unknown}
+\end{cases}
+\end{equation}
+
+Parameter yang digunakan dalam kalkulasi \emph{cost} ditunjukkan pada
+Tabel~\ref{tab:cost_defaults}.
 
 \begin{table}[H]
 \centering
@@ -404,250 +730,407 @@ $c_{\text{lethal}}$  & 253 & \emph{Lethal cost} \\
 \end{tabular}
 \end{table}
 
-\subsubsection{Kalkukasi Potensial Kuadratik}
+\subsubsection{Kalkulasi Potensial Kuadratik}
 
-Kalkulasi potensial kuadratik adalah aproksimasi Euclidean wavefront yang lebih akurat. Diberikan dua neighbor terkecil dari arah horizontal dan vertikal:
+Kalkulasi potensial kuadratik adalah aproksimasi Euclidean wavefront
+yang lebih akurat. Diberikan dua neighbor terkecil dari arah horizontal
+dan vertikal:
 
-\begin{equation}t_c = \min(P_{\text{left}}, P_{\text{right}}), \quad t_a = \min(P_{\text{up}}, P_{\text{down}})\end{equation}
+\begin{equation}
+t_c = \min(P_{\text{left}}, P_{\text{right}}), \quad
+t_a = \min(P_{\text{up}}, P_{\text{down}})
+\end{equation}
 
 Selisih: $\Delta = |t_c - t_a|$ (jika $t_c < t_a$, tukar).
 
 Jika $\Delta \geq c_{\text{eff}}$:
 
-\begin{equation}P(n) = t_a + c_{\text{eff}}\end{equation}
+\begin{equation}
+P(n) = t_a + c_{\text{eff}}
+\end{equation}
 
 Jika $\Delta < c_{\text{eff}}$ (interpolasi kuadratik):
 
-\begin{equation}d = \frac{\Delta}{c_{\text{eff}}}\end{equation}
+\begin{equation}
+d = \frac{\Delta}{c_{\text{eff}}}
+\end{equation}
 
-\begin{equation}v = -0.2301 \cdot d^2 + 0.5307 \cdot d + 0.7040\end{equation}
+\begin{equation}
+v = -0.2301 \cdot d^2 + 0.5307 \cdot d + 0.7040
+\end{equation}
 
-\begin{equation}P(n) = t_a + c_{\text{eff}} \cdot v\end{equation}
+\begin{equation}
+P(n) = t_a + c_{\text{eff}} \cdot v
+\end{equation}
 
-Koefisien polinomial `-0.2301, 0.5307, 0.7040` adalah hasil least-squares fit dari fungsi $\sqrt{1 + d^2}$ (jarak Euclidean sebenarnya dari point source). Kurva ini mendekati:
+Koefisien polinomial tersebut adalah hasil \emph{least-squares fit}
+dari fungsi $\sqrt{1 + d^2}$ (jarak Euclidean sebenarnya dari
+\emph{point source}). Kurva ini mendekati:
 
-\begin{equation}v(d) \approx \sqrt{1 + d^2}\end{equation}
+\begin{equation}
+v(d) \approx \sqrt{1 + d^2}
+\end{equation}
 
 dengan error minimal.
 
-\subsubsection{A*}
+\subsubsection{Algoritma A*}
 
-menggunakan heuristic untuk memprioritaskan ekspansi ke arah goal:
+Setelah \emph{potential field} selesai dihitung, algoritma A*
+menelusuri \emph{grid} dari posisi robot menuju tujuan dengan
+memprioritaskan ekspansi ke arah \emph{goal}. Prioritas ekspansi
+setiap sel $n$ dihitung dengan menjumlahkan nilai potensial sel
+tersebut dengan estimasi jarak Manhattan ke tujuan:
 
-\begin{equation}\text{priority} = P(n) + \text{ManhattanDistance}(n, \text{goal}) \cdot c_{\text{neutral}}\end{equation}
+\begin{equation}
+\text{priority} = P(n) + \text{ManhattanDistance}(n, \text{goal})
+\cdot c_{\text{neutral}}
+\end{equation}
 
-\begin{equation}\text{ManhattanDistance}(x, y) = |x_{\text{goal}} - x| + |y_{\text{goal}} - y|\end{equation}
+\begin{equation}
+\text{ManhattanDistance}(x, y) = |x_{\text{goal}} - x|
++ |y_{\text{goal}} - y|
+\end{equation}
 
-kalkulasi potential linear (Manhattan):
+Heuristik ini membuat A* lebih cepat dari Dijkstra karena
+mengeksplorasi lebih sedikit sel, terutama ketika tujuan jauh.
+Bentuk ekspansi A* menyerupai elips yang condong ke arah awal.
 
-\begin{equation}P(n) = \min(P_{\text{left}}, P_{\text{right}}, P_{\text{up}}, P_{\text{down}}) + c_{\text{eff}}\end{equation}
+Untuk kalkulasi potensial linear (Manhattan):
 
+\begin{equation}
+P(n) = \min(P_{\text{left}}, P_{\text{right}}, P_{\text{up}},
+P_{\text{down}}) + c_{\text{eff}}
+\end{equation}
 
-Heuristic ini membuat A* lebih cepat dari Dijkstra karena mengeksplorasi lebih sedikit cell, terutama ketika goal jauh. A* berekspansi seperti ellips yang condong ke start
+\subsubsection{Pembersihan Endpoint}
 
-\subsubsection{Clear Endpoint}
-
-Setelah potential selesai, area 2×2 cell di sekitar goal di-clear:
-
-Ini memastikan gradient path bisa menemukan jalan ke goal area meskipun goal berada di obstacle.
+Setelah \emph{potential field} selesai, area 2 $\times$ 2 sel di
+sekitar tujuan dibersihkan. Langkah ini memastikan bahwa \emph{gradient
+path} dapat menemukan jalan menuju area tujuan meskipun tujuan berada
+tepat pada sel \emph{obstacle}. Tanpa pembersihan ini, gradien di
+sekitar tujuan akan terjebak pada nilai potensial yang tinggi.
 
 \subsubsection{Ekstraksi Gradient Path}
 
-Gradient path bertujuan menghasilkan path halus dengan interpolasi sub-sel. dengan step = 0.5 sel per langkah.
+Gradient path bertujuan menghasilkan path yang halus dengan interpolasi
+sub-sel. Proses ini menggunakan \emph{step} sebesar 0,5 sel per
+langkah. Komputasi gradien dilakukan dengan aproksimasi
+\emph{central difference}:
 
-Komputasi gradient sebagai berikut 
+\begin{equation}
+g_x = \frac{P(x-1, y) - P(x+1, y)}{2}
+\end{equation}
 
-Aproksimasi central difference:
-
-\begin{equation}g_x = \frac{P(x-1, y) - P(x+1, y)}{2}\end{equation}
-
-\begin{equation}g_y = \frac{P(x, y-1) - P(x, y+1)}{2}\end{equation}
+\begin{equation}
+g_y = \frac{P(x, y-1) - P(x, y+1)}{2}
+\end{equation}
 
 Normalisasi:
 
-\begin{equation}\hat{g}_x = \frac{g_x}{\sqrt{g_x^2 + g_y^2}}, \quad \hat{g}_y = \frac{g_y}{\sqrt{g_x^2 + g_y^2}}\end{equation}
+\begin{equation}
+\hat{g}_x = \frac{g_x}{\sqrt{g_x^2 + g_y^2}}, \quad
+\hat{g}_y = \frac{g_y}{\sqrt{g_x^2 + g_y^2}}
+\end{equation}
 
-Untuk sel yang berada di obstacle (potensial tinggi), gradient dihitung dari tetangga terdekat yang valid.
+Untuk sel yang berada di \emph{obstacle} (potensial tinggi), gradien
+dihitung dari tetangga terdekat yang valid.
 
-Perhitungan Path Step:
+Perhitungan \emph{path step}:
 
-\begin{equation}\text{step} = \frac{\text{pathStep}}{\sqrt{g_x(p)^2 + g_y(p)^2}}\end{equation}
+\begin{equation}
+\text{step} = \frac{\text{pathStep}}{\sqrt{g_x(p)^2 + g_y(p)^2}}
+\end{equation}
 
-\begin{equation}d_x \gets d_x + g_x(p) \cdot \text{step}, \quad d_y \gets d_y + g_y(p) \cdot \text{step}\end{equation}
+\begin{equation}
+d_x \gets d_x + g_x(p) \cdot \text{step}, \quad
+d_y \gets d_y + g_y(p) \cdot \text{step}
+\end{equation}
 
-Cell overflow: Ketika $|d_x| \geq 1.0$ atau $|d_y| \geq 1.0$, pindah ke cell tetangga:
+Ketika $|d_x| \geq 1.0$ atau $|d_y| \geq 1.0$, terjadi \emph{cell
+overflow} dan posisi berpindah ke sel tetangga.
 
-\subsubsection{Path Antar Region}
+\subsection{Path Router}
 
-Untuk memungkinkan global planner bekerja antar region, digunakan path router yang memodifikasi planner untuk memungkinkan navigasi multi-region melalui transisi. Jika goal berada di area yang berbeda dari posisi robot saat ini, node ini menyusun plan bertahap melalui serangkaian poin transisi.
+Path router adalah komponen yang memungkinkan \emph{global planner}
+bekerja pada navigasi multi-\emph{region}. Ketika tujuan berada di
+\emph{region} yang berbeda dari posisi robot saat ini, \emph{path
+router} menyusun rencana perjalanan bertahap melalui \emph{node}
+transisi pada \emph{topological graph}.
 
-Daripada mengirim goal langsung yang mungkin tidak bisa dijangkau karena area berbeda secara topologi, path router melakukan langkah-langkah berikut:
+Pada graph $G = (V, E)$ (Subbab~\ref{sec:topologi_graph}), perjalanan
+dari suatu \emph{node} awal ke \emph{node} tujuan dilakukan dengan
+menelusuri \emph{edge} secara berurutan. Sebagai contoh, perjalanan
+dari $v_1$ (Entry$_{AB}$) ke $v_4$ (Exit$_{BC}$) dilalui melalui
+$v_2$ dan $v_3$:
+
+\[
+P = (v_1, v_2, v_3, v_4)
+\]
+
+Setiap \emph{edge} inter-region $(v_1, v_2)$ dan $(v_3, v_4)$
+memerlukan mekanisme lompatan yang ditangani oleh \emph{region
+switcher}.
+
+Langkah-langkah yang dilakukan \emph{path router} adalah:
 \begin{enumerate}
-\item Menentukan rute area: region A → region B → region C → ...
-\item Mengirim goal bertahap ke setiap transition point
-\item Menunggu robot melompat (costmap jumper) sebelum melanjutkan ke step berikutnya
-\item Mengirim final goal hanya setelah semua transisi selesai
+  \item \textbf{Menentukan rute.} Berdasarkan posisi robot dan
+  tujuan, \emph{path router} menentukan urutan \emph{region} yang
+  harus dilalui (misal A $\to$ B $\to$ C) dan \emph{node} transisi
+  yang relevan.
+  \item \textbf{Mengirim goal bertahap.} Goal dikirim ke setiap
+  \emph{transition point} secara berurutan, dimulai dari \emph{node}
+  transisi pertama.
+  \item \textbf{Menunggu lompatan.} Setelah robot mencapai \emph{node}
+  entry dan \emph{region switcher} melakukan lompatan, \emph{path
+  router} menunggu sinyal \texttt{/transition\_jumped} sebelum
+  melanjutkan.
+  \item \textbf{Mengirim final goal.} Setelah semua transisi selesai,
+  \emph{path router} mengirim tujuan akhir ke \emph{global planner}.
 \end{enumerate}
 
-Selama proses berjalan, path router melakukan pelacakan posisi robot dan mengupdate region sekarang berdasarkan posisi robot dari ICP:
+Selama proses berjalan, \emph{path router} terus melacak posisi robot
+dan memperbarui \emph{region} aktif berdasarkan data dari lokalisasi
+ICP.
 
 \subsection{Local Planner DWA}
 
-Algoritma \emph{Dynamic Window Approach} (DWA) bekerja dalam lima langkah
-utama. Pertama, algoritma mengambil sampel semua kemungkinan kecepatan
-$(v_x, v_y, \omega)$ yang dapat dicapai dalam satu siklus kendali berdasarkan
-\emph{dynamic window}. Kedua, setiap sampel kecepatan disimulasikan menjadi
-sebuah \emph{trajectory} menggunakan model kinematik robot. Ketiga, setiap
-\emph{trajectory} diberi skor berdasarkan empat kriteria: jarak terhadap
-\emph{global plan}, jarak terhadap \emph{goal}, jarak terhadap \emph{obstacle},
-serta pencegahan osilasi. Keempat, \emph{trajectory} dengan skor terbaik
-dipilih. Kelima, perintah kecepatan dari \emph{trajectory} terbaik tersebut
-dikirim ke robot.
+\emph{Dynamic Window Approach} (DWA) adalah algoritma \emph{local
+planner} yang merencanakan pergerakan robot dalam jangka pendek.
+Pada setiap siklus kontrol, DWA mengambil sampel kecepatan yang
+mungkin dicapai dalam batas akselerasi robot, mensimulasikan
+lintasan yang dihasilkan, dan memilih lintasan dengan skor terbaik.
+Algoritma ini bekerja dalam lima langkah utama: (1) sampling
+kecepatan dalam \emph{dynamic window}, (2) simulasi lintasan
+menggunakan model kinematik, (3) penilaian lintasan berdasarkan
+kriteria jarak dan keselarasan, (4) pemilihan lintasan terbaik,
+dan (5) eksekusi perintah kecepatan.
 
-DWA Velocity window dibatasi oleh apa yang dapat dicapai dalam satu siklus kontrol:
-\begin{equation}v_{\text{min}} = \max\left(v_{\text{min\_limit}},\; v_{\text{current}} - \dot{v}_{\text{max}} \cdot \Delta t\right)\end{equation}
-\begin{equation}v_{\text{max}} = \min\left(v_{\text{max\_limit}},\; v_{\text{current}} + \dot{v}_{\text{max}} \cdot \Delta t\right)\end{equation}
+\subsubsection{Velocity Window}
 
-dimana $\Delta t$ adalah waktu satu siklus kontrol.
+\emph{Velocity window} membatasi kecepatan yang dapat dicapai robot
+dalam satu siklus kontrol berdasarkan akselerasi maksimum. Batas
+kecepatan minimum dan maksimum untuk setiap sumbu dihitung dengan:
 
+\begin{equation}
+v_{\text{min}} = \max\left(v_{\text{min\_limit}},\;
+v_{\text{current}} - \dot{v}_{\text{max}} \cdot \Delta t\right)
+\end{equation}
+
+\begin{equation}
+v_{\text{max}} = \min\left(v_{\text{max\_limit}},\;
+v_{\text{current}} + \dot{v}_{\text{max}} \cdot \Delta t\right)
+\end{equation}
+
+dengan $\Delta t$ adalah durasi satu siklus kontrol. Prinsip yang
+sama diterapkan pada kecepatan rotasi $\omega$.
 
 \subsubsection{Velocity Sampling}
 
-Untuk setiap dimensi $(v_x, v_y, \omega)$, rentang dibagi menjadi sample merata:
+Setelah batas kecepatan ditentukan, rentang kecepatan pada setiap
+dimensi $(v_x, v_y, \omega)$ dibagi menjadi sampel yang merata:
 
-\begin{equation}\Delta v_x = \frac{v_{x,\text{max}} - v_{x,\text{min}}}{N_{v_x} - 1}\end{equation}
+\begin{equation}
+\Delta v_x = \frac{v_{x,\text{max}} - v_{x,\text{min}}}{N_{v_x} - 1}
+\end{equation}
 
-\begin{equation}\Delta v_y = \frac{v_{y,\text{max}} - v_{y,\text{min}}}{N_{v_y} - 1}\end{equation}
+\begin{equation}
+\Delta v_y = \frac{v_{y,\text{max}} - v_{y,\text{min}}}{N_{v_y} - 1}
+\end{equation}
 
-\begin{equation}\Delta \omega = \frac{\omega_{\text{max}} - \omega_{\text{min}}}{N_{\omega} - 1}\end{equation}
+\begin{equation}
+\Delta \omega = \frac{\omega_{\text{max}} - \omega_{\text{min}}}{N_{\omega} - 1}
+\end{equation}
 
-Total trajectory yang di-sample:
+Total jumlah lintasan yang dievaluasi dalam satu siklus adalah:
 
-\begin{equation}N_{\text{total}} = N_{v_x} \times N_{v_y} \times N_{\omega}\end{equation}
+\begin{equation}
+N_{\text{total}} = N_{v_x} \times N_{v_y} \times N_{\omega}
+\end{equation}
 
-Konfigurasi dari yaml: $N_{v_x} = 6$, $N_{v_y} = 6$, $N_{\omega} = 30$ → total 1080 trajectories per evaluasi.
+Konfigurasi yang digunakan adalah $N_{v_x} = 6$, $N_{v_y} = 6$,
+$N_{\omega} = 30$, sehingga total 1080 lintasan per evaluasi.
 
 \subsubsection{Model Kinematik}
 
-Untuk setiap sample kecepatan $(v_x, v_y, \omega)$, trajectory disimulasikan menggunakan model kinematik diferensial:
+Setiap sampel kecepatan $(v_x, v_y, \omega)$ disimulasikan menjadi
+lintasan menggunakan model kinematik \emph{differential drive}:
 
-\begin{equation}x_{t+1} = x_t + \left(v_x \cos\theta_t + v_y \cos\left(\frac{\pi}{2} + \theta_t\right)\right) \cdot \Delta t\end{equation}
+\begin{equation}
+x_{t+1} = x_t + \left(v_x \cos\theta_t + v_y \cos\left(\frac{\pi}{2}
++ \theta_t\right)\right) \cdot \Delta t
+\end{equation}
 
-\begin{equation}y_{t+1} = y_t + \left(v_x \sin\theta_t + v_y \sin\left(\frac{\pi}{2} + \theta_t\right)\right) \cdot \Delta t\end{equation}
+\begin{equation}
+y_{t+1} = y_t + \left(v_x \sin\theta_t + v_y \sin\left(\frac{\pi}{2}
++ \theta_t\right)\right) \cdot \Delta t
+\end{equation}
 
-\begin{equation}\theta_{t+1} = \theta_t + \omega \cdot \Delta t\end{equation}
+\begin{equation}
+\theta_{t+1} = \theta_t + \omega \cdot \Delta t
+\end{equation}
 
-Jumlah langkah simulasi ditentukan oleh granularity:
+Jumlah langkah simulasi ditentukan oleh \emph{granularity}:
 
-\begin{equation}N_{\text{steps}} = \frac{T_{\text{sim}}}{\Delta t}\end{equation}
+\begin{equation}
+N_{\text{steps}} = \frac{T_{\text{sim}}}{\Delta t}
+\end{equation}
 
-\begin{equation}\Delta t = \min\left(\frac{\text{sim\_granularity}}{|v|},\; \frac{\text{angular\_sim\_granularity}}{|\omega|}\right)\end{equation}
+\begin{equation}
+\Delta t = \min\left(\frac{\text{sim\_granularity}}{|v|},\;
+\frac{\text{angular\_sim\_granularity}}{|\omega|}\right)
+\end{equation}
 
-\subsubsection{Penilaian Trayektori}
+\subsubsection{Penilaian Lintasan}
 
-\begin{equation}C_{\text{total}} = C_{\text{osc}} + w_{\text{obs}} \cdot C_{\text{obs}} + w_{\text{gf}} \cdot C_{\text{gf}} + w_{\text{align}} \cdot C_{\text{align}} + w_{\text{path}} \cdot C_{\text{path}} + w_{\text{goal}} \cdot C_{\text{goal}} + w_{\text{twirl}} \cdot C_{\text{twirl}}\end{equation}
+Setelah lintasan disimulasikan, setiap lintasan diberi skor
+berdasarkan beberapa kriteria. Skor total dihitung dengan
+menjumlahkan kontribusi dari masing-masing \emph{critic}:
 
-% critics[0] = oscillation_costs_      // Mencegah osilasi
-% critics[1] = obstacle_costs_         // Menghindari obstacle
-% critics[2] = goal_front_costs_       // Hidung robot mengarah ke goal
-% critics[3] = alignment_costs_        // Hidung robot sejajar path
-% critics[4] = path_costs_             // Robot mengikuti path
-% critics[5] = goal_costs_             // Robot menuju goal
-% critics[6] = twirling_costs_         // Penalti rotasi berlebih
+\begin{align}
+C_{\text{total}} = &\; C_{\text{osc}} \notag \\
+&+ w_{\text{obs}} \cdot C_{\text{obs}}
++ w_{\text{gf}} \cdot C_{\text{gf}}
++ w_{\text{align}} \cdot C_{\text{align}} \notag \\
+&+ w_{\text{path}} \cdot C_{\text{path}}
++ w_{\text{goal}} \cdot C_{\text{goal}}
++ w_{\text{twirl}} \cdot C_{\text{twirl}}
+\end{align}
 
-\begin{equation}C_{\text{obs}} = \begin{cases} \sum_{k=1}^{N} C_k & \text{if sum\_scores} \\ \max_k C_k & \text{otherwise} \end{cases}\end{equation}
+Terdapat tujuh \emph{critic} yang digunakan, masing-masing dengan
+fungsi penilaian yang berbeda:
 
-Dilakukan juga Collision Checking. Setiap titik sepanjang trajectory, footprint robot di-rasterize ke costmap:
+\begin{table}[H]
+\centering
+\caption{Daftar kriteria penilaian lintasan}
+\label{tab:dwa_critics}
+\begin{tabular}{clc}
+\toprule
+\textbf{No} & \textbf{Critic} & \textbf{Fungsi} \\
+\midrule
+0 & Oscillation costs  & Mencegah osilasi gerak \\
+1 & Obstacle costs     & Menghindari tabrakan dengan rintangan \\
+2 & Goal front costs   & Menilai apakah hidung robot mengarah ke tujuan \\
+3 & Alignment costs    & Menilai apakah hidung robot sejajar lintasan \\
+4 & Path costs         & Menilai sejauh mana robot mengikuti lintasan global \\
+5 & Goal costs         & Menilai jarak robot ke tujuan \\
+6 & Twirling costs     & Memberi penalti pada rotasi berlebihan \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-% ```cpp
-% footprintCost(x, y, theta, scaled_footprint)
-% ```
+Obstacle cost $C_{\text{obs}}$ dihitung berdasarkan sel-sel
+\emph{costmap} yang dilintasi oleh \emph{footprint} robot. Untuk
+setiap titik sepanjang lintasan, \emph{footprint} robot di-
+\emph{rasterize} ke grid \emph{costmap} menggunakan algoritma
+Bresenham. Jika terdapat sel dengan nilai \texttt{LETHAL\_OBSTACLE}
+(254), lintasan dianggap tidak valid. Nilai $C_{\text{obs}}$
+dihitung dengan:
 
-Menggunakan Bresenham line drawing untuk menelusuri setiap tepi footprint polygon di grid costmap.
+\begin{equation}
+C_{\text{obs}} = \begin{cases}
+\displaystyle\sum_{k=1}^{N} C_k & \text{jika mode penjumlahan} \\[6pt]
+\max_k C_k & \text{sebaliknya}
+\end{cases}
+\end{equation}
 
-Semua nilai di agregasi menjadi satu skor total untuk trajectory tersebut. Trajectory dengan skor terendah dipilih sebagai perintah kecepatan yang akan dieksekusi.
+\subsubsection{Kalkulasi Biaya dengan MapGrid}
 
-Mode sum scores:
+Penilaian jarak terhadap lintasan global dan tujuan menggunakan
+struktur data \texttt{MapGrid} yang menyebarkan nilai jarak dari
+sel-sel target menggunakan BFS. Proses propagasi dilakukan dengan
+langkah-langkah berikut:
 
-\begin{equation}C_{\text{obs}} = \begin{cases} \sum_{k=1}^{N} C_k & \text{if sum\_scores} \\ \max_k C_k & \text{otherwise} \end{cases}\end{equation}
+\begin{enumerate}
+  \item Setiap sel diinisialisasi dengan nilai \emph{obstacle cost}.
+  \item Sel target (\emph{waypoint} lintasan global atau titik
+  tujuan) diberi jarak 0 sebagai \emph{seed}.
+  \item BFS menyebar ke setiap tetangga: sel yang bukan \emph{obstacle}
+  menerima jarak $d_{\text{parent}} + 1$.
+  \item Propagasi berhenti jika bertemu \texttt{LETHAL\_OBSTACLE} atau
+  \texttt{NO\_INFORMATION}.
+\end{enumerate}
 
-% **Collision detection**: Jika ada footprint cell dengan `LETHAL_OBSTACLE` (254), return `-6.0`. Jika off-map, return `-7.0`.
+Hasil BFS berupa peta jarak:
 
-\subsubsection{kalkulasi Cost}
+\begin{equation}
+d_{\text{cell}} = \text{jumlah langkah BFS dari sel target terdekat}
+\end{equation}
 
-Tujuan menilai trajectory berdasarkan jarak ke global plan atau goal
+Untuk kriteria yang memerlukan penilaian arah (\emph{goal front} dan
+\emph{alignment}), titik penilaian digeser ke depan sejauh
+$d_{\text{forward}}$ menggunakan \emph{forward point shift}:
 
-Wavefront Propagation
+\begin{equation}
+p_{\text{score}} = p_{\text{robot}} + d_{\text{forward}} \cdot
+\begin{pmatrix} \cos\theta \\ \sin\theta \end{pmatrix}
+\end{equation}
 
-% `MapGrid` menggunakan BFS untuk menyebarkan nilai jarak dari target cells:
+\textbf{Path costs} ($C_{\text{path}}$) menilai jarak lintasan yang
+disimulasikan terhadap lintasan global. BFS dilakukan dengan semua
+\emph{waypoint} dalam jangkauan sebagai \emph{seed}. Bobot:
 
-% ```
-% 1. Reset semua cell ke obstacleCosts()
-% 2. Set target cells (path waypoints atau goal point) → distance = 0
-% 3. BFS: setiap tetangga yang bukan obstacle mendapat distance = parent distance + 1
-% 4. Berhenti di LETHAL OBSTACLE, INSCRIBED INFLATED OBSTACLE, NO INFORMATION
-```
+\begin{equation}
+w_{\text{path}} = \text{resolution} \cdot
+\text{path\_distance\_bias}
+\end{equation}
 
-\begin{equation}d_{\text{cell}} = \text{number of BFS steps from nearest target cell}\end{equation}
+Goal costs ($C_{\text{goal}}$) menilai jarak ke titik
+tujuan akhir. BFS hanya menggunakan titik tujuan yang terjangkau
+sebagai \emph{seed}. Bobot:
 
-Scoring Mode
+\begin{equation}
+w_{\text{goal}} = \text{resolution} \cdot
+\text{goal\_distance\_bias}
+\end{equation}
 
-Untuk setiap titik pada trajectory, nilai `target dist` dari MapGrid dibaca.
+Goal front costs ($C_{\text{gf}}$) menilai apakah bagian
+depan robot mengarah ke tujuan. Menggunakan \emph{forward point
+shift}:
 
-Forward Point Shift
+\begin{equation}
+p_{\text{hidung}} = p_{\text{robot}} + d_{\text{forward}} \cdot
+\hat{v}
+\end{equation}
 
-% Untuk `goal_front_costs_` dan `alignment_costs_`, titik scoring digeser ke depan sejauh `forward_point_distance_`:
+\begin{equation}
+C_{\text{gf}} = \text{target\_dist}(p_{\text{hidung}})
+\end{equation}
 
-\begin{equation}p_{\text{score}} = p_{\text{robot}} + d_{\text{forward}} \cdot \begin{pmatrix} \cos\theta \\ \sin\theta \end{pmatrix}\end{equation}
+Alignment costs ($C_{\text{align}}$) menilai apakah bagian
+depan robot sejajar dengan lintasan global. Sama dengan \emph{path
+costs} tetapi dengan \emph{forward point shift}. Dinonaktifkan jika
+robot sudah dekat dengan tujuan:
 
-Path Costs ($C_{\text{path}}$)
+\begin{equation}
+\text{dinonaktifkan jika } \|p_{\text{robot}} - p_{\text{goal}}\|
+< d_{\text{forward}} \cdot \text{cheat\_factor}
+\end{equation}
 
-% ```cpp
-% path_costs_.setTargetPoses(global_plan)
-% // Semua waypoints dalam local costmap menjadi seed BFS
-% ```
+\subsubsection{Seleksi Lintasan}
 
-Weight: $w_{\text{path}} = \text{resolution} \cdot \text{path\_distance\_bias}$
+Setelah semua lintasan dinilai, lintasan dengan skor total terendah
+dipilih sebagai perintah kecepatan yang akan dikirim ke robot.
+Proses seleksi dilakukan sebagai berikut:
 
-Goal Costs ($C_{\text{goal}}$)
+\begin{algorithm}[H]
+\caption{Seleksi lintasan terbaik}
+\label{alg:trajectory_selection}
+\begin{algorithmic}[1]
+\State Siapkan semua \emph{critics} melalui \texttt{MapGridCostFunction::prepare()}
+\For{setiap sampel kecepatan dari generator}
+    \State Hasilkan lintasan: $\text{Trajectory}(pos, vel, sample)$
+    \State Hitung skor: $\text{scoreTrajectory}(traj, best\_cost)$
+    \If{$cost \geq 0$ dan $cost < best\_cost$}
+        \State Simpan sebagai lintasan terbaik
+    \EndIf
+\EndFor
+\If{tidak ada lintasan valid}
+    \State Gunakan kecepatan nol (zero velocity)
+\EndIf
+\end{algorithmic}
+\end{algorithm}
 
-% ```cpp
-% goal_costs_.setLocalGoal(global_plan)
-% // Hanya titik terakhir yang reachable menjadi seed BFS
-% ```
+\textbf{Early termination}: Jika total cost sudah melebihi
+\texttt{best\_cost} saat menjumlahkan \emph{critics}, evaluasi
+lintasan dihentikan lebih awal untuk menghemat komputasi.
 
-Weight: $w_{\text{goal}} = \text{resolution} \cdot \text{goal\_distance\_bias}$
-
-Goal Front Costs ($C_{\text{gf}}$)
-
-Menggunakan forward point shift. Menilai apakah **hidung robot** mengarah ke goal.
-
-\begin{equation}p_{\text{hidung}} = p_{\text{robot}} + d_{\text{forward}} \cdot \hat{v}\end{equation}
-
-\begin{equation}C_{\text{gf}} = \text{target\_dist}(p_{\text{hidung}})\end{equation}
-
-% Weight: sama dengan goal costs, tetapi di-nol-kan jika `forward_point_distance <= 0`.
-
-Alignment Costs ($C_{\text{align}}$)
-
-Sama dengan path costs, tetapi dengan forward point shift. Menilai apakah hidung robot sejajar dengan path.
-
-Dinonaktifkan jika robot sudah dekat dengan goal:
-
-\begin{equation*}\text{disabled if } \|p_{\text{robot}} - p_{\text{goal}}\| < d_{\text{forward}} \cdot \text{cheat\_factor}\end{equation*}
-
-Seleksi Trajectory terbaik
-
-% File: `simple_scored_sampling_planner.cpp:81`
-
-\begin{lstlisting}
-1. Prepare semua critics:
-     - MapGridCostFunction::prepare() -> wavefront BFS propagation
-2. Iterate semua trajectory dari generator:
-     a. GenerateTrajectory(pos, vel, sample_vel, &traj)
-     b. scoreTrajectory(traj, best_cost)
-     c. Jika cost >= 0 dan cost < best_cost -> update best trajectory
-3. Jika tidak ada trajectory valid -> gunakan zero velocity
-\end{lstlisting}
-
-\textbf{Early termination}: Jika total cost sudah melebihi \texttt{best\_cost} saat menjumlahkan critics, evaluasi trajectory dihentikan lebih awal.

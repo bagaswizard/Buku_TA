@@ -799,58 +799,54 @@ def add_icon_goal(slide, left, top, width, height, title, desc):
 
 
 def slide_literature(prs):
-    """Slide 7: Tinjauan Pustaka (Konsep Dasar)."""
+    """Slide 7: Dasar Teori."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
-    add_text_box(slide, MARGIN, Inches(0.35), Inches(6), Inches(0.55),
-                 "TINJAUAN PUSTAKA", font_name=FONT_TITLE, font_size=Pt(30),
+    add_text_box(slide, MARGIN, Inches(0.35), Inches(5), Inches(0.55),
+                 "DASAR TEORI", font_name=FONT_TITLE, font_size=Pt(30),
                  color=HEADING, bold=True)
     add_divider(slide, MARGIN, Inches(0.85), Inches(2.2))
 
-    concepts = [
-        ("Layered Costmap", "Grid 2D bertingkat (0–255). Layers: static map, obstacle, inflation. "
-         "Setiap layer menyimpan informasi lingkungan spesifik. (macenski 2023)"),
-        ("ICP Localization", "Scan matching berbasis point cloud. Iterative minimization MSD antara "
-         "data sensor dan fixed map. Prekomputasi KNN untuk lookup O(1)."),
-        ("A* Path Planning", "BFS dengan fungsi heuristik f(n)=g(n)+h(n). Open/closed list. "
-         "Kualitas path bergantung pada kualitas fungsi heuristik."),
-        ("DWA Local Planner", "Dynamic Window Approach. Sampling velocity → simulasi kinematik → "
-         "scoring trajectory → pilih terbaik. Mampu menghindari obstacle tidak diketahui."),
+    # 5 subsection titles from bab/2-tinjauan-pustaka.tex
+    topics = [
+        "Occupancy Grid",
+        "Layered Costmap",
+        "Lokalisasi Iterative Closest Point (ICP)",
+        "Path Planning A*",
+        "Path Tracking",
     ]
 
-    card_w = Inches(5.6)
-    card_h = Inches(2.0)
-    positions = [
-        (MARGIN, Inches(1.15)),
-        (MARGIN + card_w + Inches(0.3), Inches(1.15)),
-        (MARGIN, Inches(3.4)),
-        (MARGIN + card_w + Inches(0.3), Inches(3.4)),
-    ]
+    card_w = Inches(5.5)
+    card_h = Inches(1.1)
+    gap_x = Inches(0.4)
+    gap_y = Inches(0.25)
+    start_x = MARGIN
+    start_y = Inches(1.2)
+    cols = 2
 
-    colors = [PRIMARY, SECONDARY, RGBColor(0x1A, 0x6B, 0x3C), ORANGE]
+    colors = [PRIMARY, PRIMARY, SECONDARY, SECONDARY, ORANGE]
 
-    for (x, y), (title, desc), color in zip(positions, concepts, colors):
-        card = add_rect(slide, x, y, card_w, card_h, fill_color=BOX_FILL, corner_radius=Cm(0.2))
-        # Top accent bar
-        add_rect(slide, x, y, card_w, Pt(4), fill_color=color)
-        add_text_box(slide, x + Inches(0.2), y + Inches(0.15), card_w - Inches(0.4), Inches(0.35),
-                     title, font_name=FONT_TITLE, font_size=Pt(15), color=HEADING, bold=True)
-        add_text_box(slide, x + Inches(0.2), y + Inches(0.55), card_w - Inches(0.4),
-                     card_h - Inches(0.75),
-                     desc, font_size=Pt(11), color=BODY, line_spacing=1.4)
+    for i, topic in enumerate(topics):
+        row = i // cols
+        col = i % cols
+        x = start_x + col * (card_w + gap_x)
+        y = start_y + row * (card_h + gap_y)
 
-    # State of the art row
-    add_text_box(slide, MARGIN, Inches(5.55), Inches(11.5), Inches(0.3),
-                 "State of the Art — Navigasi Antar Lantai",
-                 font_name=FONT_TITLE, font_size=Pt(13), color=HEADING, bold=True)
+        add_rect(slide, x, y, card_w, card_h,
+                 fill_color=BOX_FILL, corner_radius=Cm(0.15))
+        add_rect(slide, x, y, Pt(5), card_h, fill_color=colors[i])
 
-    sota = ("Hu 2022: Adaptive slope navigation dengan multi-layer costmap · "
-            "Kim 2024: Indoor delivery robot multi-floor dengan integrated nav map · "
-            "Palacin 2023: Inter-floor navigation menggunakan elevator + ICP · "
-            "Jung 2024: A* dengan realistic cost functions (elevator vs stairs)")
-    add_text_box(slide, MARGIN, Inches(5.9), Inches(11.5), Inches(0.8),
-                 sota, font_size=Pt(10), color=BODY, line_spacing=1.4)
+        # Number
+        add_text_box(slide, x + Inches(0.15), y + Inches(0.12),
+                     Inches(0.6), Inches(0.45),
+                     f"{i+1:02d}", font_name=FONT_TITLE, font_size=Pt(24),
+                     color=colors[i], bold=True)
+        # Title
+        add_text_box(slide, x + Inches(0.8), y + Inches(0.12),
+                     card_w - Inches(1.0), Inches(0.85),
+                     topic, font_name=FONT_TITLE, font_size=Pt(16),
+                     color=HEADING, bold=True)
 
     add_slide_number(slide, 7)
 
@@ -1101,93 +1097,351 @@ def slide_map_processing(prs):
     add_slide_number(slide, 11)
 
 
-def slide_costmap_structure(prs):
-    """Slide 12: Struktur Layered Costmap."""
+def slide_costmap_overview(prs):
+    """Slide 12: Costmap — Gambaran Umum."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
     add_text_box(slide, MARGIN, Inches(0.35), Inches(7), Inches(0.55),
-                 "STRUKTUR LAYERED COSTMAP", font_name=FONT_TITLE, font_size=Pt(28),
+                 "COSTMAP \u2014 REPRESENTASI BIAYA NAVIGASI", font_name=FONT_TITLE, font_size=Pt(26),
                  color=HEADING, bold=True)
     add_divider(slide, MARGIN, Inches(0.85), Inches(2.5))
 
-    # Three layer cards stacked vertically on the left
-    layers = [
-        ("GLOBAL COSTMAP", "Static layer (obstacle tetap) + Inflation layer",
-         PRIMARY, "Cost Scaling Factor (CSF) mempengaruhi\ngradient biaya di sekitar obstacle"),
-        ("LOCAL COSTMAP", "Obstacle layer (LiDAR real-time) + Inflation layer",
-         SECONDARY, "Diperbarui secara dinamis dari\ndata scan LiDAR"),
-        ("TRANSITION COSTMAP", "Menyimpan informasi koneksi antar region",
-         ORANGE, "Memungkinkan robot berpindah\nregion secara mulus"),
+    # Left: definition + layer composition table
+    add_text_box(slide, MARGIN, Inches(1.1), Inches(6.5), Inches(0.8),
+                 "Costmap adalah grid 2D yang menyimpan informasi biaya navigasi. "
+                 "Nilai rendah menandakan area aman, nilai tinggi menandakan area "
+                 "berbahaya atau terlarang. Sistem ini membagi costmap menjadi "
+                 "tiga lapisan dengan fungsi berbeda:",
+                 font_size=Pt(11), color=BODY, line_spacing=1.35)
+
+    # Layer composition table as cards
+    layers_info = [
+        ("GLOBAL COSTMAP", "Static Layer + Inflation Layer", PRIMARY,
+         "Perencanaan path skala luas dari peta tetap"),
+        ("LOCAL COSTMAP", "Obstacle Layer + Inflation Layer", SECONDARY,
+         "Navigasi jangka pendek, real-time dari LiDAR"),
+        ("TRANSITION COSTMAP", "Static Layer + Transition Layer", ORANGE,
+         "Perpindahan antar region, zona transisi"),
     ]
 
-    layer_y = Inches(1.1)
-    layer_h = Inches(1.05)
-    layer_w = Inches(5.8)
-
-    for title, desc, color, note in layers:
-        card = add_rect(slide, MARGIN, layer_y, layer_w, layer_h,
-                        fill_color=BOX_FILL, corner_radius=Cm(0.15))
-        add_rect(slide, MARGIN, layer_y, Pt(5), layer_h, fill_color=color)
-        add_text_box(slide, MARGIN + Inches(0.2), layer_y + Inches(0.08),
-                     Inches(3.5), Inches(0.3),
-                     title, font_name=FONT_TITLE, font_size=Pt(14),
+    ly = Inches(2.0)
+    for title, comp, color, func in layers_info:
+        add_rect(slide, MARGIN, ly, Inches(6.5), Inches(0.75),
+                 fill_color=BOX_FILL, corner_radius=Cm(0.10))
+        add_rect(slide, MARGIN, ly, Pt(5), Inches(0.75), fill_color=color)
+        add_text_box(slide, MARGIN + Inches(0.2), ly + Inches(0.05),
+                     Inches(2.5), Inches(0.3),
+                     title, font_name=FONT_TITLE, font_size=Pt(12),
                      color=color, bold=True)
-        add_text_box(slide, MARGIN + Inches(0.2), layer_y + Inches(0.38),
-                     Inches(3.5), Inches(0.25),
-                     desc, font_size=Pt(11), color=BODY)
-        add_text_box(slide, MARGIN + Inches(3.8), layer_y + Inches(0.08),
-                     Inches(1.8), Inches(0.9),
-                     note, font_size=Pt(9), color=SUBTLE_TEXT,
-                     italic=True, line_spacing=1.3)
-        layer_y += layer_h + Inches(0.15)
+        add_text_box(slide, MARGIN + Inches(2.8), ly + Inches(0.05),
+                     Inches(3.5), Inches(0.3),
+                     comp, font_size=Pt(10), color=HEADING, bold=True)
+        add_text_box(slide, MARGIN + Inches(0.2), ly + Inches(0.38),
+                     Inches(6.1), Inches(0.3),
+                     func, font_size=Pt(9), color=SUBTLE_TEXT)
+        ly += Inches(0.85)
 
-    # Right side: Inflation formula and costmap values
-    right_x = Inches(7.2)
+    # Right side: costmap constants table
+    right_x = Inches(7.5)
+    add_rect(slide, right_x, Inches(1.1), Inches(5.3), Inches(5.2),
+             fill_color=BOX_FILL, corner_radius=Cm(0.15))
+    add_text_box(slide, right_x + Inches(0.2), Inches(1.15), Inches(4.9), Inches(0.3),
+                 "Nilai Konstanta Costmap", font_name=FONT_TITLE,
+                 font_size=Pt(14), color=HEADING, bold=True)
 
-    # Inflation formula box
-    formula_box = add_rect(slide, right_x, Inches(1.1), Inches(5.5), Inches(1.3),
-                           fill_color=RGBColor(0xFD, 0xF2, 0xE3), corner_radius=Cm(0.15))
-    add_text_box(slide, right_x + Inches(0.2), Inches(1.15), Inches(5.1), Inches(0.25),
-                 "Fungsi Inflasi", font_name=FONT_TITLE, font_size=Pt(13),
-                 color=ORANGE, bold=True)
-    add_text_box(slide, right_x + Inches(0.2), Inches(1.45), Inches(5.1), Inches(0.7),
-                 "C(d) = 253 · e^(-α · (d − r_inscribed))   untuk d ≤ R\n"
-                 "C(d) = 0                                            untuk d > R\n\n"
-                 "Di mana d = jarak dari obstacle, R = radius inflasi",
-                 font_size=Pt(12), color=BODY, line_spacing=1.4)
-
-    # Costmap values table
-    vals_box = add_rect(slide, right_x, Inches(2.65), Inches(5.5), Inches(2.0),
-                        fill_color=BOX_FILL, corner_radius=Cm(0.15))
-    add_text_box(slide, right_x + Inches(0.2), Inches(2.7), Inches(5.1), Inches(0.25),
-                 "Nilai Sel Costmap (Occupancy Grid)", font_name=FONT_TITLE,
-                 font_size=Pt(13), color=HEADING, bold=True)
-
-    values = [
-        ("FREE_SPACE", "0", "Area bebas, dapat dilalui"),
-        ("TRANSITION_CELL", "1–5", "Zona transisi antar region"),
-        ("INFLATED_OBSTACLE", "6–252", "Area inflasi di sekitar obstacle"),
-        ("LETHAL_OBSTACLE", "254", "Obstacle tidak dapat dilalui"),
-        ("NO_INFORMATION", "255", "Area belum diketahui"),
+    consts = [
+        ("NO_INFORMATION", "255", "Area tidak diketahui"),
+        ("LETHAL_OBSTACLE", "254", "Obstacle mematikan"),
+        ("INSCRIBED_INFLATED", "253", "Batas inflasi maksimal"),
+        ("INFLATED_OBSTACLE", "1\u2013252", "Area inflasi obstacle"),
+        ("TRANSITION_CELL", "1\u20135", "Zona transisi region"),
+        ("FREE_SPACE", "0", "Ruang bebas"),
     ]
 
-    vy = Inches(3.05)
-    for name, val, desc in values:
-        add_text_box(slide, right_x + Inches(0.2), vy, Inches(1.8), Inches(0.2),
-                     name, font_size=Pt(10), color=HEADING, bold=True)
-        add_text_box(slide, right_x + Inches(2.1), vy, Inches(0.8), Inches(0.2),
-                     val, font_size=Pt(10), color=PRIMARY, bold=True,
+    vy = Inches(1.6)
+    for name, val, desc in consts:
+        add_text_box(slide, right_x + Inches(0.2), vy, Inches(2.0), Inches(0.22),
+                     name, font_size=Pt(8), color=HEADING, bold=True)
+        add_text_box(slide, right_x + Inches(2.3), vy, Inches(0.8), Inches(0.22),
+                     val, font_size=Pt(9), color=PRIMARY, bold=True,
                      alignment=PP_ALIGN.CENTER)
-        add_text_box(slide, right_x + Inches(3.0), vy, Inches(2.3), Inches(0.2),
-                     desc, font_size=Pt(9), color=SUBTLE_TEXT)
+        add_text_box(slide, right_x + Inches(3.2), vy, Inches(1.8), Inches(0.22),
+                     desc, font_size=Pt(8), color=SUBTLE_TEXT)
         vy += Inches(0.28)
+
+    # Bottom note
+    add_rect(slide, right_x + Inches(0.2), vy + Inches(0.10), Inches(4.9), Inches(0.65),
+             fill_color=RGBColor(0xFD, 0xF2, 0xE3), corner_radius=Cm(0.10))
+    add_text_box(slide, right_x + Inches(0.35), vy + Inches(0.15), Inches(4.6), Inches(0.55),
+                 "Inscribed radius adalah jarak dari pusat robot ke batas "
+                 "footprint. Sel dalam radius ini dianggap terlalu dekat "
+                 "dan diberi cost maksimal 253.",
+                 font_size=Pt(8), color=SUBTLE_TEXT, line_spacing=1.3)
 
     add_slide_number(slide, 12)
 
 
+def slide_costmap_global(prs):
+    """Slide 13: Global Costmap."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
+
+    add_text_box(slide, MARGIN, Inches(0.35), Inches(7), Inches(0.55),
+                 "GLOBAL COSTMAP \u2014 PERENCANAAN JALUR SKALA LUAS",
+                 font_name=FONT_TITLE, font_size=Pt(26),
+                 color=HEADING, bold=True)
+    add_divider(slide, MARGIN, Inches(0.85), Inches(2.5))
+
+    # Left content
+    add_text_box(slide, MARGIN, Inches(1.1), Inches(6.5), Inches(0.45),
+                 "Global costmap mencakup seluruh area yang diketahui dari peta. "
+                 "Digunakan oleh global planner (A*) untuk merencanakan path "
+                 "dari posisi robot menuju tujuan dalam skala luas. "
+                 "Costmap ini tidak berubah secara dinamis selama navigasi.",
+                 font_size=Pt(11), color=BODY, line_spacing=1.35)
+
+    # Static layer card
+    add_rect(slide, MARGIN, Inches(1.7), Inches(6.5), Inches(1.1),
+             fill_color=BOX_FILL, corner_radius=Cm(0.15))
+    add_rect(slide, MARGIN, Inches(1.7), Pt(5), Inches(1.1), fill_color=PRIMARY)
+    add_text_box(slide, MARGIN + Inches(0.2), Inches(1.75), Inches(3.0), Inches(0.3),
+                 "Static Layer", font_name=FONT_TITLE, font_size=Pt(14),
+                 color=PRIMARY, bold=True)
+    add_text_box(slide, MARGIN + Inches(0.2), Inches(2.05), Inches(6.1), Inches(0.6),
+                 "Menyimpan obstacle tetap dari peta. Mengkonversi nilai occupancy grid "
+                 "(0\u2013100) ke cost internal (0\u2013255): unknown=255, free=0, "
+                 "occupied=254. Bersumber dari combined map dan tidak berubah.",
+                 font_size=Pt(10), color=BODY, line_spacing=1.3)
+
+    # Inflation layer card
+    add_rect(slide, MARGIN, Inches(2.95), Inches(6.5), Inches(1.1),
+             fill_color=BOX_FILL, corner_radius=Cm(0.15))
+    add_rect(slide, MARGIN, Inches(2.95), Pt(5), Inches(1.1), fill_color=PRIMARY)
+    add_text_box(slide, MARGIN + Inches(0.2), Inches(3.0), Inches(3.0), Inches(0.3),
+                 "Inflation Layer", font_name=FONT_TITLE, font_size=Pt(14),
+                 color=PRIMARY, bold=True)
+    add_text_box(slide, MARGIN + Inches(0.2), Inches(3.30), Inches(6.1), Inches(0.6),
+                 "Memperluas obstacle dengan gradient cost untuk menjaga jarak aman. "
+                 "Cost Scaling Factor (CSF) memengaruhi kecuraman gradien: "
+                 "CSF tinggi = penurunan cost lebih curam, path lebih mepet ke obstacle. "
+                 "CSF rendah = gradien landai, path menjauhi obstacle.",
+                 font_size=Pt(10), color=BODY, line_spacing=1.3)
+
+    # Right side: inflation formula
+    right_x = Inches(7.5)
+    add_rect(slide, right_x, Inches(1.1), Inches(5.3), Inches(3.0),
+             fill_color=RGBColor(0xFD, 0xF2, 0xE3), corner_radius=Cm(0.15))
+    add_text_box(slide, right_x + Inches(0.2), Inches(1.15), Inches(4.9), Inches(0.3),
+                 "Fungsi Inflasi", font_name=FONT_TITLE, font_size=Pt(14),
+                 color=ORANGE, bold=True)
+    add_text_box(slide, right_x + Inches(0.2), Inches(1.55), Inches(4.9), Inches(1.5),
+                 "C(d) = 253 \u00b7 e^(\u2212\u03b1 \u00b7 (d \u2212 r_inscribed))\n"
+                 "untuk r_inscribed < d \u2264 R\n\n"
+                 "d = jarak dari obstacle\n"
+                 "R = inflation radius\n"
+                 "r_inscribed = inscribed radius (cost = 253)\n"
+                 "\u03b1 = scaling factor (kontrol kecuraman)\n\n"
+                 "C(d) = 253 untuk d \u2264 r_inscribed\n"
+                 "C(d) = 0 untuk d > R",
+                 font_size=Pt(11), color=BODY, line_spacing=1.35)
+
+    # CSF note
+    add_rect(slide, right_x, Inches(4.35), Inches(5.3), Inches(0.5),
+             fill_color=BOX_FILL, corner_radius=Cm(0.10))
+    add_text_box(slide, right_x + Inches(0.15), Inches(4.38), Inches(5.0), Inches(0.45),
+                 "Cost Scaling Factor (CSF) mengalikan costmap sebelum inflasi. "
+                 "Nilai uji: 10, 20, 50, 100. CSF = 100 menghasilkan path terpendek.",
+                 font_size=Pt(9), color=BODY, line_spacing=1.3)
+
+    add_slide_number(slide, 13)
+
+
+def slide_costmap_local(prs):
+    """Slide 14: Local Costmap."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
+
+    add_text_box(slide, MARGIN, Inches(0.35), Inches(7), Inches(0.55),
+                 "LOCAL COSTMAP \u2014 NAVIGASI JANGKA PENDEK REAL-TIME",
+                 font_name=FONT_TITLE, font_size=Pt(26),
+                 color=HEADING, bold=True)
+    add_divider(slide, MARGIN, Inches(0.85), Inches(2.5))
+
+    # Left content
+    add_text_box(slide, MARGIN, Inches(1.1), Inches(6.5), Inches(0.45),
+                 "Local costmap mencakup area di sekitar robot dalam radius "
+                 "tertentu dan bergerak mengikuti robot (rolling window). "
+                 "Digunakan oleh DWA local planner untuk perencanaan gerak "
+                 "jangka pendek dan menghindari rintangan real-time.",
+                 font_size=Pt(11), color=BODY, line_spacing=1.35)
+
+    # Rolling window card
+    add_rect(slide, MARGIN, Inches(1.7), Inches(6.5), Inches(0.85),
+             fill_color=BOX_FILL, corner_radius=Cm(0.15))
+    add_rect(slide, MARGIN, Inches(1.7), Pt(5), Inches(0.85), fill_color=SECONDARY)
+    add_text_box(slide, MARGIN + Inches(0.15), Inches(1.73), Inches(3.0), Inches(0.25),
+                 "Rolling Window", font_name=FONT_TITLE, font_size=Pt(13),
+                 color=SECONDARY, bold=True)
+    add_text_box(slide, MARGIN + Inches(0.15), Inches(1.98), Inches(6.2), Inches(0.5),
+                 "Grid bergerak mengikuti posisi robot. Origin digeser setiap "
+                 "kali robot berpindah sehingga robot selalu di dekat pusat. "
+                 "Sel baru yang muncul di area belum tercakup diisi dari data LiDAR.",
+                 font_size=Pt(10), color=BODY, line_spacing=1.25)
+
+    # Obstacle layer card
+    add_rect(slide, MARGIN, Inches(2.7), Inches(6.5), Inches(1.35),
+             fill_color=BOX_FILL, corner_radius=Cm(0.15))
+    add_rect(slide, MARGIN, Inches(2.7), Pt(5), Inches(1.35), fill_color=SECONDARY)
+    add_text_box(slide, MARGIN + Inches(0.15), Inches(2.75), Inches(3.0), Inches(0.25),
+                 "Obstacle Layer", font_name=FONT_TITLE, font_size=Pt(13),
+                 color=SECONDARY, bold=True)
+    add_text_box(slide, MARGIN + Inches(0.15), Inches(3.0), Inches(6.2), Inches(0.9),
+                 "Rintangan dinamis dari data scan LiDAR real-time:\n"
+                 "\u2022 Konversi endpoint laser ke koordinat sensor\n"
+                 "\u2022 Transformasi ke frame peta\n"
+                 "\u2022 Markasi occupied \u2192 cost 254 (LETHAL)\n"
+                 "\u2022 Bresenham ray tracing untuk clear area antara robot dan "
+                 "endpoint (set cost = 0 di sepanjang ray)",
+                 font_size=Pt(10), color=BODY, line_spacing=1.25)
+
+    # Inflation layer card
+    add_rect(slide, MARGIN, Inches(4.2), Inches(6.5), Inches(0.85),
+             fill_color=BOX_FILL, corner_radius=Cm(0.15))
+    add_rect(slide, MARGIN, Inches(4.2), Pt(5), Inches(0.85), fill_color=SECONDARY)
+    add_text_box(slide, MARGIN + Inches(0.15), Inches(4.23), Inches(3.0), Inches(0.25),
+                 "Inflation Layer", font_name=FONT_TITLE, font_size=Pt(13),
+                 color=SECONDARY, bold=True)
+    add_text_box(slide, MARGIN + Inches(0.15), Inches(4.48), Inches(6.2), Inches(0.5),
+                 "Fungsi inflasi sama dengan global costmap, namun diterapkan "
+                 "pada obstacle dari scan LiDAR real-time, bukan dari peta tetap.",
+                 font_size=Pt(10), color=BODY, line_spacing=1.25)
+
+    # Right side: comparison summary
+    right_x = Inches(7.5)
+    add_rect(slide, right_x, Inches(1.1), Inches(5.3), Inches(1.5),
+             fill_color=BOX_FILL, corner_radius=Cm(0.15))
+    add_text_box(slide, right_x + Inches(0.15), Inches(1.15), Inches(5.0), Inches(0.25),
+                 "Perbandingan Global vs Local", font_name=FONT_TITLE,
+                 font_size=Pt(13), color=HEADING, bold=True)
+    add_text_box(slide, right_x + Inches(0.15), Inches(1.45), Inches(5.0), Inches(1.0),
+                 "Global Costmap:\n"
+                 "\u2022 Sumber: peta tetap (static layer)\n"
+                 "\u2022 Cakupan: seluruh area\n"
+                 "\u2022 Statis selama navigasi\n\n"
+                 "Local Costmap:\n"
+                 "\u2022 Sumber: scan LiDAR real-time (obstacle layer)\n"
+                 "\u2022 Cakupan: rolling window di sekitar robot\n"
+                 "\u2022 Diperbarui setiap siklus kendali",
+                 font_size=Pt(10), color=BODY, line_spacing=1.3)
+
+    # Key fact box
+    add_rect(slide, right_x, Inches(2.85), Inches(5.3), Inches(2.2),
+             fill_color=RGBColor(0xFF, 0xF3, 0xE0), corner_radius=Cm(0.15))
+    add_rect(slide, right_x, Inches(2.85), Pt(4), Inches(2.2), fill_color=ORANGE)
+    add_text_box(slide, right_x + Inches(0.15), Inches(2.9), Inches(5.0), Inches(0.25),
+                 "Bresenham Ray Tracing", font_name=FONT_TITLE, font_size=Pt(12),
+                 color=ORANGE, bold=True)
+    add_text_box(slide, right_x + Inches(0.15), Inches(3.2), Inches(5.0), Inches(1.7),
+                 "Setiap sinar laser dari robot ke endpoint ditelusuri "
+                 "menggunakan algoritma Bresenham 2D:\n\n"
+                 "1. Inisialisasi error = \u0394x \u2212 \u0394y\n"
+                 "2. Iterasi sepanjang ray dari (x\u2080, y\u2080) ke (x\u2081, y\u2081)\n"
+                 "3. Setiap sel yang dilewati diberi cost = 0 (FREE_SPACE)\n"
+                 "4. Endpoint diberi cost = 254 (LETHAL_OBSTACLE)\n\n"
+                 "Memastikan area antara robot dan obstacle terdeteksi "
+                 "sebagai ruang bebas, bukan rintangan.",
+                 font_size=Pt(9), color=BODY, line_spacing=1.3)
+
+    add_slide_number(slide, 14)
+
+
+def slide_costmap_transition(prs):
+    """Slide 15: Transition Costmap."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
+
+    add_text_box(slide, MARGIN, Inches(0.35), Inches(7), Inches(0.55),
+                 "TRANSITION COSTMAP \u2014 PERPINDAHAN ANTAR REGION",
+                 font_name=FONT_TITLE, font_size=Pt(26),
+                 color=HEADING, bold=True)
+    add_divider(slide, MARGIN, Inches(0.85), Inches(2.5))
+
+    # Left content
+    add_text_box(slide, MARGIN, Inches(1.1), Inches(6.5), Inches(0.5),
+                 "Transition costmap menggabungkan data transisi dengan peta "
+                 "statis. Digunakan oleh region switcher untuk mendeteksi kapan "
+                 "robot memasuki perbatasan antar region dan melakukan lompatan pose.",
+                 font_size=Pt(11), color=BODY, line_spacing=1.35)
+
+    # Transition layer card
+    add_rect(slide, MARGIN, Inches(1.75), Inches(6.5), Inches(1.3),
+             fill_color=BOX_FILL, corner_radius=Cm(0.15))
+    add_rect(slide, MARGIN, Inches(1.75), Pt(5), Inches(1.3), fill_color=ORANGE)
+    add_text_box(slide, MARGIN + Inches(0.15), Inches(1.8), Inches(3.0), Inches(0.25),
+                 "Transition Layer", font_name=FONT_TITLE, font_size=Pt(13),
+                 color=ORANGE, bold=True)
+    add_text_box(slide, MARGIN + Inches(0.15), Inches(2.1), Inches(6.2), Inches(0.8),
+                 "Dua jenis nilai cost yang saling melengkapi:\n\n"
+                 "T = 1   Garis transisi utama \u2014 tempat lompatan pose dieksekusi\n"
+                 "E = 5   Zona buffer \u2014 robot mendeteksi bahwa ia mendekati "
+                 "batas region dan mulai bersiap transisi",
+                 font_size=Pt(10), color=BODY, line_spacing=1.25)
+
+    # Region switcher flow
+    add_rect(slide, MARGIN, Inches(3.2), Inches(6.5), Inches(0.6),
+             fill_color=BOX_FILL, corner_radius=Cm(0.10))
+    add_text_box(slide, MARGIN + Inches(0.15), Inches(3.23), Inches(6.2), Inches(0.55),
+                 "Region Switcher: Deteksi E=5 \u2192 Bersiap transisi  |  "
+                 "Deteksi T=1 \u2192 Eksekusi lompatan pose ke region tujuan",
+                 font_size=Pt(9), color=BODY, line_spacing=1.25)
+
+    # Static layer note
+    add_rect(slide, MARGIN, Inches(3.95), Inches(6.5), Inches(0.5),
+             fill_color=BOX_FILL, corner_radius=Cm(0.10))
+    add_rect(slide, MARGIN, Inches(3.95), Pt(4), Inches(0.5), fill_color=SECONDARY)
+    add_text_box(slide, MARGIN + Inches(0.15), Inches(3.98), Inches(6.2), Inches(0.45),
+                 "Static Layer: obstacle tetap dari peta (sama dengan global costmap)",
+                 font_size=Pt(9), color=SUBTLE_TEXT, line_spacing=1.25)
+
+    # Right side: BFS expansion
+    right_x = Inches(7.5)
+    add_rect(slide, right_x, Inches(1.1), Inches(5.3), Inches(3.3),
+             fill_color=BOX_FILL, corner_radius=Cm(0.15))
+    add_text_box(slide, right_x + Inches(0.15), Inches(1.15), Inches(5.0), Inches(0.3),
+                 "BFS Expansion \u2014 Zona Buffer", font_name=FONT_TITLE,
+                 font_size=Pt(13), color=HEADING, bold=True)
+    add_text_box(slide, right_x + Inches(0.15), Inches(1.5), Inches(5.0), Inches(2.8),
+                 "Nilai E = 5 dihasilkan melalui ekspansi BFS dari sel-sel "
+                 "transisi (T = 1):\n\n"
+                 "1. Seed: seluruh sel dengan cost T = 1\n"
+                 "2. Ekspansi: BFS 4-way hingga radius R sel\n"
+                 "3. Setiap sel yang dikunjungi (bukan seed) \u2192 E = 5\n"
+                 "4. Berhenti jika bertemu LETHAL_OBSTACLE (254)\n\n"
+                 "Ilustrasi (R = 2):\n"
+                 "  Sebelum:        Setelah:\n"
+                 "  . . . . .      . E E E .\n"
+                 "  . . T . .      E E T E E\n"
+                 "  . T T T .  \u2192  E T T T E\n"
+                 "  . . T . .      E E T E E\n"
+                 "  . . . . .      . E E E .\n\n"
+                 "T = 1 (garis transisi)   E = 5 (buffer deteksi)",
+                 font_size=Pt(9), color=BODY, line_spacing=1.2)
+
+    # Key fact box
+    add_rect(slide, right_x, Inches(4.65), Inches(5.3), Inches(0.55),
+             fill_color=RGBColor(0xFF, 0xF3, 0xE0), corner_radius=Cm(0.10))
+    add_rect(slide, right_x, Inches(4.65), Pt(4), Inches(0.55), fill_color=ORANGE)
+    add_text_box(slide, right_x + Inches(0.15), Inches(4.68), Inches(5.0), Inches(0.5),
+                 "Transition costmap memungkinkan robot berpindah region secara "
+                 "mulus tanpa kehilangan informasi konektivitas antar lantai.",
+                 font_size=Pt(9), color=BODY, italic=True, line_spacing=1.25)
+
+    add_slide_number(slide, 15)
+
+
 def slide_icp(prs):
-    """Slide 13: Lokalisasi ICP & Region Switcher."""
+    """Slide 16: Lokalisasi ICP & Region Switcher."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -1307,11 +1561,11 @@ def slide_icp(prs):
                  "dengan aman sebelum kualitas lokalisasi ICP menurun signifikan.",
                  font_size=Pt(11), color=BODY, line_spacing=1.3)
 
-    add_slide_number(slide, 13)
+    add_slide_number(slide, 16)
 
 
 def slide_path_planning(prs):
-    """Slide 14: Path Planning (A* Global Planner)."""
+    """Slide 17: Path Planning (A* Global Planner)."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -1419,11 +1673,11 @@ def slide_path_planning(prs):
                  "konektor untuk perpindahan mulus antar region.",
                  font_size=Pt(11), color=BODY, line_spacing=1.35)
 
-    add_slide_number(slide, 14)
+    add_slide_number(slide, 17)
 
 
 def slide_dwa(prs):
-    """Slide 15: Path Tracking (DWA Local Planner)."""
+    """Slide 18: Path Tracking (DWA Local Planner)."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -1526,11 +1780,11 @@ def slide_dwa(prs):
                  "tercermin dari peningkatan max cross track error pada kondisi gempa.",
                  font_size=Pt(11), color=BODY, line_spacing=1.3)
 
-    add_slide_number(slide, 15)
+    add_slide_number(slide, 18)
 
 
 def slide_arena(prs):
-    """Slide 16: Arena Pengujian & Skenario."""
+    """Slide 19: Arena Pengujian & Skenario."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_RESULTS_S, GRAD_RESULTS_E)
 
@@ -1567,11 +1821,11 @@ def slide_arena(prs):
                  "Sensor: LiDAR 2D  \u00b7  Peta: Known Map",
                  font_size=Pt(11), color=BODY, bold=False)
 
-    add_slide_number(slide, 16)
+    add_slide_number(slide, 19)
 
 
 def slide_results_icp(prs):
-    """Slide 17: Hasil Pengujian — ICP Localization."""
+    """Slide 20: Hasil Pengujian — ICP Localization."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_RESULTS_S, GRAD_RESULTS_E)
 
@@ -1610,7 +1864,7 @@ def slide_results_icp(prs):
                  "signifikan pada sumbu x dan yaw akibat variasi vertikal scan LiDAR.",
                  font_size=Pt(11), color=BODY, line_spacing=1.3)
 
-    add_slide_number(slide, 17)
+    add_slide_number(slide, 20)
 
 
 def _make_path_result_slide(prs, region_label, map_png, csf_csv, stats_csv, slide_num,
@@ -1667,9 +1921,9 @@ def _make_path_result_slide(prs, region_label, map_png, csf_csv, stats_csv, slid
 
 
 def slide_results_path_RA(prs):
-    """Slide 18: Hasil Path Planning — Region A."""
+    """Slide 21: Hasil Path Planning — Region A."""
     _make_path_result_slide(prs, "A", "map_with_paths_RA.png",
-                            "path_CSF_RA.csv", "path_stats_RA.csv", 18,
+                            "path_CSF_RA.csv", "path_stats_RA.csv", 21,
                             "CSF 100 = path terpendek (0.97 m) & paling efisien.\n"
                             "CSF 10/20/50 = path lebih panjang, di tengah lorong.\n"
                             "SD CSF 100 paling rendah (0.002 m) -> konsistensi tinggi.",
@@ -1677,9 +1931,9 @@ def slide_results_path_RA(prs):
 
 
 def slide_results_path_RB(prs):
-    """Slide 19: Hasil Path Planning — Region B."""
+    """Slide 22: Hasil Path Planning — Region B."""
     _make_path_result_slide(prs, "B", "map_with_paths_RB.png",
-                            "path_CSF_RB.csv", "path_stats_RB.csv", 19,
+                            "path_CSF_RB.csv", "path_stats_RB.csv", 22,
                             "CSF tidak signifikan: layout lorong sempit -> semua\n"
                             "CSF menghasilkan path hampir identik (~0.59 m).\n"
                             "SD sangat kecil (< 0.004 m) untuk semua CSF.",
@@ -1687,16 +1941,16 @@ def slide_results_path_RB(prs):
 
 
 def slide_results_path_RC(prs):
-    """Slide 20: Hasil Path Planning — Region C."""
+    """Slide 23: Hasil Path Planning — Region C."""
     _make_path_result_slide(prs, "C", "map_with_paths_RC.png",
-                            "path_CSF_RC.csv", "path_stats_RC.csv", 20,
+                            "path_CSF_RC.csv", "path_stats_RC.csv", 23,
                             "CSF 100 = path terpendek (2.52 m).\n"
                             "CSF 10 lebih aman di tengah lorong, lebih panjang.\n"
                             "Trade-off: path pendek vs deviasi ground truth.",
                             key_color=RGBColor(0x2E, 0x7D, 0x32))
 
 def slide_results_navigation(prs):
-    """Slide 21: Hasil Pengujian — Navigasi Penuh."""
+    """Slide 24: Hasil Pengujian — Navigasi Penuh."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_RESULTS_S, GRAD_RESULTS_E)
 
@@ -1792,11 +2046,11 @@ def slide_results_navigation(prs):
                      item, font_size=Pt(9), color=BODY, line_spacing=1.1)
         inty += Inches(0.22)
 
-    add_slide_number(slide, 21)
+    add_slide_number(slide, 24)
 
 
 def slide_conclusion(prs):
-    """Slide 22: Kesimpulan."""
+    """Slide 25: Kesimpulan."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_CLOSING_S, GRAD_CLOSING_E)
 
@@ -1836,11 +2090,11 @@ def slide_conclusion(prs):
                      card_w - Inches(0.4), Inches(1.2),
                      desc, font_size=Pt(12), color=BODY, line_spacing=1.45)
 
-    add_slide_number(slide, 22)
+    add_slide_number(slide, 25)
 
 
 def slide_future_work(prs):
-    """Slide 23: Saran / Future Work."""
+    """Slide 26: Saran / Future Work."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_CLOSING_S, GRAD_CLOSING_E)
 
@@ -1889,11 +2143,11 @@ def slide_future_work(prs):
                      card_w - Inches(0.4), Inches(1.3),
                      desc, font_size=Pt(11), color=BODY, line_spacing=1.5)
 
-    add_slide_number(slide, 23)
+    add_slide_number(slide, 26)
 
 
 def slide_thanks(prs):
-    """Slide 24: Penutup / Thank You."""
+    """Slide 27: Penutup / Thank You."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide, DARK_BG)
 
@@ -1955,7 +2209,10 @@ def main():
     slide_system_overview(prs)
     slide_nav_flow(prs)
     slide_map_processing(prs)
-    slide_costmap_structure(prs)
+    slide_costmap_overview(prs)
+    slide_costmap_global(prs)
+    slide_costmap_local(prs)
+    slide_costmap_transition(prs)
     slide_icp(prs)
     slide_path_planning(prs)
     slide_dwa(prs)

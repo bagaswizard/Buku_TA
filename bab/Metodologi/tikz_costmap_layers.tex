@@ -1,0 +1,65 @@
+\begin{tikzpicture}[
+    cell/.style={rectangle, draw, minimum size=0.35cm, inner sep=0pt, outer sep=0pt},
+    label/.style={font=\footnotesize\bfseries, align=center}
+]
+
+\definecolor{colFree}{HTML}{FFFFFF}
+\definecolor{colInflasi}{HTML}{FFF176}
+\definecolor{colStatic}{HTML}{E53935}
+\definecolor{colDinamis}{HTML}{FB8C00}
+\definecolor{colTransisi}{HTML}{AB47BC}
+
+% === Global Costmap (5x5) ===
+\node[label] at (1.5, 0.6) {\textbf{Global Costmap}};
+
+\foreach \x in {1,...,5} \foreach \y in {1,...,5} {
+    \node[cell, fill=colFree] at (\x-0.5, -\y+0.5) {};
+}
+
+\foreach \x/\y in {2/2,3/2,4/2, 1/3,2/3,4/3,5/3, 2/4,3/4,4/4, 3/5} {
+    \node[cell, fill=colInflasi] at (\x-0.5, -\y+0.5) {};
+}
+
+\node[cell, fill=colStatic] at (3-0.5, -3+0.5) {};
+
+% === Local Costmap (5x5) ===
+\node[label] at (7.0, 0.6) {\textbf{Local Costmap}};
+
+\foreach \x in {1,...,5} \foreach \y in {1,...,5} {
+    \node[cell, fill=colFree] at (\x+5.5, -\y+0.5) {};
+}
+
+\foreach \x/\y in {3/3,4/3, 3/4} {
+    \node[cell, fill=colInflasi] at (\x+5.5, -\y+0.5) {};
+}
+
+\node[cell, fill=colDinamis] at (3+5.5, -3+0.5) {};
+
+% === Transition Costmap (5x5) ===
+\node[label] at (12.5, 0.6) {\textbf{Transition Costmap}};
+
+\foreach \x in {1,...,5} \foreach \y in {1,...,5} {
+    \node[cell, fill=colFree] at (\x+11, -\y+0.5) {};
+}
+
+\foreach \y in {1,...,5} {
+    \node[cell, fill=colStatic] at (1+11, -\y+0.5) {};
+}
+
+\foreach \x/\y in {2/3,3/3, 2/4,3/4} {
+    \node[cell, fill=colTransisi, opacity=0.6] at (\x+11, -\y+0.5) {};
+}
+
+% === Legend ===
+\node[cell, fill=colStatic] at (1.0, -5.5) {};
+\node[font=\footnotesize, anchor=west] at (1.5, -5.5) {Static};
+\node[cell, fill=colDinamis] at (4.5, -5.5) {};
+\node[font=\footnotesize, anchor=west] at (5.0, -5.5) {Dynamic};
+\node[cell, fill=colInflasi] at (8.0, -5.5) {};
+\node[font=\footnotesize, anchor=west] at (8.5, -5.5) {Inflasi};
+\node[cell, fill=colTransisi] at (11.0, -5.5) {};
+\node[font=\footnotesize, anchor=west] at (11.5, -5.5) {Transisi};
+\node[cell, fill=colFree] at (14.0, -5.5) {};
+\node[font=\footnotesize, anchor=west] at (14.5, -5.5) {Free};
+
+\end{tikzpicture}
