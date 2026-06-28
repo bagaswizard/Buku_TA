@@ -21,7 +21,7 @@ SECONDARY = RGBColor(0x4A, 0x90, 0xD9)     # #4A90D9 - Biru muda
 HEADING = RGBColor(0x1A, 0x2B, 0x4C)       # #1A2B4C - Judul
 BODY = RGBColor(0x33, 0x33, 0x33)          # #333333 - Teks body
 ORANGE = RGBColor(0xF0, 0x8C, 0x2E)        # #F08C2E - Aksen
-BOX_FILL = RGBColor(0xE8, 0xF0, 0xFE)     # #E8F0FE - Box
+BOX_FILL = RGBColor(0xFF, 0xF8, 0xE7)     # #FFF8E7 - Cream card bg
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 LIGHT_BG = RGBColor(0xF5, 0xF9, 0xFF)     # Kartu pertanyaan
 WARN_BG = RGBColor(0xFF, 0xF8, 0xF0)      # Panel batasan
@@ -517,82 +517,41 @@ def slide_background(prs):
                  color=HEADING, bold=True)
     add_divider(slide, MARGIN, Inches(0.85), Inches(2.2))
 
-    # Left side: bullet points
+    # Left side: 5 focused bullet points — full width
     bullet_data = [
         ("1", "INDONESIA RAWAN GEMPA BUMI",
-         "Terletak di pertemuan 4 lempeng tektonik (Pasifik, Eurasia, Indo-Australia, Laut Filipina). "
-         "Rata-rata 18 gempa per hari (BMKG, 2020)."),
-        ("2", "OPERASI SAR BERISIKO TINGGI",
-         "Petugas SAR menghadapi ancaman keselamatan di area terdampak. "
-         "Bangunan rusak, atap hampir roboh, struktur tidak stabil. "
-         "Robot darat pernah digunakan pasca gempa Jepang untuk inspeksi bangunan (Lin et al., 2022)."),
-        ("3", "ROBOT OTONOM MEMBANTU MISI SAR",
-         "Robot UAV memberi gambaran medan dari udara. Robot darat (track/quadruped/hexapod) "
-         "mengangkut barang berat dan inspeksi area berbahaya. "
-         "Robot otonom krusial saat infrastruktur komunikasi rusak."),
-        ("4", "TANTANGAN: NAVIGASI INDOOR PASCA GEMPA",
-         "Lingkungan tidak terstruktur: puing, lantai tidak rata, tangga. "
-         "Costmap 2D konvensional terbatas pada satu bidang datar. "
-         "Robot perlu bernavigasi ANTAR LANTAI."),
+         "Terletak di 4 lempeng tektonik (Pasifik, Eurasia, Indo-Australia, Laut Filipina). "
+         "Rata-rata 18 gempa/hari (BMKG, Sabtaji 2020)."),
+        ("2", "OPERASI SAR & PERAN ROBOT",
+         "Petugas SAR hadapi ancaman keselamatan. Robot darat digunakan "
+         "pasca gempa Jepang untuk inspeksi (Lin et al., 2022). Robot UAV memberi "
+         "gambaran medan. Robot otonom krusial saat infrastruktur komunikasi rusak."),
+        ("3", "TANTANGAN NAVIGASI INDOOR",
+         "Puing, lantai tidak rata, tangga. Robot perlu lokalisasi, "
+         "path planning, dan mencapai tujuan di lingkungan tidak terstruktur. "
+         "Navigasi indoor masih menjadi permasalahan robot otonom."),
+        ("4", "SIMULASI ARENA KRSRI 2024",
+         "Sulit diuji di kondisi nyata → simulasi Mujoco. Arena dari "
+         "Kontes Robot SAR Indonesia (KRSRI) 2024. Platform: robot hexapod + LiDAR 2D. "
+         "Keterbatasan LiDAR 2D pada lingkungan bertingkat."),
         ("5", "SOLUSI: LAYERED COSTMAP",
-         "Menyederhanakan informasi 3D → beberapa bidang costmap 2D. "
-         "Setiap layer mewakili satu lantai/region. Layer transisi menghubungkan antar lantai. "
+         "Informasi 3D → occupancy grid + beberapa costmap 2D. "
+         "Setiap layer = satu lantai/region. Layer transisi menghubungkan antar lantai. "
          "Robot berpindah layer sesuai posisi di bangunan."),
     ]
 
     y = Inches(1.1)
     for num, title, desc in bullet_data:
-        draw_background_bullet(slide, MARGIN, y, Inches(6.8), Inches(1.0), num, title, desc)
+        draw_background_bullet(slide, MARGIN, y, Inches(11.5), Inches(1.0), num, title, desc)
         y += Inches(1.08)
 
-    # Right side: visual area with box diagrams
-    right_x = Inches(7.9)
-    # Box 1: Indonesia map hint
-    box1 = add_rect(slide, right_x, Inches(1.1), Inches(4.8), Inches(1.5),
-                    fill_color=BOX_FILL, corner_radius=Cm(0.2))
-    add_text_box(slide, right_x + Inches(0.2), Inches(1.15), Inches(4.4), Inches(0.3),
-                 "Kondisi Geografis Indonesia", font_name=FONT_TITLE, font_size=Pt(12),
-                 color=HEADING, bold=True)
-    add_rich_text_box(slide, right_x + Inches(0.2), Inches(1.45), Inches(4.4), Inches(1.0), [
-        {"text": "4 Lempeng Tektonik Aktif", "font_size": Pt(12), "color": BODY, "bold": True, "line_spacing": 1.15},
-        {"text": "Pasifik · Eurasia · Indo-Australia · Laut Filipina", "font_size": Pt(11), "color": SUBTLE_TEXT, "line_spacing": 1.15},
-        {"text": "± 18 gempa / hari (BMKG 2020)", "font_size": Pt(11), "color": BODY, "line_spacing": 1.3},
-    ])
-
-    # Box 2: Post-earthquake scenario
-    box2 = add_rect(slide, right_x, Inches(2.8), Inches(4.8), Inches(1.5),
-                    fill_color=BOX_FILL, corner_radius=Cm(0.2))
-    add_text_box(slide, right_x + Inches(0.2), Inches(2.85), Inches(4.4), Inches(0.3),
-                 "Pasca Gempa Bumi", font_name=FONT_TITLE, font_size=Pt(12),
-                 color=HEADING, bold=True)
-    add_rich_text_box(slide, right_x + Inches(0.2), Inches(3.15), Inches(4.4), Inches(1.0), [
-        {"text": "Dampak pada Bangunan:", "font_size": Pt(12), "color": BODY, "bold": True, "line_spacing": 1.15},
-        {"text": "Puing dan reruntuhan • Lantai tidak rata", "font_size": Pt(11), "color": SUBTLE_TEXT, "line_spacing": 1.15},
-        {"text": "Tangga rusak • Struktur multi-lantai tidak stabil", "font_size": Pt(11), "color": SUBTLE_TEXT, "line_spacing": 1.15},
-        {"text": "Robot darat digunakan di Jepang untuk inspeksi (Lin 2022)", "font_size": Pt(11), "color": BODY, "line_spacing": 1.3},
-    ])
-
-    # Box 3: Layered costmap concept
-    box3 = add_rect(slide, right_x, Inches(4.5), Inches(4.8), Inches(1.5),
-                    fill_color=RGBColor(0xFD, 0xF2, 0xE3), corner_radius=Cm(0.2))
-    add_text_box(slide, right_x + Inches(0.2), Inches(4.55), Inches(4.4), Inches(0.3),
-                 "Solusi: Layered Costmap", font_name=FONT_TITLE, font_size=Pt(12),
-                 color=ORANGE, bold=True)
-    add_rich_text_box(slide, right_x + Inches(0.2), Inches(4.85), Inches(4.4), Inches(1.0), [
-        {"text": "3D → 2D Multi-Layer", "font_size": Pt(12), "color": BODY, "bold": True, "line_spacing": 1.15},
-        {"text": "Setiap layer = 1 lantai/region pada bangunan", "font_size": Pt(11), "color": SUBTLE_TEXT, "line_spacing": 1.15},
-        {"text": "Layer transisi = penghubung antar lantai", "font_size": Pt(11), "color": SUBTLE_TEXT, "line_spacing": 1.15},
-        {"text": "Robot berpindah layer sesuai posisi di bangunan", "font_size": Pt(11), "color": BODY, "line_spacing": 1.3},
-    ])
-
-    # Highlight callout box
-    callout = add_rect(slide, MARGIN, Inches(6.55), Inches(11.5), Inches(0.45),
-                       fill_color=RGBColor(0xFF, 0xF3, 0xE0), corner_radius=Cm(0.1))
-    # Orange left border accent
-    accent_bar = add_rect(slide, MARGIN, Inches(6.55), Pt(4), Inches(0.45), fill_color=ORANGE)
+    # Bottom highlight — one key takeaway
+    add_rect(slide, MARGIN, Inches(6.55), Inches(11.5), Inches(0.45),
+             fill_color=RGBColor(0xFF, 0xF3, 0xE0), corner_radius=Cm(0.1))
+    add_rect(slide, MARGIN, Inches(6.55), Pt(4), Inches(0.45), fill_color=ORANGE)
     add_text_box(slide, MARGIN + Inches(0.12), Inches(6.55), Inches(11.3), Inches(0.45),
-                 "Pendekatan ini menyederhanakan kompleksitas 3D menjadi representasi 2D yang manageable, "
-                 "memungkinkan penggunaan sensor LiDAR 2D.",
+                 "Layered costmap menyederhanakan kompleksitas 3D menjadi representasi 2D "
+                 "yang manageable dengan sensor LiDAR 2D pada robot hexapod.",
                  font_size=Pt(11), color=BODY, italic=True, line_spacing=1.2)
 
     add_slide_number(slide, 3)
@@ -637,86 +596,131 @@ def slide_problem(prs):
 
     # Three question cards
     questions = [
-        ("01", "REPRESENTASI LINGKUNGAN",
-         "Bagaimana merepresentasikan informasi lingkungan multi-lantai menggunakan "
-         "layered costmap agar dapat digunakan pada algoritma navigasi antar lantai?"),
+        ("01", "REPRESENTASI LINGKUNGAN 3D",
+         "Bagaimana cara menggunakan layered costmap untuk mewakilkan informasi "
+         "lingkungan 3D yang terdiri dari beberapa lantai sehingga bisa digunakan "
+         "pada algoritma navigasi 2D?"),
         ("02", "ALGORITMA NAVIGASI",
          "Bagaimana merancang algoritma lokalisasi, path planning, dan path tracking "
          "yang bekerja pada sistem navigasi berbasis layered costmap?"),
         ("03", "VALIDASI SISTEM",
          "Apakah robot darat otonom dapat melakukan navigasi hingga mencapai tujuan "
-         "pada arena uji menggunakan metode navigasi antar lantai yang dikembangkan?"),
+         "pada lingkungan simulasi menggunakan metode navigasi antar lantai yang dikembangkan?"),
     ]
 
     card_w = Inches(11.5)
-    card_h = Inches(1.0)
+    card_h = Inches(1.35)
     card_x = MARGIN
     card_y = Inches(1.15)
 
     for i, (num, title, desc) in enumerate(questions):
-        y = card_y + i * (card_h + Inches(0.18))
+        y = card_y + i * (card_h + Inches(0.25))
         card = add_rect(slide, card_x, y, card_w, card_h,
                         fill_color=LIGHT_BG, corner_radius=Cm(0.15))
         # Left accent bar
         add_rect(slide, card_x, y, Pt(5), card_h, fill_color=SECONDARY)
         # Number
-        add_text_box(slide, card_x + Inches(0.2), y + Inches(0.1),
-                     Inches(0.6), Inches(0.45),
-                     num, font_name=FONT_TITLE, font_size=Pt(22),
+        add_text_box(slide, card_x + Inches(0.2), y + Inches(0.15),
+                     Inches(0.6), Inches(0.55),
+                     num, font_name=FONT_TITLE, font_size=Pt(28),
                      color=SECONDARY, bold=True)
         # Title
-        add_text_box(slide, card_x + Inches(0.8), y + Inches(0.08),
-                     Inches(3.5), Inches(0.35),
-                     title, font_name=FONT_TITLE, font_size=Pt(13),
+        add_text_box(slide, card_x + Inches(0.8), y + Inches(0.12),
+                     Inches(4.0), Inches(0.4),
+                     title, font_name=FONT_TITLE, font_size=Pt(15),
                      color=HEADING, bold=True)
         # Description
-        add_text_box(slide, card_x + Inches(0.8), y + Inches(0.42),
-                     card_w - Inches(1.1), Inches(0.5),
-                     desc, font_size=Pt(12), color=BODY, line_spacing=1.25)
-
-    # Constraints panel
-    constraint_y = Inches(4.55)
-    constraint_h = Inches(2.3)
-    constraint_bg = add_rect(slide, MARGIN, constraint_y, Inches(11.5), constraint_h,
-                             fill_color=WARN_BG, corner_radius=Cm(0.15))
-
-    add_text_box(slide, MARGIN + Inches(0.25), constraint_y + Inches(0.1),
-                 Inches(3), Inches(0.35),
-                 "BATASAN PENELITIAN", font_name=FONT_TITLE, font_size=Pt(14),
-                 color=ORANGE, bold=True)
-
-    constraints = [
-        "Pengujian dilakukan pada SIMULASI (Mujoco) — bukan kondisi pasca gempa\n"
-        "sebenarnya, melainkan rekayasa arena uji (rintangan tidak diketahui,\n"
-        "tanjakan, permukaan tidak rata)",
-        "Robot yang digunakan: HEXAPOD (6 kaki), navigasi otonom dari titik\n"
-        "awal ke tujuan yang telah ditentukan",
-        "Algoritma navigasi bekerja pada kondisi rintangan statis yang SUDAH\n"
-        "DIKETAHUI (known map)",
-    ]
-
-    for i, ctext in enumerate(constraints):
-        c_y = constraint_y + Inches(0.55) + i * Inches(0.55)
-        # Warning icon (simple triangle shape)
-        tri = slide.shapes.add_shape(
-            MSO_SHAPE.ISOSCELES_TRIANGLE,
-            MARGIN + Inches(0.35), c_y + Inches(0.12),
-            Inches(0.2), Inches(0.18)
-        )
-        tri.fill.solid()
-        tri.fill.fore_color.rgb = ORANGE
-        tri.line.fill.background()
-
-        add_text_box(slide, MARGIN + Inches(0.7), c_y,
-                     Inches(10.3), Inches(0.55),
-                     ctext, font_size=Pt(11), color=SUBTLE_TEXT,
-                     line_spacing=1.3)
+        add_text_box(slide, card_x + Inches(0.8), y + Inches(0.55),
+                     card_w - Inches(1.1), Inches(0.7),
+                     desc, font_size=Pt(13), color=BODY, line_spacing=1.35)
 
     add_slide_number(slide, 4)
 
 
+def slide_constraints(prs):
+    """Slide 5: Batasan Penelitian."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    set_gradient_bg(slide, GRAD_CONTEXT_S, GRAD_CONTEXT_E)
+
+    add_text_box(slide, MARGIN, Inches(0.35), Inches(5), Inches(0.55),
+                 "BATASAN PENELITIAN", font_name=FONT_TITLE, font_size=Pt(30),
+                 color=HEADING, bold=True)
+    add_divider(slide, MARGIN, Inches(0.85), Inches(2.5))
+
+    constraints = [
+        ("Simulasi Arena KRSRI 2024 (Mujoco)",
+         "Merekayasa kondisi pasca gempa dengan rintangan tidak diketahui,\n"
+         "tanjakan, dan permukaan tidak rata pada SKALA LEBIH KECIL."
+         "\n\nBukan kondisi gempa sebenarnya → validasi awal metode.",
+         PRIMARY),
+        ("Platform Robot Hexapod + LiDAR 2D",
+         "Robot hexapod 6 kaki bernavigasi secara OTONOM penuh dari\n"
+         "titik awal ke tujuan yang telah ditentukan."
+         "\n\nKeterbatasan LiDAR 2D pada lingkungan bertingkat\n"
+         "menjadi tantangan dalam sistem navigasi.",
+         SECONDARY),
+        ("Lingkungan Statis Diketahui (Known Map)",
+         "Algoritma navigasi bekerja pada kondisi lingkungan DENGAN\n"
+         "rintangan statis yang SUDAH DIKETAHUI."
+         "\n\nRintangan dinamis tidak termasuk dalam cakupan\n"
+         "pengujian tugas akhir ini.",
+         ORANGE),
+    ]
+
+    card_w = Inches(11.5)
+    card_h = Inches(1.55)
+    card_x = MARGIN
+    card_y = Inches(1.2)
+
+    for i, (title, desc, color) in enumerate(constraints):
+        y = card_y + i * (card_h + Inches(0.25))
+        add_rect(slide, card_x, y, card_w, card_h,
+                 fill_color=BOX_FILL, corner_radius=Cm(0.15))
+        add_rect(slide, card_x, y, Pt(5), card_h, fill_color=color)
+
+        # Warning triangle
+        tri = slide.shapes.add_shape(
+            MSO_SHAPE.ISOSCELES_TRIANGLE,
+            card_x + Inches(0.25), y + Inches(0.2),
+            Inches(0.35), Inches(0.32)
+        )
+        tri.fill.solid()
+        tri.fill.fore_color.rgb = color
+        tri.line.fill.background()
+        # "!" in triangle
+        tf = tri.text_frame
+        p = tf.paragraphs[0]
+        p.text = "!"
+        p.font.name = FONT_TITLE
+        p.font.size = Pt(14)
+        p.font.color.rgb = WHITE
+        p.font.bold = True
+        p.alignment = PP_ALIGN.CENTER
+
+        # Title
+        add_text_box(slide, card_x + Inches(0.8), y + Inches(0.12),
+                     Inches(5.0), Inches(0.35),
+                     title, font_name=FONT_TITLE, font_size=Pt(16),
+                     color=color, bold=True)
+        # Description
+        add_text_box(slide, card_x + Inches(0.8), y + Inches(0.48),
+                     card_w - Inches(1.1), Inches(1.0),
+                     desc, font_size=Pt(12), color=BODY, line_spacing=1.35)
+
+    # Bottom note
+    add_rect(slide, MARGIN, Inches(6.55), Inches(11.5), Inches(0.45),
+             fill_color=RGBColor(0xFF, 0xF3, 0xE0), corner_radius=Cm(0.1))
+    add_rect(slide, MARGIN, Inches(6.55), Pt(4), Inches(0.45), fill_color=ORANGE)
+    add_text_box(slide, MARGIN + Inches(0.12), Inches(6.55), Inches(11.3), Inches(0.45),
+                 "Metode yang dikembangkan TIDAK dirancang untuk langsung digunakan di kondisi pasca gempa. "
+                 "Pengujian dilakukan pada simulasi untuk validasi awal sebelum penerapan di skenario nyata.",
+                 font_size=Pt(11), color=BODY, italic=True, line_spacing=1.2)
+
+    add_slide_number(slide, 5)
+
+
 def slide_objectives(prs):
-    """Slide 5: Tujuan & Manfaat."""
+    """Slide 6: Tujuan & Manfaat."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_CONTEXT_S, GRAD_CONTEXT_E)
 
@@ -765,7 +769,7 @@ def slide_objectives(prs):
                         icon, "", desc)
         by += Inches(0.95)
 
-    add_slide_number(slide, 5)
+    add_slide_number(slide, 6)
 
 
 def add_icon_goal(slide, left, top, width, height, title, desc):
@@ -795,7 +799,7 @@ def add_icon_goal(slide, left, top, width, height, title, desc):
 
 
 def slide_literature(prs):
-    """Slide 6: Tinjauan Pustaka (Konsep Dasar)."""
+    """Slide 7: Tinjauan Pustaka (Konsep Dasar)."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -848,11 +852,11 @@ def slide_literature(prs):
     add_text_box(slide, MARGIN, Inches(5.9), Inches(11.5), Inches(0.8),
                  sota, font_size=Pt(10), color=BODY, line_spacing=1.4)
 
-    add_slide_number(slide, 6)
+    add_slide_number(slide, 7)
 
 
 def slide_prior_research(prs):
-    """Slide 7: Penelitian Terdahulu — Comparison Table."""
+    """Slide 8: Penelitian Terdahulu — Comparison Table."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -980,11 +984,11 @@ def slide_prior_research(prs):
         p2.font.bold = False
         p2.alignment = PP_ALIGN.LEFT
 
-    add_slide_number(slide, 7)
+    add_slide_number(slide, 8)
 
 
 def slide_system_overview(prs):
-    """Slide 8: Arsitektur Sistem."""
+    """Slide 9: Arsitektur Sistem."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -997,7 +1001,7 @@ def slide_system_overview(prs):
     arch_path = os.path.join(base_dir, "gambar", "navigation_architecture.png")
 
     img_h = Inches(5.6)
-    img_w = img_h * (1177.0 / 774.0)
+    img_w = int(img_h * (1177.0 / 774.0))
     img_left = (SLIDE_W - img_w) / 2
     img_top = Inches(1.15)
 
@@ -1008,11 +1012,11 @@ def slide_system_overview(prs):
     # The architecture image
     slide.shapes.add_picture(arch_path, img_left, img_top, img_w, img_h)
 
-    add_slide_number(slide, 8)
+    add_slide_number(slide, 9)
 
 
 def slide_nav_flow(prs):
-    """Slide 9: Detail Alur Navigasi."""
+    """Slide 10: Detail Alur Navigasi."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -1024,7 +1028,7 @@ def slide_nav_flow(prs):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     flow_path = os.path.join(base_dir, "gambar", "main_nav_flow_split.png")
     flow_h = Inches(5.5)
-    flow_w = flow_h * (752.0 / 542.0)
+    flow_w = int(flow_h * (752.0 / 542.0))
     flow_left = (SLIDE_W - flow_w) / 2
     flow_top = Inches(1.2)
 
@@ -1032,11 +1036,11 @@ def slide_nav_flow(prs):
              fill_color=None, border_color=PRIMARY, border_width=Pt(3))
     slide.shapes.add_picture(flow_path, flow_left, flow_top, flow_w, flow_h)
 
-    add_slide_number(slide, 9)
+    add_slide_number(slide, 10)
 
 
 def slide_map_processing(prs):
-    """Slide 10: Pengolahan Data Map (Multi-Region)."""
+    """Slide 11: Pengolahan Data Map (Multi-Region)."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -1067,7 +1071,7 @@ def slide_map_processing(prs):
     trans_path = os.path.join(base_dir, "gambar", "transition_map.png")
     trans_w = trans_h  # 512x512 = 1:1
     overlay_path = os.path.join(base_dir, "gambar", "transition_map_overlay.png")
-    overlay_w = trans_h * (728.0 / 733.0)
+    overlay_w = int(trans_h * (728.0 / 733.0))
 
     gap = Inches(0.6)
     total_w = trans_w + gap + overlay_w
@@ -1090,15 +1094,15 @@ def slide_map_processing(prs):
     slide.shapes.add_picture(overlay_path, overlay_left, trans_top, overlay_w, trans_h)
 
     # Caption
-    add_text_box(slide, MARGIN, Inches(6.65), Inches(11.5), Inches(0.3),
+    add_text_box(slide, MARGIN, Inches(6.82), Inches(11.5), Inches(0.20),
                  "Transition Map menyimpan koneksi spasial (A↔B, B↔C), orientasi region, dan pose awal robot",
-                 font_size=Pt(10), color=BODY, alignment=PP_ALIGN.CENTER)
+                 font_size=Pt(9), color=BODY, alignment=PP_ALIGN.CENTER)
 
-    add_slide_number(slide, 10)
+    add_slide_number(slide, 11)
 
 
 def slide_costmap_structure(prs):
-    """Slide 10: Struktur Layered Costmap."""
+    """Slide 12: Struktur Layered Costmap."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -1126,7 +1130,7 @@ def slide_costmap_structure(prs):
                         fill_color=BOX_FILL, corner_radius=Cm(0.15))
         add_rect(slide, MARGIN, layer_y, Pt(5), layer_h, fill_color=color)
         add_text_box(slide, MARGIN + Inches(0.2), layer_y + Inches(0.08),
-                     layer_w - Inches(0.4), Inches(0.3),
+                     Inches(3.5), Inches(0.3),
                      title, font_name=FONT_TITLE, font_size=Pt(14),
                      color=color, bold=True)
         add_text_box(slide, MARGIN + Inches(0.2), layer_y + Inches(0.38),
@@ -1179,11 +1183,11 @@ def slide_costmap_structure(prs):
                      desc, font_size=Pt(9), color=SUBTLE_TEXT)
         vy += Inches(0.28)
 
-    add_slide_number(slide, 11)
+    add_slide_number(slide, 12)
 
 
 def slide_icp(prs):
-    """Slide 11: Lokalisasi ICP & Region Switcher."""
+    """Slide 13: Lokalisasi ICP & Region Switcher."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -1303,11 +1307,11 @@ def slide_icp(prs):
                  "dengan aman sebelum kualitas lokalisasi ICP menurun signifikan.",
                  font_size=Pt(11), color=BODY, line_spacing=1.3)
 
-    add_slide_number(slide, 12)
+    add_slide_number(slide, 13)
 
 
 def slide_path_planning(prs):
-    """Slide 13: Path Planning (A* Global Planner)."""
+    """Slide 14: Path Planning (A* Global Planner)."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -1366,22 +1370,23 @@ def slide_path_planning(prs):
     # Diagram: 3 region boxes connected by transition arrows
     regions = ["Region A", "Region B", "Region C"]
     rx = right_x + Inches(0.3)
-    ry = Inches(1.65)
+    ry = Inches(1.55)
     rw = Inches(2.0)
-    rh = Inches(0.9)
+    rh = Inches(0.75)
+    rgap = Inches(0.3)
 
     for i, rname in enumerate(regions):
         # Vertical stacking with transition in between
-        rcard = add_rect(slide, rx, ry + i * (rh + Inches(0.6)),
+        rcard = add_rect(slide, rx, ry + i * (rh + rgap),
                          rw, rh, fill_color=BOX_FILL, corner_radius=Cm(0.10))
-        add_rect(slide, rx, ry + i * (rh + Inches(0.6)), rw, Pt(3), fill_color=PRIMARY)
-        add_text_box(slide, rx + Inches(0.05), ry + i * (rh + Inches(0.6)) + Inches(0.05),
-                     rw - Inches(0.1), Inches(0.35),
+        add_rect(slide, rx, ry + i * (rh + rgap), rw, Pt(3), fill_color=PRIMARY)
+        add_text_box(slide, rx + Inches(0.05), ry + i * (rh + rgap) + Inches(0.03),
+                     rw - Inches(0.1), Inches(0.3),
                      rname, font_name=FONT_TITLE, font_size=Pt(13),
                      color=PRIMARY, bold=True, alignment=PP_ALIGN.CENTER)
         add_text_box(slide, rx + Inches(0.05),
-                     ry + i * (rh + Inches(0.6)) + Inches(0.4),
-                     rw - Inches(0.1), Inches(0.4),
+                     ry + i * (rh + rgap) + Inches(0.35),
+                     rw - Inches(0.1), Inches(0.35),
                      "A* planning pada\ncostmap region",
                      font_size=Pt(9), color=SUBTLE_TEXT,
                      alignment=PP_ALIGN.CENTER, line_spacing=1.25)
@@ -1391,7 +1396,7 @@ def slide_path_planning(prs):
             arr = slide.shapes.add_shape(
                 MSO_SHAPE.DOWN_ARROW,
                 rx + rw / 2 - Inches(0.15),
-                ry + (i + 0.5) * (rh + Inches(0.6)) - Inches(0.05),
+                ry + (i + 0.5) * (rh + rgap) - Inches(0.05),
                 Inches(0.3), Inches(0.35)
             )
             arr.fill.solid()
@@ -1399,10 +1404,10 @@ def slide_path_planning(prs):
             arr.line.fill.background()
 
     # Right side bottom: Path Interceptor explanation
-    add_rect(slide, right_x, Inches(4.6), Inches(5.5), Inches(2.3),
+    add_rect(slide, right_x, Inches(4.55), Inches(5.5), Inches(2.1),
              fill_color=BOX_FILL, corner_radius=Cm(0.10))
-    add_rect(slide, right_x, Inches(4.6), Pt(4), Inches(2.3), fill_color=ORANGE)
-    add_text_box(slide, right_x + Inches(0.15), Inches(4.7), Inches(5.2), Inches(2.1),
+    add_rect(slide, right_x, Inches(4.55), Pt(4), Inches(2.1), fill_color=ORANGE)
+    add_text_box(slide, right_x + Inches(0.15), Inches(4.65), Inches(5.2), Inches(1.9),
                  "Path interceptor memecah rute global multi-region\n"
                  "menjadi segmen per region yang di-plan secara\n"
                  "independen oleh A*:\n\n"
@@ -1414,11 +1419,11 @@ def slide_path_planning(prs):
                  "konektor untuk perpindahan mulus antar region.",
                  font_size=Pt(11), color=BODY, line_spacing=1.35)
 
-    add_slide_number(slide, 13)
+    add_slide_number(slide, 14)
 
 
 def slide_dwa(prs):
-    """Slide 13: Path Tracking (DWA Local Planner)."""
+    """Slide 15: Path Tracking (DWA Local Planner)."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_TECH_S, GRAD_TECH_E)
 
@@ -1521,11 +1526,11 @@ def slide_dwa(prs):
                  "tercermin dari peningkatan max cross track error pada kondisi gempa.",
                  font_size=Pt(11), color=BODY, line_spacing=1.3)
 
-    add_slide_number(slide, 14)
+    add_slide_number(slide, 15)
 
 
 def slide_arena(prs):
-    """Slide 14: Arena Pengujian & Skenario."""
+    """Slide 16: Arena Pengujian & Skenario."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_RESULTS_S, GRAD_RESULTS_E)
 
@@ -1536,17 +1541,17 @@ def slide_arena(prs):
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     img_h = Inches(2.2)
-    img_w = img_h * (1847.0 / 1051.0)
+    img_w = int(img_h * (1847.0 / 1051.0))
     gap_x = Inches(0.45)
     gap_y = Inches(0.35)
     total_w = img_w * 2 + gap_x
     start_x = (SLIDE_W - total_w) / 2
 
     arena_imgs = [
-        ("sim_RA.png", "Region A — Lorong & Ramp", start_x, Inches(1.2)),
-        ("sim_RA_rough.png", "Region A — Rough Floor", start_x + img_w + gap_x, Inches(1.2)),
-        ("sim_RB.png", "Region B — Lorong Sempit", start_x, Inches(1.2) + img_h + gap_y),
-        ("sim_RC2.png", "Region C — Area Terbuka", start_x + img_w + gap_x, Inches(1.2) + img_h + gap_y),
+        ("sim_RA.png", "Region A \u2014 Lorong & Ramp", start_x, Inches(1.2)),
+        ("sim_RA_rough.png", "Region A \u2014 Rough Floor", start_x + img_w + gap_x, Inches(1.2)),
+        ("sim_RB.png", "Region B \u2014 Lorong Sempit", start_x, Inches(1.2) + img_h + gap_y),
+        ("sim_RC2.png", "Region C \u2014 Area Terbuka", start_x + img_w + gap_x, Inches(1.2) + img_h + gap_y),
     ]
 
     for fname, label, ax, ay in arena_imgs:
@@ -1557,17 +1562,16 @@ def slide_arena(prs):
                      alignment=PP_ALIGN.CENTER)
         slide.shapes.add_picture(img_path, ax, ay, img_w, img_h)
 
-    # Simulator & robot info
     add_text_box(slide, MARGIN, Inches(6.15), Inches(11.5), Inches(0.35),
-                 "Platform: Mujoco Simulator  ·  Robot: Hexapod (6 kaki)  ·  "
-                 "Sensor: LiDAR 2D  ·  Peta: Known Map",
+                 "Platform: Mujoco Simulator  \u00b7  Robot: Hexapod (6 kaki)  \u00b7  "
+                 "Sensor: LiDAR 2D  \u00b7  Peta: Known Map",
                  font_size=Pt(11), color=BODY, bold=False)
 
-    add_slide_number(slide, 15)
+    add_slide_number(slide, 16)
 
 
 def slide_results_icp(prs):
-    """Slide 15: Hasil Pengujian — ICP Localization."""
+    """Slide 17: Hasil Pengujian — ICP Localization."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_RESULTS_S, GRAD_RESULTS_E)
 
@@ -1578,7 +1582,7 @@ def slide_results_icp(prs):
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     img_h = Inches(3.0)
-    img_w = img_h * (1500.0 / 1200.0)
+    img_w = int(img_h * (1500.0 / 1200.0))
     gap = Inches(0.5)
     total_w = img_w * 2 + gap
     start_x = (SLIDE_W - total_w) / 2
@@ -1606,7 +1610,7 @@ def slide_results_icp(prs):
                  "signifikan pada sumbu x dan yaw akibat variasi vertikal scan LiDAR.",
                  font_size=Pt(11), color=BODY, line_spacing=1.3)
 
-    add_slide_number(slide, 16)
+    add_slide_number(slide, 17)
 
 
 def _make_path_result_slide(prs, region_label, map_png, csf_csv, stats_csv, slide_num,
@@ -1616,7 +1620,7 @@ def _make_path_result_slide(prs, region_label, map_png, csf_csv, stats_csv, slid
     set_gradient_bg(slide, GRAD_RESULTS_S, GRAD_RESULTS_E)
 
     add_text_box(slide, MARGIN, Inches(0.3), Inches(10), Inches(0.5),
-                 f"HASIL PATH PLANNING — REGION {region_label}", font_name=FONT_TITLE,
+                 f"HASIL PATH PLANNING \u2014 REGION {region_label}", font_name=FONT_TITLE,
                  font_size=Pt(24), color=HEADING, bold=True)
     add_divider(slide, MARGIN, Inches(0.75), Inches(2.5))
 
@@ -1629,7 +1633,7 @@ def _make_path_result_slide(prs, region_label, map_png, csf_csv, stats_csv, slid
     try:
         from PIL import Image
         im = Image.open(img_path)
-        img_w = img_h * (im.width / im.height)
+        img_w = int(img_h * (im.width / im.height))
     except Exception:
         pass
     img_left = MARGIN
@@ -1643,12 +1647,12 @@ def _make_path_result_slide(prs, region_label, map_png, csf_csv, stats_csv, slid
 
     csf_widths = [Inches(0.6), Inches(1.0), Inches(1.0), Inches(1.0), Inches(1.0)]
     _add_csv_table(slide, tbl_left, tbl_top, csf_widths, csf_csv,
-                   title="Tabel CSF — Panjang, Waktu, Clearance, Waypoint")
+                   title="Tabel CSF \u2014 Panjang, Waktu, Clearance, Waypoint")
 
     stats_top = tbl_top + Inches(1.7)
     stats_widths = [Inches(0.6), Inches(1.0), Inches(1.0), Inches(1.0)]
     _add_csv_table(slide, tbl_left, stats_top, stats_widths, stats_csv,
-                   title="Tabel Deviasi — Mean/Max Cross Track & SD")
+                   title="Tabel Deviasi \u2014 Mean/Max Cross Track & SD")
 
     key_y = stats_top + Inches(1.8)
     add_rect(slide, right_x, key_y, Inches(4.6), Inches(1.0),
@@ -1663,9 +1667,9 @@ def _make_path_result_slide(prs, region_label, map_png, csf_csv, stats_csv, slid
 
 
 def slide_results_path_RA(prs):
-    """Slide 17: Hasil Path Planning — Region A."""
+    """Slide 18: Hasil Path Planning — Region A."""
     _make_path_result_slide(prs, "A", "map_with_paths_RA.png",
-                            "path_CSF_RA.csv", "path_stats_RA.csv", 17,
+                            "path_CSF_RA.csv", "path_stats_RA.csv", 18,
                             "CSF 100 = path terpendek (0.97 m) & paling efisien.\n"
                             "CSF 10/20/50 = path lebih panjang, di tengah lorong.\n"
                             "SD CSF 100 paling rendah (0.002 m) -> konsistensi tinggi.",
@@ -1673,9 +1677,9 @@ def slide_results_path_RA(prs):
 
 
 def slide_results_path_RB(prs):
-    """Slide 18: Hasil Path Planning — Region B."""
+    """Slide 19: Hasil Path Planning — Region B."""
     _make_path_result_slide(prs, "B", "map_with_paths_RB.png",
-                            "path_CSF_RB.csv", "path_stats_RB.csv", 18,
+                            "path_CSF_RB.csv", "path_stats_RB.csv", 19,
                             "CSF tidak signifikan: layout lorong sempit -> semua\n"
                             "CSF menghasilkan path hampir identik (~0.59 m).\n"
                             "SD sangat kecil (< 0.004 m) untuk semua CSF.",
@@ -1683,16 +1687,16 @@ def slide_results_path_RB(prs):
 
 
 def slide_results_path_RC(prs):
-    """Slide 19: Hasil Path Planning — Region C."""
+    """Slide 20: Hasil Path Planning — Region C."""
     _make_path_result_slide(prs, "C", "map_with_paths_RC.png",
-                            "path_CSF_RC.csv", "path_stats_RC.csv", 19,
+                            "path_CSF_RC.csv", "path_stats_RC.csv", 20,
                             "CSF 100 = path terpendek (2.52 m).\n"
                             "CSF 10 lebih aman di tengah lorong, lebih panjang.\n"
                             "Trade-off: path pendek vs deviasi ground truth.",
                             key_color=RGBColor(0x2E, 0x7D, 0x32))
 
 def slide_results_navigation(prs):
-    """Slide 20: Hasil Pengujian — Navigasi Penuh."""
+    """Slide 21: Hasil Pengujian — Navigasi Penuh."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_RESULTS_S, GRAD_RESULTS_E)
 
@@ -1703,7 +1707,7 @@ def slide_results_navigation(prs):
 
     # --- Left side: DWA tracking tables ---
     tbl_left = MARGIN
-    tbl_top = Inches(1.0)
+    tbl_top = Inches(1.05)
 
     track_widths = [Inches(0.9), Inches(1.15), Inches(1.55), Inches(1.55)]
     tbl1, h1, _ = _add_csv_table(slide, tbl_left, tbl_top, track_widths,
@@ -1788,11 +1792,11 @@ def slide_results_navigation(prs):
                      item, font_size=Pt(9), color=BODY, line_spacing=1.1)
         inty += Inches(0.22)
 
-    add_slide_number(slide, 20)
+    add_slide_number(slide, 21)
 
 
 def slide_conclusion(prs):
-    """Slide 18: Kesimpulan."""
+    """Slide 22: Kesimpulan."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_CLOSING_S, GRAD_CLOSING_E)
 
@@ -1832,11 +1836,11 @@ def slide_conclusion(prs):
                      card_w - Inches(0.4), Inches(1.2),
                      desc, font_size=Pt(12), color=BODY, line_spacing=1.45)
 
-    add_slide_number(slide, 21)
+    add_slide_number(slide, 22)
 
 
 def slide_future_work(prs):
-    """Slide 19: Saran / Future Work."""
+    """Slide 23: Saran / Future Work."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_gradient_bg(slide, GRAD_CLOSING_S, GRAD_CLOSING_E)
 
@@ -1885,11 +1889,11 @@ def slide_future_work(prs):
                      card_w - Inches(0.4), Inches(1.3),
                      desc, font_size=Pt(11), color=BODY, line_spacing=1.5)
 
-    add_slide_number(slide, 22)
+    add_slide_number(slide, 23)
 
 
 def slide_thanks(prs):
-    """Slide 20: Penutup / Thank You."""
+    """Slide 24: Penutup / Thank You."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     set_slide_bg(slide, DARK_BG)
 
@@ -1944,6 +1948,7 @@ def main():
     slide_outline(prs)
     slide_background(prs)
     slide_problem(prs)
+    slide_constraints(prs)
     slide_objectives(prs)
     slide_literature(prs)
     slide_prior_research(prs)

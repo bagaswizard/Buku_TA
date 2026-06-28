@@ -1,0 +1,31 @@
+\definecolor{colLokalisasi}{HTML}{B2EBF2}
+\begin{tikzpicture}[
+    regionbox/.style={
+        rectangle, draw, rounded corners=3pt, minimum width=5.5cm, minimum height=2.5cm,
+        align=center
+    },
+    nodecirc/.style={
+        circle, draw, minimum size=0.7cm, inner sep=1pt, fill=white, font=\small
+    },
+    arrow/.style={thick, ->, >=Stealth}
+]
+
+\node[regionbox, fill=colLokalisasi, label={above:\textbf{Region A}}] (boxA) at (2.75,0) {};
+\node[regionbox, fill=colLokalisasi, label={above:\textbf{Region B}}] (boxB) at (8.25,0) {};
+\node[regionbox, fill=colLokalisasi, label={above:\textbf{Region C}}] (boxC) at (13.75,0) {};
+
+\node[nodecirc, label={below:$v_0$~Init}] (v0) at (1.5, 0) {};
+\node[nodecirc, label={below:$v_1$~Entry$_{AB}$}] (v1) at (4.0, 0) {};
+\node[nodecirc, label={below:$v_2$~Exit$_{AB}$}] (v2) at (7.0, 0) {};
+\node[nodecirc, label={below:$v_3$~Entry$_{BC}$}] (v3) at (9.5, 0) {};
+\node[nodecirc, label={below:$v_4$~Exit$_{BC}$}] (v4) at (12.5, 0) {};
+\node[nodecirc, label={below:$v_5$~Goal}] (v5) at (15.0, 0) {};
+
+\draw[arrow] (v0) -- (v1);
+\draw[arrow] (v2) -- (v3);
+\draw[arrow] (v4) -- (v5);
+
+\draw[arrow, dashed] (v1) -- node[above] {} (v2);
+\draw[arrow, dashed] (v3) -- node[above] {} (v4);
+
+\end{tikzpicture}

@@ -2,7 +2,7 @@
 \label{chap:tinjauanpustaka}
 
 
-\section{Hasil Penelitian/Perancangan Terdahulu}
+\section{Hasil Penelitian Terdahulu}
 \label{sec:hasil_terdahulu}
 
 Penelitian oleh \parencite[]{macenski2023desks} adalah yang pertama membahas metode \emph{layered costmap}, yaitu sebuah metode untuk menambah lapisan secara sistematis dengan tiap lapisan mampu menyimpan informasi lingkungan tertentu. Tiap lapisan dapat mewakili sumber informasi, algoritma, ataupun hasil berbeda. Setiap siklus update dapat memperbarui informasi pada grid \emph{costmap}. Manfaatnya dengan menggunakan \emph{layered costmap} termasuk pembaruan yang lebih jelas, area pembaruan yang dinamis, proses pembaruan yang teratur, dan konfigurasi yang fleksibel, memungkinkan representasi nilai biaya yang kompleks dan perilaku navigasi yang peka konteks, seperti navigasi sosial.
@@ -14,12 +14,22 @@ Beberapa penelitian sebelumnya mengusulkan metode untuk mewakilkan informasi mul
 Beberapa penelitian membuat metode untuk secara otomatis mendeteksi perantara pergantian lantai seperti lift dan tangga. 
 Paper oleh \parencite{li2021autonomous} menunjukan robot melakukan navigasi gedung bertingkat dengan mengoperasikan lift secara otonom. Sedangka, penelitian oleh \parencite[]{lee2023autonomous} dan \parencite[]{kim2020mobile} memanfaatkan pengenalan tombol lift dengan \emph{deep learning} untuk memungkinkan robot beroperasi secara mandiri di antara lantai tanpa memerlukan modifikasi fasilitas lift yang ada atau sistem manajemen gedung tambahan. Penelitian oleh \parencite[]{zhu2020atv} mengusulkan metode \emph{real-time} untuk mendeteksi dan lokalisasi tangga dengan sensor LiDAR VL-16P yang digunakan untuk mendeteksi fitur geometris dari tangga 
 
-Untuk metode \emph{path planning},\parencite[]{xie2023autonomous} membuat sistem navigasi untuk melintasi lantai dan tangga dengan mengintegrasikan algoritma A* untuk perencanaan jalur awal dan \emph{DWA-based path following} untuk permukaan datar. Paper oleh \parencite[]{jung2024munes} mengusulkan skema untuk perencanaan lintasan menggunakan algoritma A* yang ditambah dengan fungsi biaya untuk mempertimbangkan faktor-faktor realistis seperti waktu tunggu lift, dan ini memungkinkan robot memilih mode pergerakan antar lantai (lift atau tangga).Penelitian oleh \parencite{palacin2023path} menggunakan \emph{static navigation tree} yang menggambarkan \emph{weighted paths} dalam bangunan bertingkat. Lalu, \emph{navigation tree} digunakan untuk merencanakan jalur dan mengestimasi durasi dari semua rute pengiriman menggunakan algoritma dijkstra. 
+Untuk metode \emph{path planning}, \parencite[]{xie2023autonomous} membuat sistem navigasi untuk melintasi lantai dan tangga dengan mengintegrasikan algoritma A* untuk perencanaan jalur awal dan \emph{DWA-based path following} untuk permukaan datar. Paper oleh \parencite[]{jung2024munes} mengusulkan skema untuk perencanaan lintasan menggunakan algoritma A* yang ditambah dengan fungsi biaya untuk mempertimbangkan faktor-faktor realistis seperti waktu tunggu lift, dan ini memungkinkan robot memilih mode pergerakan antar lantai (lift atau tangga). Penelitian oleh \parencite{palacin2023path} menggunakan \emph{static navigation tree} yang menggambarkan \emph{weighted paths} dalam bangunan bertingkat. Lalu, \emph{navigation tree} digunakan untuk merencanakan jalur dan mengestimasi durasi dari semua rute pengiriman menggunakan algoritma dijkstra. 
 
 \section{Teori Dasar}
 \label{sec:konsep dasar}
 
-% \subsection{Occupancy Grid}
+\subsection{Occupancy Grid}
+
+Occupancy Grid adalah salah satu metode pemetaan spasial yang paling fundamental dalam robotika, di mana ruang lingkungan direpresentasikan sebagai sebuah kisi (grid) yang terdiri dari sel-sel berukuran sama. Sejauh ini, domain yang paling umum dari peta \textit{occupancy grid} (kisi keterhunian) adalah peta denah lantai 2-D, yang menggambarkan irisan 2-D dari dunia 3-D. Peta 2-D seringkali sudah cukup, terutama ketika robot bernavigasi di atas permukaan datar dan sensor dipasang sedemikian rupa sehingga hanya menangkap satu irisan dari dunia tersebut. Teknik \textit{occupancy grid} dapat digeneralisasi menjadi representasi 3-D, tetapi membutuhkan beban komputasi yang signifikan.
+
+Misalkan $\mathbf{m}_i$ menyatakan sel kisi dengan indeks $i$. Sebuah peta \textit{occupancy grid} mempartisi ruang menjadi sejumlah sel kisi yang terbatas:
+
+\begin{equation}
+m = \sum_i \mathbf{m}_i \tag{9.2}
+\end{equation}
+
+Setiap $\mathbf{m}_i$ memiliki nilai keterhunian biner yang terikat padanya, yang menentukan apakah sebuah sel terisi (\textit{occupied}) atau kosong (\textit{free}). Kita akan menuliskan '1' untuk terisi dan '0' untuk kosong \parencite{thrun2002probabilistic}. 
 
 \subsection{Layered Costmap}
 Costmap adalah representasi grid dua dimensi dari lingkungan robot yang digunakan dalam sistem navigasi, dengan tiap sel pada grid memiliki harga yang terasosiasi dengannya. Pada \emph{costmap} modern, tiap sel merupakan integer dari 0 hingga 255 yang merepresentasikan biaya navigasi. Secara umum, algoritma perencanaan jalur akan mengutamakan melewati sel dengan harga rendah dan menghindari sel dengan harga tinggi. Metode \emph{costmap} memberikan keseimbangan antara kualitas informasi dan efisiensi algoritma. Sebagai ekstensi dari \emph{costmap}, digunakan konsep \emph{layered costmap}, yaitu struktur costmap yang terbagi menjadi beberapa layer terpisah berdasarkan jenis data atau fungsi spesifik (misalnya static map, obstacle, inflation, proxemic). Setiap layer memodifikasi master costmap secara terstruktur dan independen, memungkinkan sistem navigasi mempertimbangkan konteks yang lebih kompleks dan menghasilkan perilaku pergerakan robot yang lebih cerdas dan adaptif terhadap lingkungan \parencite[]{macenski2023desks}.
@@ -61,8 +71,6 @@ R = m \begin{bmatrix} \cos(\theta) & -\sin(\theta) \\ \sin(\theta) & \cos(\theta
 t = \bar{b} - R\bar{a}
 \end{equation}
 
-% \subsubsection{KNN}
-
 \subsection{Path Planning A* }
 \emph{Path planning} adalah proses perencanaan jalur geometris yang menghubungkan titik awal ke titik tujuan tanpa menabrak rintangan, biasanya dilakukan dalam ruang konfigurasi (configuration space) dengan mempertimbangkan berbagai batasan lingkungan. Metode \emph{path planning} umum mencakup teknik roadmap, cell decomposition, dan artificial potential field.
 \par
@@ -75,11 +83,8 @@ Pada persamaan diatas, g(n) adalah biaya kumulatif dari titik awal ke simpul n, 
 \par
 Pilihan heuristik yang baik sangat penting untuk kualitas dan efisiensi pencarian A*. Heuristik yang mengestimasi biaya nyata menjamin jalur terpendek, tetapi bisa memperluas terlalu banyak simpul. Sebaliknya, heuristik yang melebih-lebihkan dapat mempercepat pencarian ke tujuan, namun berisiko melambatkan jika jalur optimal menyimpang. Meskipun A* banyak digunakan karena menemukan jalur biaya minimum dan memastikan keberadaan jalur bebas, kelemahan utamanya adalah konsumsi waktu yang tinggi dan berat komputasi yang signifikan \parencite[]{damle2022dynamic}.
 
-% \subsection{Path Tracking Pure Pursuit}
-% \emph{Path tracking} atau trajectory planning bertugas menambahkan informasi waktu pada jalur tersebut, sehingga menghasilkan lintasan yang dapat diikuti oleh robot secara fisik. Proses ini mempertimbangkan batasan kinematik dan dinamik dari robot, termasuk kecepatan, percepatan, dan jerk, untuk menghasilkan lintasan yang halus, aman, dan efisien. \emph{path tracking} memastikan bahwa gerakan aktual robot mengikuti jalur yang telah direncanakan dengan akurat dan memastikan kestabilan robot serta performa yang sesuai dengan sistem kontrol yang digunakan
-% \parencite[]{yao2020control}.
-% \par
-% \emph{Pure-pursuit} adalah metode \emph{path tracking} geometris yang efektif untuk robot otonom. Cara kerjanya adalah membayangkan kendaraan mengikuti sebuah titik di jalur yang diberikan, beberapa jarak di depannya. Titik ini dipilih pada jarak pandang ke depan (look-ahead distance) yang ditentukan. Implementasinya meliputi penentuan lokasi kendaraan saat ini, menemukan titik terdekat di jalur, memilih titik tujuan pada jarak pandang ke depan konstan, mengubah koordinat titik tujuan ke kendaraan, menghitung kelengkungan, dan memperoleh sudut kemudi. Keunggulan metode ini adalah kemudahan penyetelan jarak pandang ke depan, kesederhanaan komputasi, dan ketiadaan istilah turunan \parencite[]{yao2020control}.
-% \begin{equation}
-%     \text{Error}_{\text{cte}} = \text{Error}_{\text{calculate}} + \text{Error}_{\text{tracking}}
-% \end{equation}
+\subsection{Path tracking}
+Pembuatan trajectory atau \emph{Path tracking} bertugas menambahkan informasi waktu pada jalur tersebut, sehingga menghasilkan lintasan yang dapat diikuti oleh robot secara fisik. Proses ini mempertimbangkan batasan kinematik dan dinamik dari robot, termasuk kecepatan, percepatan, dan jerk, untuk menghasilkan lintasan yang halus, aman, dan efisien. \emph{path tracking} memastikan bahwa gerakan aktual robot mengikuti jalur yang telah direncanakan dengan akurat dan memastikan kestabilan robot serta performa yang sesuai dengan sistem kontrol yang digunakan
+\parencite[]{yao2020control}.
+
+

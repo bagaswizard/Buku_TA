@@ -26,25 +26,33 @@ kedua \emph{region} terpisah oleh area \emph{unknown}.
 
 \subsection{Map Region}
 
-Peta untuk setiap \emph{region} diperoleh melalui proses \emph{mapping}  menggunakan Hector SLAM atau dibuat secara manual berdasarkan dimensi ukuran lingkungan asli. Hasil akhir peta masing-masing \emph{region} ditunjukkan pada Gambar \ref{fig:tiga_gambar}.
+Peta untuk setiap \emph{region} diperoleh melalui proses \emph{mapping}
+menggunakan Hector SLAM. Pada sistem ini, proses mapping dilakukan untuk setiap \emph{region} secara
+terpisah. Robot dijalankan secara manual (\emph{teleoperated}) di setiap area
+sambil mengumpulkan data \emph{laser scan}. Hector SLAM memproses data tersebut
+untuk menghasilkan \emph{occupancy grid} 2D masing-masing \emph{region}. Peta
+yang dihasilkan kemudian diperiksa dan dilakukan penyesuaian manual jika
+terdapat artefak atau ketidaksesuaian dengan dimensi lingkungan asli. Hasil
+akhir peta untuk setiap \emph{region} ditunjukkan pada
+Gambar~\ref{fig:tiga_gambar}.
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}[t]{0.3\textwidth}
     \centering
     \includegraphics[trim={1cm 1cm 1cm 1cm}, clip, width=\textwidth]{gambar/map_R1_edit.png}
     \caption{Map Region A}
     \label{fig:gambar1}
 \end{subfigure}
 \hfill
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}[t]{0.3\textwidth}
     \centering
     \includegraphics[width=\textwidth]{gambar/map_R2_real.png}
     \caption{Map Region B}
     \label{fig:gambar2}
 \end{subfigure}
 \hfill
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}[t]{0.3\textwidth}
     \centering
     \includegraphics[width=\textwidth]{gambar/map_r10_edit.png}
     \caption{Map Region C}
@@ -79,14 +87,14 @@ oleh satu \emph{region}. Banyaknya bagian tersebut ditentukan oleh jumlah peta
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}[t]{0.3\textwidth}
     \centering
     \includegraphics[width=\textwidth]{gambar/transition_map.png}
     \caption{Map transisi}
     \label{fig:transition_map}
 \end{subfigure}
 \qquad
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}[t]{0.3\textwidth}
     \centering
     \includegraphics[width=\textwidth]{gambar/transition_map_overlay.png}
     \caption{Map transisi dengan overlay region}
@@ -114,7 +122,7 @@ terhadap \emph{global frame of reference} dalam bentuk \emph{quaternion}, serta
 \end{tabular}
 \end{table}
 
-Koneksi antar \emph{region} bersifat linear, artinya setiap \emph{wormhole}
+Koneksi antar \emph{region} bersifat linear, artinya setiap pasangan
 hanya menghubungkan dua \emph{region} yang berdekatan secara langsung. Sebagai
 contoh, \emph{region} A hanya dapat terhubung ke \emph{region} B, dan \emph{region}
 B hanya dapat terhubung ke \emph{region} C. Tidak ada koneksi langsung dari
@@ -155,3 +163,80 @@ Posisi inisial & (375, 75) \\
 \end{table}
 
 Posisi awal robot ditentukan secara manual dalam koordinat piksel, lalu dikonversi ke koordinat dunia menggunakan informasi orientasi dan resolusi peta. Posisi ini digunakan sebagai titik awal untuk dalam sistem navigasi.
+
+\subsection{Representasi Topologi Graph}
+
+Untuk memodelkan hubungan antar \emph{region} secara formal, sistem navigasi
+merepresentasikan map transisi sebagai \emph{topological graph} tak-berarah
+$G = (V, E)$. Setiap titik penting dalam sistem navigasi dinyatakan sebagai
+\emph{node}, dan konektivitas antar titik tersebut dinyatakan sebagai \emph{edge}. Sistem ini digunakan untuk merencanakan lintasan dari posisi awal robot ke tujuan.
+
+\begin{table}[H]
+\centering
+\caption{Daftar node pada topological graph}
+\label{tab:topologi_node}
+\begin{tabular}{cllc}
+\toprule
+\textbf{Node} & \textbf{Label} & \textbf{Deskripsi} & \textbf{Region} \\
+\midrule
+$v_0$ & Init    & Posisi awal robot               & A \\
+$v_1$ & Entry$_{AB}$ & Titik transisi sisi A (pasangan 0) & A \\
+$v_2$ & Exit$_{AB}$  & Titik transisi sisi B (pasangan 0) & B \\
+$v_3$ & Entry$_{BC}$ & Titik transisi sisi B (pasangan 1) & B \\
+$v_4$ & Exit$_{BC}$  & Titik transisi sisi C (pasangan 1) & C \\
+$v_5$ & Goal    & Posisi tujuan                    & C \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Setiap \emph{node} $v_i \in V$ adalah titik acuan dalam koordinat dunia
+yang diperoleh dari metadata transisi (pixel transisi dan orientasi
+\emph{region}). Himpunan \emph{edge} $E$ didefinisikan sebagai berikut:
+
+\[
+E = \{ (v_0, v_1),\ (v_1, v_2),\ (v_2, v_3),\ (v_3, v_4),\ (v_4, v_5) \}
+\]
+
+\emph{Edge} dibagi menjadi dua tipe berdasarkan wilayah lintasannya:
+
+\begin{enumerate}[nosep]
+    \item \textbf{Intra-region}: $(v_0, v_1)$, $(v_2, v_3)$, $(v_4, v_5)$.
+    Edge ini berada di dalam satu \emph{region} dan dapat dilalui oleh
+    navigasi standar.
+    \item \textbf{Inter-region} (transisi): $(v_1, v_2)$ (pair 0, A--B)
+    dan $(v_3, v_4)$ (pair 1, B--C). Edge ini melintasi batas antar
+    \emph{region} dan memerlukan \emph{region switcher} dan \emph{path router} untuk melakukan navigasi.
+\end{enumerate}
+
+Partisi \emph{region} terhadap himpunan node adalah:
+
+\[
+R_A = \{v_0, v_1\},\quad
+R_B = \{v_2, v_3\},\quad
+R_C = \{v_4, v_5\}
+\]
+
+
+Representasi graph dari map transisi divisualisasikan pada
+Gambar~\ref{fig:topologi_graph}.
+
+\begin{figure}[H]
+\centering
+\input{bab/Metodologi/tikz_topologi_graph.tex}
+\caption{Representasi graph dari map transisi}
+\label{fig:topologi_graph}
+\end{figure}
+
+Dengan representasi graph ini, problem navigasi multi-\emph{region} dapat
+direduksi menjadi pencarian lintasan pada $G$. Misalnya, untuk perjalanan
+dari posisi awal ($v_0$) ke tujuan ($v_5$) melewati \emph{region} B,
+lintasan yang ditempuh adalah:
+
+\[
+P = (v_0, v_1, v_2, v_3, v_4, v_5)
+\]
+
+Lintasan ini berkorespondensi langsung dengan urutan \emph{step} yang
+dihasilkan oleh \emph{path router}, yaitu melewati pasangan 0 (A ke B) dan
+pasangan 1 (B ke C) secara berurutan. Karena graph $G$ bersifat tak-berarah,
+lintasan yang sama berlaku untuk arah sebaliknya (C ke A).

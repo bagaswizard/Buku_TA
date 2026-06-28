@@ -191,7 +191,7 @@ $\text{max\_iter}$ & 50 & Iterasi maksimum ICP \\
 $s$          & 2            & \emph{Random stride} subsampling \\
 $t_{\text{norm}}$ & $0.01$ m & Batas konvergensi translasi \\
 $r_{\text{norm}}$ & $0.01$ rad ($\approx 0.57^\circ$) & Batas konvergensi rotasi \\
-$k$          & 8            & Jumlah \emph{nearest neighbors} \\
+$k$          & 7            & Jumlah \emph{nearest neighbors} \\
 $r$          & 10           & Radius pencarian \emph{neighbor} \\
 \bottomrule
 \end{tabular}
@@ -359,6 +359,21 @@ Transition layer adalah lapisan yang menambahkan data area transisi ke dalam cos
 Lapisan ini juga memperluas area transisi dengan radius tertentu, sehingga robot dapat mendeteksi transisi sebelum benar-benar mencapai garis transisi. Hal ini membuat buffer zona deteksi di sekitar data transisi. 
 
 Tiap region di map memiliki metadata transisi unik yang menyimpan informasi relasi antar peta. Informasi tersebut termasuk orientasi relatif terhadap orientasi global yang dijadikan acuan.
+
+\subsection{Region Switcher}
+
+Region switcher bertugas mendeteksi kapan robot memasuki zona transisi
+dan melakukan perpindahan region beserta lompatan pose robot. Diagram
+alirnya ditunjukkan pada Gambar~\ref{fig:region_switcher_flow}.
+
+\begin{figure}[H]
+\centering
+\input{bab/Metodologi/tikz_region_switcher.tex}
+\caption{Diagram alir region switcher}
+\label{fig:region_switcher_flow}
+\end{figure}
+
+Centroid Calculation
 
 \subsection{Global Planner}
 

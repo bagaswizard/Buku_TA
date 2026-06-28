@@ -1,0 +1,59 @@
+\subsection{Studi Literatur}
+Tahap awal ini akan fokus pada pengumpulan dan pemahaman mendalam teori dasar layered \emph{costmap}. Selain itu, akan dipelajari berbagai algoritma navigasi, seperti A*, yang relevan untuk \emph{path planning} robot, serta pemahaman mengenai teknik lokalisasi, seperti ICP. Tujuannya adalah untuk membangun dasar teoritis yang kuat sebagai landasan perancangan dan implementasi sistem navigasi.
+\subsection{Perancangan Sistem}
+Pada tahap ini, struktur layered \emph{costmap} akan didesain secara rinci, termasuk penentuan jumlah lapisan dan jenis informasi yang akan dimuat pada setiap lapisan. Alur data dari berbagai sensor akan dirancang untuk memastikan informasi lingkungan dapat diintegrasikan dengan efisien ke dalam \emph{costmap}. Arsitektur sistem navigasi secara keseluruhan akan dibentuk, mempertimbangkan interaksi antara modul sensor lidar, lokalisasi, perencanaan jalur, dan kontrol gerak robot.
+\subsection{Pembuatan Arena Percobaan}
+Arena laboratorium akan disusun secara khusus untuk mensimulasikan lingkungan multi-level yang relevan dengan navigasi robot. Arena ini akan mencakup beberapa elevasi sederhana, seperti tanjakan atau platform bertingkat, yang memungkinkan robot untuk berpindah antar level. Desain arena akan mempertimbangkan berbagai kondisi lingkungan daerah gempa yang mungkin mempengaruhi kinerja navigasi robot. Ini juga akan mencakup penempatan landmark atau fitur yang dapat digunakan untuk lokalisasi dan navigasi.
+\subsection{Implementasi Navigasi}
+Modul layered \emph{costmap} yang telah dirancang akan diimplementasikan ke dalam sistem perangkat lunak robot, memastikan integrasi yang mulus dengan data sensor. Algoritma lokalisasi akan dikodekan dan disesuaikan untuk bekerja secara efektif dengan layered \emph{costmap}, memungkinkan robot mengetahui posisinya secara presisi di berbagai level. Terakhir, algoritma navigasi yang dipilih akan diintegrasikan untuk memungkinkan robot merencanakan dan mengeksekusi pergerakan antar titik tujuan, termasuk transisi antar elevasi.
+\subsection{Uji Coba dan Evaluasi}
+Pengujian akan dilakukan untuk menguji kemampuan robot dalam bernavigasi antar titik tujuan yang terletak pada level berbeda di arena percobaan. Pengujian ini akan mencakup skenario yang bervariasi, seperti navigasi melalui rintangan, menaiki dan menuruni elevasi, dan mencapai tujuan di lantai yang berbeda. Performa robot akan dievaluasi berdasarkan metrik seperti akurasi pencapaian tujuan, waktu tempuh, dan kelancaran pergerakan. Data dari uji coba akan dikumpulkan secara sistematis untuk analisis lebih lanjut.
+\subsection{Analisis Hasil}
+Data yang terkumpul dari tahap uji coba akan dianalisis secara mendalam untuk mengidentifikasi kekuatan dan kelemahan dari pendekatan navigasi yang menggunakan layered \emph{costmap}. Analisis juga akan mencakup identifikasi faktor-faktor yang mempengaruhi performa robot dan potensi perbaikan di masa mendatang.
+\subsection{Penyusunan Laporan}
+Seluruh hasil penelitian, mulai dari studi literatur, perancangan sistem, implementasi, hingga analisis hasil uji coba, akan didokumentasikan secara lengkap dalam bentuk laporan. Laporan ini akan disusun sesuai dengan standar penulisan ilmiah sebagai tugas akhir. Laporan akan merinci metodologi yang digunakan, temuan-temuan kunci, diskusi implikasi, serta kesimpulan dan saran untuk penelitian selanjutnya.
+
+% \chapter{JADWAL PENELITIAN}
+
+% Ubah tabel berikut sesuai dengan isi dari rencana kerja
+\newcommand{\w}{}
+\newcommand{\G}{\cellcolor{gray}}
+\begin{table}[H]
+  \captionof{table}{Tabel timeline}
+  \label{tbl:timeline}
+  \begin{tabular}{|p{3.5cm}|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+
+    \hline
+    \multirow{2}{*}{Kegiatan} & \multicolumn{16}{|c|}{Minggu}                                                                       \\
+    \cline{2-17}              &
+    1                         & 2                             & 3  & 4  & 5  & 6  & 7  & 8  & 9  & 10 & 11 & 12 & 13 & 14 & 15 & 16 \\
+    \hline
+
+    % Gunakan \G untuk mengisi sel dan \w untuk mengosongkan sel
+    Studi Literatur          &
+    \G                        & \G                            & \w & \w & \w & \w & \w & \w & \w & \w & \w & \w & \w & \w & \w & \w \\
+    \hline
+
+    Perancangan Sistem           &
+    \w                        & \w                            & \G & \G & \G & \G & \w & \w & \w & \w & \w & \w & \w & \w & \w & \w \\
+    \hline
+
+    Pembuatan Arena Percobaan              &
+    \w                        & \w                            & \w & \w & \w & \G & \G & \G & \w & \w & \w & \w & \w & \w & \w & \w \\
+    \hline
+
+    Implementasi Navigasi       &
+    \w                        & \w                            & \w & \w & \w & \w & \w & \G & \G & \G & \G & \w & \w & \w & \w & \w \\
+    \hline
+    Uji Coba dan Evaluasi       &
+    \w                        & \w                            & \w & \w & \w & \w & \w & \w & \w & \w & \G & \G & \G & \w & \w & \w \\
+    \hline
+    Analisis Hasil       &
+    \w                        & \w                            & \w & \w & \w & \w & \w & \w & \w & \w & \w & \w & \w & \G & \w & \w \\
+    \hline
+
+     Penyusunan Laporan      &
+    \w                        & \w                            & \w & \w & \w & \w & \w & \w & \w & \w & \w & \w & \w & \w & \G & \G \\
+    \hline
+  \end{tabular}
+\end{table}

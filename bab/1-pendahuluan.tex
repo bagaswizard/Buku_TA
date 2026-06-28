@@ -10,7 +10,11 @@ Robot bisa ikut berperan dalam membantu petugas SAR melaksanakan tugasnya. Robot
 
 Dalam implementasinya, robot darat SAR dapat dikendalikan manual oleh operator atau bisa otonom. Walaupun robot yang dikendalikan operator memiliki algoritma yang lebih sederhana, robot otonom juga memiliki peran pada operasi SAR, terutama pada daerah di mana infrastruktur komunikasinya rusak \parencite[]{zhang2023earthshaker}. Untuk bisa melakukan misi otonom di dalam bangunan, robot darat perlu bisa melakukan lokalisasi, menemukan jalur navigasi yang aman, dan mencapai posisi tujuan, pada lingkungan tidak terstruktur, seperti pada lingkungan indoor dengan banyak puing yang disebabkan oleh gempa. Meskipun beberapa robot mampu bernavigasi pada lingkungan tidak terstruktur, navigasi robot darat pada area indoor masih menjadi permasalahan untuk robot otonom.
 
-Di dalam tugas akhir ini, diusulkan sebuah metode untuk mencoba menjawab permasalahan tersebut. Pada implementasi navigasi untuk robot darat otonom, umum digunakan \emph{costmap} 2D untuk menyimpan informasi lingkungan. Metode ini terbatas saat robot perlu mencapai lokasi yang tidak terletak pada bidang yang sama. Untuk membenahi ini, sebuah metode untuk menyederhanakan informasi lingkungan 3D menjadi direpresentasikan oleh beberapa bidang \emph{costmap} 2D atau \emph{layered} \emph{costmap}. Tiap \emph{map} dapat mewakili sebuah lantai di dalam bangunan atau lingkungan indoor. Sebuah layer dapat juga menunjukan tangga penghubung antar lantai. Lalu, robot darat otonom dapat bergerak pada salah satu \emph{map} tertentu, kemudian berpindah ke \emph{map} lain sesuai posisinya di bangunan.
+Dalam proses pembuatan algoritma, sulit untuk diuji pada kondisi pasca gempa yang sebenarnya, sehingga diuji pada lingkungan yang mensimulasikan kondisi gempa. Lingkungan simulasi diadaptasi dari arena yang digunakan untuk Kontes Robot SAR Indonesia (KRSRI) 2024. Platform yang digunakan adalah robot hexapod yang dilengkapi dengan sensor LiDAR 2D. Keterbatasan LiDAR 2D pada lingkungan pasca gempa yang bertingkat merupakan tantangan tersendiri dalam implementasi sistem navigasi.
+
+Di dalam tugas akhir ini, diusulkan sebuah metode untuk mencoba menjawab permasalahan tersebut. Pada implementasi navigasi untuk robot darat otonom, umum digunakan \emph{occupancy grid} dan \emph{costmap} 2D untuk menyimpan informasi lingkungan. Metode ini terbatas saat robot perlu mencapai lokasi yang tidak terletak pada bidang yang sama. Untuk membenahi ini, sebuah metode untuk menyederhanakan informasi lingkungan 3D menjadi direpresentasikan oleh beberapa bidang \emph{costmap} 2D atau \emph{layered} \emph{costmap}. Tiap \emph{map} dapat mewakili sebuah lantai di dalam bangunan atau lingkungan indoor. Lalu, robot darat otonom dapat bergerak pada salah satu \emph{map} tertentu, kemudian berpindah ke \emph{map} lain sesuai posisinya di bangunan.
+
+
 \par\vspace{1.2cm}
 
 \section{Rumusan Masalah}
@@ -19,9 +23,9 @@ Di dalam tugas akhir ini, diusulkan sebuah metode untuk mencoba menjawab permasa
 % Ubah paragraf berikut sesuai dengan rumusan masalah dari tugas akhir
 Berdasarkan latar belakang pada bagian sebelumnya, terdapat beberapa inti masalah yang perlu dibahas. Permasalahan tersebut dijabarkan sebagai berikut:
 \begin{enumerate}
-  \item Bagaimana cara untuk merepresentasikan informasi lingkungan yang terdiri dari beberapa lantai menggunakan \emph{layered} \emph{costmap} untuk bisa digunakan pada algoritma navigasi antar lantai?
+  \item Bagaimana cara menggunakan \emph{layered} \emph{costmap} untuk mewakilkan informasi lingkungan 3D yang terdiri dari beberapa lantai sehingga bisa digunakan pada algoritma navigasi 2D?
   \item Bagaimana cara membuat algoritma lokalisasi, \emph{path planning}, dan \emph{path tracking} yang bisa bekerja pada algoritma navigasi yang menggunakan \emph{layered} \emph{costmap}?
-  \item Apakah dengan menggunakan metode navigasi antar lantai, robot darat otonom dapat melakukan navigasi hingga mencapai tujuan pada arena lab?
+  \item Apakah dengan menggunakan metode navigasi antar lantai, robot darat otonom dapat melakukan navigasi hingga mencapai tujuan pada lingkungan simulasi?
 \end{enumerate}
 
 \section{Batasan Masalah}
@@ -31,7 +35,7 @@ Dalam tugas akhir ini, metode multilayer \emph{costmap} yang dikembangkan tidak 
 \begin{enumerate}
   \item Pengujian dilakukan pada simulasi yang didesain untuk merekayasa kondisi pasca gempa. Arena dilengkapi dengan rekayasa rintangan tidak diketahui, tanjakan, dan permukaan tidak rata, yang dibuat pada skala lebih kecil. 
   \item Navigasi dilakukan oleh robot darat hexapod yang melakukan navigasi secara otonom, dengan bergerak dari titik awal menuju tujuan yang telah ditentukan. 
-  \item Algoritma navigasi yang digunakan digunakan pada kondisi lingkungan yang rintangan statis sudah diketahui.
+  \item Algoritma navigasi digunakan pada kondisi sudah diketahui lingkungan utamanya (\emph{known map}).
 \end{enumerate}
 
 

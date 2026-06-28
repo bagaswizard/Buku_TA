@@ -1,0 +1,24 @@
+Tugas akhir ini memanfaatkan perangkat keras dan perangkat lunak sebagai berikut:
+\subsection{Robot darat hexapod sebagai platform navigasi}
+Robot hexapod Phynix digunakan sebagai platform utama karena kemampuannya untuk bergerak stabil di medan tidak rata. Dengan enam kaki yang dapat dikendalikan secara individual, robot ini mampu menyesuaikan postur dan posisi untuk menjaga keseimbangan saat berpindah antar bidang atau lapisan \emph{costmap}. 
+\begin{figure} [H] \centering
+  \includegraphics[scale=0.6]{gambar/platform_robot.png}
+  \caption{Platform Navigasi Phynix }
+  \label{fig:platform_robot}
+\end{figure}
+\subsection{Sensor ydlidar-t-mini-plus}
+Sensor LiDAR 2D digunakan untuk mendeteksi rintangan yang ada di lingkungan sekitar robot secara real-time. LIDAR bekerja dengan memancarkan sinar laser dan mengukur waktu pantulan untuk menentukan jarak ke objek di sekitarnya. Data hasil pembacaan ini digunakan sebagai masukan untuk membentuk \emph{costmap} dan deteksi rintangan pada sistem navigasi. LiDAR yang digunakan adalah ydlidar-t-mini-plus dengan karakteristik frekuensi \emph{scan} 12 Hz, \emph{scan angle} $360^\circ$, resolusi sudut $0.54^\circ$, dan jarak maksimum 12m. LiDAR ini digunakan karena spesifikasinya yang bagus untuk navigasi dan ukurannya yang kecil.
+\begin{figure} [H] \centering
+  \includegraphics[scale=0.4]{gambar/ydlidar-t-mini-plus.jpg}
+  \caption{ydlidar-t-mini-plus \parencite{ShenzhenEAITechnology2024ydlidar}}
+  \label{fig:ydlidar}
+\end{figure}
+\subsection{Software visualisasi berupa Rviz}
+Rviz merupakan perangkat lunak visualisasi dari ROS yang digunakan untuk menampilkan data sensor, posisi robot, \emph{costmap}, serta jalur navigasi secara grafis. Dengan Rviz, pengguna dapat memonitor pergerakan robot dan memverifikasi apakah sistem navigasi dan lokalisasi berjalan dengan benar dalam lingkungan uji nyata.
+\subsection{Arena percobaan}
+Arena percobaan yang digunakan dalam penelitian ini adalah arena dari Kontes Robot SAR Indonesia (KRSRI) 2024. Arena ini didesain untuk merepresentasikan kondisi area pasca bencana dalam skala laboratorium, mencakup beberapa elevasi seperti tanjakan, permukaan tidak rata, dan rintangan yang meniru situasi nyata secara sederhana namun relevan untuk pengujian robot SAR.
+\begin{figure} [H] \centering
+  \includegraphics[scale=0.65]{gambar/arena_with_dimension.png}
+  \caption{Arena laboratorium \parencite[]{KRI2024Pedoman} }
+  \label{fig:arena_with_dimension}
+\end{figure}

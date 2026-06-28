@@ -1,0 +1,37 @@
+\begin{tikzpicture}[
+    node distance=1.2cm and 2cm,
+    startstop/.style={
+        rectangle, rounded corners=3pt, minimum width=2.8cm, minimum height=0.8cm,
+        align=center, draw, fill=colTransCost, font=\small\bfseries
+    },
+    process/.style={
+        rectangle, rounded corners=2pt, minimum width=4.2cm, minimum height=0.8cm,
+        align=center, draw, font=\small
+    },
+    decision/.style={
+        diamond, aspect=1.5, minimum width=3cm, minimum height=1cm,
+        align=center, draw, fill=colTransCost!40, font=\small
+    },
+    arrow/.style={thick, ->, >=Stealth}
+]
+
+\definecolor{colTransCost}{HTML}{E1BEE7}
+
+\node[startstop] (start) {Mulai};
+\node[process, below=of start] (receive) {Terima costmap transisi};
+\node[process, below=of receive] (check) {Cek pose robot};
+\node[decision, below=of check] (dec) {Robot di\\sel transisi?};
+\node[process, below=of dec] (wait) {Tunggu sebelum lompat\\\footnotesize selama $t = r / \lvert\vec{v}\rvert$};
+\node[process, below=of wait] (jump) {Lakukan lompatan\\\footnotesize(update pose \& region sekarang)};
+\node[startstop, below=of jump] (end) {Selesai};
+
+\draw[arrow] (start) -- (receive);
+\draw[arrow] (receive) -- (check);
+\draw[arrow] (check) -- (dec);
+\draw[arrow] (dec) -- node[right] {Ya} (wait);
+\draw[arrow] (wait) -- (jump);
+\draw[arrow] (jump) -- (end);
+
+\draw[arrow] (dec.west) -- node[above] {Tidak} ++(-2.5,0) |- (check.west);
+
+\end{tikzpicture}
