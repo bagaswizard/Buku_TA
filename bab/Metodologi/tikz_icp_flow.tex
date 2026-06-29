@@ -1,0 +1,22 @@
+\definecolor{colICP}{HTML}{B2EBF2}
+\begin{tikzpicture}[
+    node distance=0.4cm and 0.4cm,
+    process/.style={
+        rectangle, draw, rounded corners=3pt, minimum width=2cm, minimum height=1cm,
+        align=center, fill=colICP, font=\footnotesize
+    },
+    arrow/.style={thick, ->, >=Stealth}
+]
+
+\node[process] (scan) {LiDAR\\Scan};
+\node[process, right=of scan] (knn) {KNN\\Lookup};
+\node[process, right=of knn] (match) {Scan\\Matching};
+\node[process, right=of match] (svd) {SVD\\Solver};
+\node[process, right=of svd] (pose) {Pose\\($x,y,\theta$)};
+
+\draw[arrow] (scan) -- (knn);
+\draw[arrow] (knn) -- (match);
+\draw[arrow] (match) -- (svd);
+\draw[arrow] (svd) -- (pose);
+
+\end{tikzpicture}

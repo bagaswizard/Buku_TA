@@ -1,0 +1,22 @@
+\definecolor{colPathRouter}{HTML}{E1BEE7}
+\begin{tikzpicture}[
+    node distance=0.4cm and 0.4cm,
+    process/.style={
+        rectangle, draw, rounded corners=3pt, minimum width=2cm, minimum height=1cm,
+        align=center, fill=colPathRouter, font=\footnotesize
+    },
+    arrow/.style={thick, ->, >=Stealth}
+]
+
+\node[process] (goal) {Multi-Region\\Goal};
+\node[process, right=of goal] (graph) {Graph Nodes\\($v_0$--$v_5$)};
+\node[process, right=of graph] (route) {Build Route\\(A$\to$B$\to$C)};
+\node[process, right=of route] (sub) {Sequential\\Sub-Goals};
+\node[process, right=of sub] (send) {Send to\\Planner};
+
+\draw[arrow] (goal) -- (graph);
+\draw[arrow] (graph) -- (route);
+\draw[arrow] (route) -- (sub);
+\draw[arrow] (sub) -- (send);
+
+\end{tikzpicture}

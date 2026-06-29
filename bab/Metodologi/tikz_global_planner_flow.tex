@@ -1,0 +1,24 @@
+\definecolor{colGlobalPlan}{HTML}{C8E6C9}
+\begin{tikzpicture}[
+    node distance=0.4cm and 0.4cm,
+    process/.style={
+        rectangle, draw, rounded corners=3pt, minimum width=2cm, minimum height=1cm,
+        align=center, fill=colGlobalPlan, font=\footnotesize
+    },
+    arrow/.style={thick, ->, >=Stealth}
+]
+
+\node[process] (input) {Costmap\\+ Goal};
+\node[process, right=of input] (cost) {Cost\\Calc ($c_{\text{eff}}$)};
+\node[process, right=of cost] (pot) {Quadratic\\Potential};
+\node[process, right=of pot] (astar) {A*\\Expansion};
+\node[process, right=of astar] (grad) {Gradient\\Path};
+\node[process, right=of grad] (out) {Waypoints};
+
+\draw[arrow] (input) -- (cost);
+\draw[arrow] (cost) -- (pot);
+\draw[arrow] (pot) -- (astar);
+\draw[arrow] (astar) -- (grad);
+\draw[arrow] (grad) -- (out);
+
+\end{tikzpicture}

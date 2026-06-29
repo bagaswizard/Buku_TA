@@ -54,6 +54,13 @@ memperbarui posisi awal ICP pada region yang baru.
 
 \subsection{Lokalisasi Iterative Closest Point (ICP)}
 
+\begin{figure}[H]
+\centering
+\input{bab/Metodologi/tikz_icp_flow.tex}
+\caption{Diagram alir proses ICP}
+\label{fig:icp_flow}
+\end{figure}
+
 Sistem navigasi ini menggunakan algoritma Iterative Closest Point (ICP) yang digunakan untuk memperkirakan koreksi pose robot terhadap static occupancy grid map. ICP bekerja dengan mencocokkan titik-titik dari laser scan dengan titik-titik yang sesuai pada peta, lalu menghitung transformasi optimal yang meminimalkan jarak antara pasangan titik tersebut. Proses ini iteratif, di mana setiap iterasi memperbaiki estimasi pose robot hingga konvergen ke solusi yang stabil. Sebelum ICP, dilakukan prekomputasi KNN untuk mempercepat pencarian pasangan titik selama proses ICP. 
 
 \subsubsection{Prekomputasi KNN}
@@ -423,9 +430,9 @@ Layer ini memperluas obstacle dengan gradient cost, sehingga perencana path dapa
 \begin{equation}
 C(d) =
 \begin{cases}
-253, & \text{jika } d \leq r_{\text{inscribed}} \\[4pt]
-252 \cdot e^{-\alpha \cdot (d - r_{\text{inscribed}})}, & \text{jika } r_{\text{inscribed}} < d \leq R \\[4pt]
-0, & \text{jika } d > R
+253, & \text{if } d \leq r_{\text{inscribed}} \\[4pt]
+252 \cdot e^{-\alpha \cdot (d - r_{\text{inscribed}})}, & \text{if } r_{\text{inscribed}} < d \leq R \\[4pt]
+0, & \text{if } d > R
 \end{cases}
 \label{eq:inflation_function}
 \end{equation}
@@ -682,6 +689,13 @@ mengeksekusi lompatan dalam beberapa langkah berikut:
 
 \subsection{Global Planner}
 
+\begin{figure}[H]
+\centering
+\input{bab/Metodologi/tikz_global_planner_flow.tex}
+\caption{Diagram alir proses global planner}
+\label{fig:global_planner_flow}
+\end{figure}
+
 Global planner bertugas merencanakan jalur dari posisi robot menuju
 tujuan dalam skala luas menggunakan peta global. Algoritma yang
 digunakan adalah A* dengan \emph{wavefront expansion} pada
@@ -851,6 +865,13 @@ overflow} dan posisi berpindah ke sel tetangga.
 
 \subsection{Path Router}
 
+\begin{figure}[H]
+\centering
+\input{bab/Metodologi/tikz_path_router_flow.tex}
+\caption{Diagram alir proses path router}
+\label{fig:path_router_flow}
+\end{figure}
+
 Path router adalah komponen yang memungkinkan \emph{global planner}
 bekerja pada navigasi multi-\emph{region}. Ketika tujuan berada di
 \emph{region} yang berbeda dari posisi robot saat ini, \emph{path
@@ -893,6 +914,13 @@ dan memperbarui \emph{region} aktif berdasarkan data dari lokalisasi
 ICP.
 
 \subsection{Local Planner DWA}
+
+\begin{figure}[H]
+\centering
+\input{bab/Metodologi/tikz_dwa_flow.tex}
+\caption{Diagram alir proses DWA local planner}
+\label{fig:dwa_flow}
+\end{figure}
 
 \emph{Dynamic Window Approach} (DWA) adalah algoritma \emph{local
 planner} yang merencanakan pergerakan robot dalam jangka pendek.

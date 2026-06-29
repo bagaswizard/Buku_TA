@@ -1,0 +1,24 @@
+\definecolor{colDWA}{HTML}{FFE0B2}
+\begin{tikzpicture}[
+    node distance=0.4cm and 0.4cm,
+    process/.style={
+        rectangle, draw, rounded corners=3pt, minimum width=2cm, minimum height=1cm,
+        align=center, fill=colDWA, font=\footnotesize
+    },
+    arrow/.style={thick, ->, >=Stealth}
+]
+
+\node[process] (input) {Path + Costmap\\+ Pose};
+\node[process, right=of input] (sample) {Velocity\\Sampling};
+\node[process, right=of sample] (sim) {Trajectory\\Simulation};
+\node[process, right=of sim] (score) {7 Critics\\Scoring};
+\node[process, right=of score] (select) {Select\\Best};
+\node[process, right=of select] (out) {Velocity\\($v_x,v_y,\omega$)};
+
+\draw[arrow] (input) -- (sample);
+\draw[arrow] (sample) -- (sim);
+\draw[arrow] (sim) -- (score);
+\draw[arrow] (score) -- (select);
+\draw[arrow] (select) -- (out);
+
+\end{tikzpicture}

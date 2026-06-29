@@ -1,74 +1,53 @@
-# Plan: Rapikan `\subsection{Local Planner DWA}`
+# Plan: Flowchart Horizontal per Subsection Bab 3
 
 ## Objective
-Perbaiki tata bahasa, struktur, dan konsistensi pada section Local Planner DWA (baris 901–1061 di `sistem_navigasi.tex`). Hapus komentar pseudocode yang tidak terpakai, ganti judul campuran Inggris-Indonesia, dan tambah paragraf penjelas.
+Buat 4 flowchart TikZ horizontal untuk masing-masing subsection di Bab 3 (sistem_navigasi.tex): ICP, Global Planner, Path Router, DWA.
 
-## File
-`bab/Metodologi/sistem_navigasi.tex` — baris 901–1061
+## Files to Create (4 TikZ files in `bab/Metodologi/`)
 
-## Current Issues
-| Baris | Masalah |
-|-------|---------|
-| 955 | Rumus total cost terlalu panjang dalam satu baris |
-| 957–963 | 7 critic weights dalam komentar |
-| 965 & 979 | Rumus `C_obs` duplikasi |
-| 977 | `Mode sum scores` judul Inggris |
-| 983 | `\subsubsection{kalkulasi Cost}` — huruf kecil, campuran Inggris-Indonesia |
-| 985 | Paragraf fragment satu kalimat |
-| 987–996 | `Wavefront Propagation` — komentar pseudocode |
-| 1000–1045 | 6 judul (Scoring Mode, dst) sebagai teks biasa tanpa format |
-| 1046 | `Seleksi Trajectory terbaik` tanpa subbab |
-| spread | Komentar `%` pseudocode tak terpakai di banyak tempat |
+### 1. `tikz_icp_flow.tex`
+- Warna: cyan (`colLokalisasi`, #B2EBF2)
+- Node (5): LiDAR Scan → KNN Lookup (precomputed) → Scan Matching → SVD Solver → Pose (x, y, θ)
+- Insert: setelah `\subsection{Lokalisasi Iterative Closest Point (ICP)}` line 55
 
-## Restructured Plan
+### 2. `tikz_global_planner_flow.tex`
+- Warna: hijau (`#C8E6C9`)
+- Node (6): Costmap + Goal → Cost Calculation (c_eff) → Quadratic Potential → A* Expansion → Gradient Path → Waypoints / Path
+- Insert: setelah `\subsection{Global Planner}` line 683
 
-Replace lines 901–1061 with:
+### 3. `tikz_path_router_flow.tex`
+- Warna: ungu (`colTransCost`, #E1BEE7)
+- Node (5): Multi-Region Goal → Graph Nodes (v₀-v₅) → Build Route (A→B→C) → Sequential Sub-Goals → Send to Global Planner
+- Insert: setelah `\subsection{Path Router}` line 852
 
-### 1. Paragraf pembuka (baris 900–912 diganti)
-Penjelasan singkat DWA sebagai local planner, peran dalam navigasi. Pertahankan 5 langkah utama dengan bahasa yang lebih lancar.
+### 4. `tikz_dwa_flow.tex`
+- Warna: oranye (`#FFE0B2`)
+- Node (6): Path + Costmap + Pose → Velocity Sampling → Trajectory Sim → 7 Critics Scoring → Select Best → Velocity (v_x, v_y, ω)
+- Insert: setelah `\subsection{Local Planner DWA}` line 895
 
-### 2. `\subsubsection{Velocity Window}` (existing, perbaiki)
-- Rapikan penjelasan dynamic window
-- Rumus `v_min`, `v_max` dipisah per baris
+## File to Edit (1 file)
 
-### 3. `\subsubsection{Velocity Sampling}` (existing, biarkan)
-Sudah cukup rapi.
+### `sistem_navigasi.tex`
+Tambah `\input` dalam `figure` environment setelah masing-masing `\subsection` header:
 
-### 4. `\subsubsection{Model Kinematik}` (existing, biarkan)
-Sudah cukup rapi.
+```latex
+\begin{figure}[H]
+\centering
+\input{bab/Metodologi/tikz_icp_flow.tex}
+\caption{Diagram alir proses ICP}
+\label{fig:icp_flow}
+\end{figure}
+```
 
-### 5. `\subsubsection{Penilaian Trajectory}` (baru — ganti "Penilaian Trayektori")
-- Rumus total cost dipecah per komponen (multi-line)
-- Tabel 7 critics dengan bobot default (ganti komentar lines 957–963)
-- Rumus `C_obs` (satu saja, hapus duplikasi)
-- Collision checking diintegrasikan ke paragraf
-- Hapus komentar `%` pseudocode
+(Pattern sama untuk keempatnya, dengan label unik: `fig:icp_flow`, `fig:global_planner_flow`, `fig:path_router_flow`, `fig:dwa_flow`)
 
-### 6. `\subsubsection{Kalkulasi Biaya dengan MapGrid}` (baru — ganti "kalkulasi Cost")
-- Judul Indonesia konsisten
-- BFS wavefront propagation: komentar `%` diintegrasikan ke paragraf
-- Path costs, goal costs, forward point shift, goal front, alignment costs sebagai sub-paragraf dengan `\textbf{bold}`
-- Hapus komentar `%` pseudocode
-
-### 7. `\subsubsection{Seleksi Trajectory}` (baru)
-- Paragraf pembuka singkat
-- Listing pseudocode tetap dipertahankan
-- Early termination sebagai paragraf
-
-## Changes Summary
-| Perubahan | Detail |
-|-----------|--------|
-| Hapus | Duplikasi rumus `C_obs` (baris 979) |
-| Hapus | Semua komentar `%` pseudocode (lines 957–963, 969–971, 989–995, 1012–1024, 1036, 1048) |
-| Ganti | `Penilaian Trayektori` → `Penilaian Trajectory` (konsisten) |
-| Ganti | `kalkulasi Cost` → `Kalkulasi Biaya dengan MapGrid` |
-| Ganti | `Wavefront Propagation` → diintegrasi ke paragraf |
-| Ganti | `Scoring Mode`, `Forward Point Shift`, dll → sub-paragraf dalam subbab |
-| Tambah | Tabel 7 critics (ganti komentar) |
-| Tambah | Paragraf penjelas untuk setiap subbab |
-| Biarkan | Rumus, listing pseudocode, konten teknis yang valid |
+## Style TikZ
+- Kotak: `rectangle, draw, rounded corners=3pt, minimum width=2.5cm, minimum height=1cm, align=center, font=\small`
+- Panah: `->`, `>=Stealth`
+- Label input/output: `font=\footnotesize\itshape` di bawah node
+- Kecilkan `node distance` agar muat horizontal (0.8cm antar node)
 
 ## Validation
-- Kompilasi `latexmk -pdf` — pastikan tidak ada error
-- Verifikasi semua `\label` dan `\ref` masih valid
-- Pastikan tidak ada duplikasi konten
+- `latexmk -pdf` — pastikan semua 4 figure terkompilasi tanpa error
+- Verifikasi caption konsisten antar keempat figure
+- Verifikasi label unik tidak bentrok
