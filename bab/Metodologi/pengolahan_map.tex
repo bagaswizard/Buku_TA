@@ -77,7 +77,7 @@ ROI didefinisikan sebagai area yang mengandung piksel gelap (nilai < threshold),
 $$\text{ROI} = \{(x,y) : I(x,y) < T\}$$
 
 dimana, $I(x,y)$ adalah nilai intensitas piksel pada koordinat $(x,y)$,
-$T$ adalah threshold
+$T$ adalah threshold.
 
 Peta gabungan akhir tersusun dari beberapa bagian, dan setiap bagian ditempati
 oleh satu \emph{region}. Banyaknya bagian tersebut ditentukan oleh jumlah peta
@@ -114,7 +114,7 @@ terhadap \emph{global frame of reference} dalam bentuk \emph{quaternion}, serta
 \label{tab:transitions}
 \begin{tabular}{cccc}
 \toprule
-\textbf{Pasangan} & \textbf{Region} & \textbf{Pixel A $(x, y)$} & \textbf{Pixel B $(x, y)$} \\
+\textbf{Pasangan} & \textbf{Region} & \textbf{Seed Entry $(x, y)$} & \textbf{Seed Exit $(x, y)$} \\
 \midrule
 0 & A -- B & (354, 206) & (106, 328) \\
 1 & B -- C & (106, 436) & (135, 187) \\
@@ -127,7 +127,7 @@ hanya menghubungkan dua \emph{region} yang berdekatan secara langsung. Sebagai
 contoh, \emph{region} A hanya dapat terhubung ke \emph{region} B, dan \emph{region}
 B hanya dapat terhubung ke \emph{region} C. Tidak ada koneksi langsung dari
 \emph{region} A ke \emph{region} C. Setiap pasangan direpresentasikan oleh dua
-piksel, yaitu \emph{pixel A} dan \emph{pixel B}, yang menandai lokasi garis
+piksel, yaitu \emph{Seed Entry} dan \emph{Seed Exit}, yang menandai lokasi garis
 transisi pada peta transisi. 
 
 \begin{table}[H]
@@ -194,9 +194,9 @@ Setiap \emph{node} $v_i \in V$ adalah titik acuan dalam koordinat dunia
 yang diperoleh dari metadata transisi (pixel transisi dan orientasi
 \emph{region}). Himpunan \emph{edge} $E$ didefinisikan sebagai berikut:
 
-\[
+\begin{equation}
 E = \{ (v_0, v_1),\ (v_1, v_2),\ (v_2, v_3),\ (v_3, v_4),\ (v_4, v_5) \}
-\]
+\end{equation}
 
 \emph{Edge} dibagi menjadi dua tipe berdasarkan wilayah lintasannya:
 
@@ -211,11 +211,11 @@ E = \{ (v_0, v_1),\ (v_1, v_2),\ (v_2, v_3),\ (v_3, v_4),\ (v_4, v_5) \}
 
 Partisi \emph{region} terhadap himpunan node adalah:
 
-\[
+\begin{equation}
 R_A = \{v_0, v_1\},\quad
 R_B = \{v_2, v_3\},\quad
 R_C = \{v_4, v_5\}
-\]
+\end{equation}
 
 
 Representasi graph dari map transisi divisualisasikan pada
@@ -233,9 +233,9 @@ direduksi menjadi pencarian lintasan pada $G$. Misalnya, untuk perjalanan
 dari posisi awal ($v_0$) ke tujuan ($v_5$) melewati \emph{region} B,
 lintasan yang ditempuh adalah:
 
-\[
+\begin{equation}
 P = (v_0, v_1, v_2, v_3, v_4, v_5)
-\]
+\end{equation}
 
 Lintasan ini berkorespondensi langsung dengan urutan \emph{step} yang
 dihasilkan oleh \emph{path router}, yaitu melewati pasangan 0 (A ke B) dan

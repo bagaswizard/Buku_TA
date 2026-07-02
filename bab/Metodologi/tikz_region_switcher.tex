@@ -1,15 +1,15 @@
 \begin{tikzpicture}[
-    node distance=1.2cm and 2cm,
+    node distance=1.3cm and 2.0cm,
     startstop/.style={
-        rectangle, rounded corners=3pt, minimum width=2.8cm, minimum height=0.8cm,
+        rectangle, rounded corners=12pt, minimum width=2.8cm, minimum height=0.8cm,
         align=center, draw, fill=colTransCost, font=\small\bfseries
     },
     process/.style={
-        rectangle, rounded corners=2pt, minimum width=4.2cm, minimum height=0.8cm,
+        rectangle, rounded corners=2pt, minimum width=5.0cm, minimum height=0.8cm,
         align=center, draw, font=\small
     },
     decision/.style={
-        diamond, aspect=1.5, minimum width=3cm, minimum height=1cm,
+        diamond, aspect=1.5, minimum width=3.5cm, minimum height=1cm,
         align=center, draw, fill=colTransCost!40, font=\small
     },
     arrow/.style={thick, ->, >=Stealth}
@@ -17,21 +17,33 @@
 
 \definecolor{colTransCost}{HTML}{E1BEE7}
 
+% --- Main flow ---
 \node[startstop] (start) {Mulai};
-\node[process, below=of start] (receive) {Terima costmap transisi};
-\node[process, below=of receive] (check) {Cek pose robot};
-\node[decision, below=of check] (dec) {Robot di\\sel transisi?};
-\node[process, below=of dec] (wait) {Tunggu sebelum lompat\\\footnotesize selama $t = r / \lvert\vec{v}\rvert$};
-\node[process, below=of wait] (jump) {Lakukan lompatan\\\footnotesize(update pose \& region sekarang)};
+\node[process, below=of start] (roi) {ROI sel Ekspansi ($E$) di \emph{transition costmap}\\[2pt]\footnotesize Hitung \emph{centroids} $E$};
+\node[decision, below=of roi, yshift=-0.4cm] (trans) {Robot di\\sel ekspansi?};
+\node[process, minimum height=1.2cm, below=of trans] (icp) {Mulai \emph{transition mode}\\[2pt]\footnotesize ICP dimatikan dan mulai\\\footnotesize \emph{timer timeout} transisi};
+\node[decision, below=of icp, yshift=-0.4cm] (wait) {Pitch melebihi \emph{threshold}\\atau \emph{timeout}?};
+\node[process, minimum height=1.0cm, below=of wait] (jump) {\emph{Transition mode} selesai\\\footnotesize \emph{Update} pose dan ICP diaktifkan};
 \node[startstop, below=of jump] (end) {Selesai};
 
-\draw[arrow] (start) -- (receive);
-\draw[arrow] (receive) -- (check);
-\draw[arrow] (check) -- (dec);
-\draw[arrow] (dec) -- node[right] {Ya} (wait);
-\draw[arrow] (wait) -- (jump);
+% --- Junction circles on the main path ---
+\path (roi.south) -- (trans.north) node[midway, circle, draw, fill=colTransCost, inner sep=0pt, minimum size=20pt] (c1) {};
+\path (icp.south) -- (wait.north) node[midway, circle, draw, fill=colTransCost, inner sep=0pt, minimum size=20pt] (c2) {};
+
+% --- Forward arrows (split at circles) ---
+\draw[arrow] (start) -- (roi);
+\draw[arrow] (roi) -- (c1);
+\draw[arrow] (c1) -- (trans);
+\draw[arrow] (trans) -- node[right] {Ya} (icp);
+\draw[arrow] (icp) -- (c2);
+\draw[arrow] (c2) -- (wait);
+\draw[arrow] (wait) -- node[right] {Ya} (jump);
 \draw[arrow] (jump) -- (end);
 
-\draw[arrow] (dec.west) -- node[above] {Tidak} ++(-2.5,0) |- (check.west);
+% --- Loop back: Tidak from trans → circle 1 ---
+\draw[arrow] (trans.west) -- node[above, pos=0.3] {Tidak} ++(-1.0,0) |- (c1);
+
+% --- Loop back: Tidak from wait → circle 2 ---
+\draw[arrow] (wait.west) -- node[above, pos=0.3] {Tidak} ++(-1.0,0) |- (c2);
 
 \end{tikzpicture}

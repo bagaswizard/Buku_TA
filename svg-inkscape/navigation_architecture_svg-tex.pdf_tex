@@ -38,7 +38,7 @@
   \newcommand*\fsize{\dimexpr\f@size pt\relax}%
   \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
   \ifx\svgwidth\undefined%
-    \setlength{\unitlength}{423.3825bp}%
+    \setlength{\unitlength}{423.0075bp}%
     \ifx\svgscale\undefined%
       \relax%
     \else%
@@ -50,7 +50,7 @@
   \global\let\svgwidth\undefined%
   \global\let\svgscale\undefined%
   \makeatother%
-  \begin{picture}(1,0.65809286)%
+  \begin{picture}(1,0.65778976)%
     \lineheight{1}%
     \setlength\tabcolsep{0pt}%
     \put(0,0){\includegraphics[width=\unitlength,page=1]{navigation_architecture_svg-tex.pdf}}%

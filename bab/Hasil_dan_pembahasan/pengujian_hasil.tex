@@ -274,6 +274,8 @@ navigasi di Region C karena memberikan keseimbangan terbaik antara efisiensi
 jalur (lebih pendek) dan \emph{clearance} terhadap \emph{obstacle} yang
 masih memadai.
 
+\subsection{Hasil Deviasi Path}
+
 \begin{table}[H]
 \centering
 \csvreader[tabular={cccc},
@@ -331,46 +333,62 @@ lintasan \emph{path} secara signifikan.
 
 Pada Region C, CSF 100 menghasilkan \emph{path} yang lebih pendek dan
 efisien, namun deviasinya terhadap \emph{ground truth} justru paling
-tinggi dibandingkan nilai CSF lainnya. Hal ini menunjukkan adanya
-\emph{trade-off}: \emph{path} yang lebih pendek belum tentu memiliki
+tinggi dibandingkan nilai CSF lainnya. Hal ini menunjukkan \emph{path} yang lebih pendek belum tentu memiliki
 deviasi lebih rendah terhadap referensi, karena \emph{ground truth} itu
-sendiri dirancang berdasarkan jalur yang lebih konservatif. Meskipun
+sendiri dirancang berdasarkan jalur yang . Meskipun
 demikian, dalam konteks navigasi, panjang \emph{path} yang lebih pendek
 sering kali lebih diutamakan selama deviasi masih dalam batas aman.
 
 \section{Hasil dan Analisis DWA Local Planner}
-\begin{table}[H]
-\centering
-\csvreader[tabular={cccc},
-           table head={\toprule \thead{Region} & \thead{Waktu\\(s)} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} \\ \midrule},
-           late after line={\\\hline}]
-  {lampiran/path_track.csv}{1=\a,2=\b,3=\c,4=\d}{\a & \b & \c & \d}
-\caption{Hasil tracking path}
-\label{tab:path_tracking}
-\end{table}
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={cccc},
-           table head={\toprule \thead{Region} & \thead{Waktu\\(s)} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} \\ \midrule},
-           late after line={\\\hline}]
-  {lampiran/path_track_rough.csv}{1=\a,2=\b,3=\c,4=\d}{\a & \b & \c & \d}
-\caption{Hasil tracking path kondisi gempa}
-\label{tab:path_tracking_rough}
+\footnotesize
+\begin{tabular}{c|c|c|c|c|c|c}
+\toprule
+\thead{Percobaan} & \thead{Mean CTE\\A (m)} & \thead{Mean CTE\\B (m)} & \thead{Mean CTE\\C (m)} & \thead{Max CTE\\A (m)} & \thead{Max CTE\\B (m)} & \thead{Max CTE\\C (m)} \\
+\midrule
+1 & 0.009576 & 0.028042 & 0.051642 & 0.022214 & 0.079888 & 0.182401 \\
+2 & 0.012385 & 0.027261 & 0.058659 & 0.03001 & 0.085333 & 0.175021 \\
+3 & 0.006878 & 0.032313 & 0.048686 & 0.017482 & 0.101489 & 0.149008 \\
+4 & 0.012966 & 0.022426 & -- & 0.025928 & 0.080275 & -- \\
+5 & 0.010471 & 0.023502 & 0.053426 & 0.024355 & 0.085748 & 0.150631 \\
+6 & 0.012881 & 0.02536 & 0.058164 & 0.027141 & 0.084145 & 0.15028 \\
+7 & 0.004362 & 0.040043 & 0.041391 & 0.01086 & 0.107007 & 0.163038 \\
+8 & 0.009971 & 0.016584 & -- & 0.018826 & 0.063391 & -- \\
+9 & 0.005387 & 0.037433 & 0.038019 & 0.020374 & 0.099163 & 0.187151 \\
+10 & 0.007621 & 0.035032 & 0.034088 & 0.018544 & 0.106812 & 0.178197 \\
+Mean & 0.008695 & 0.031123 & 0.048009 & 0.021373 & 0.093698 & 0.166966 \\
+\bottomrule
+\end{tabular}
+\caption{Rangkuman cross track error per run}
+\label{tab:dwa_rangkuman_ct}
 \end{table}
 
 Pengujian \emph{DWA planner} bertujuan untuk mengevaluasi kemampuannya dalam
-mengikuti \emph{global path} yang telah direncanakan sebelumnya. Hasil
-\emph{tracking} untuk kondisi normal dan kondisi gempa masing-masing
-dirangkum pada Tabel~\ref{tab:path_tracking} dan
-Tabel~\ref{tab:path_tracking_rough}. Pada kondisi normal, \emph{DWA planner}
-dapat mengikuti \emph{global path} dengan baik, tercermin dari nilai
-\emph{mean cross track error} dan \emph{max cross track error} yang relatif
-rendah. Sebaliknya, pada kondisi gempa, nilai \emph{max cross track error}
-meningkat secara signifikan. Hal ini terjadi karena terdapat
-\emph{obstacle} yang tidak diketahui oleh \emph{global path}, namun terdeteksi oleh sensor LiDAR saat navigasi
-berlangsung. Ketika \emph{obstacle} tersebut berada tepat pada lintasan
-\emph{global path}, \emph{DWA planner} terpaksa menghasilkan
-\emph{trajectory} yang menyimpang menjauhi \emph{global path} untuk
-menghindari tabrakan. Simpangan inilah yang tercermin sebagai nilai
-\emph{max cross track error} yang lebih besar.
+mengikuti \emph{global path} yang telah direncanakan sebelumnya. Nilai yang
+dievaluasi adalah \emph{cross track error} (CTE), yaitu jarak tegak lurus antara
+posisi robot pada \emph{trajectory} aktual dan titik terdekat pada \emph{global
+path}. CTE menunjukkan seberapa besar deviasi antara lintasan yang dihasilkan
+oleh \emph{local planner} terhadap lintasan referensi yang telah direncanakan
+oleh \emph{global planner}. Pada region A, nilai \emph{mean CTE} sangat rendah
+($0.0087$ m) dengan \emph{max CTE} $0.0214$ m, menunjukkan bahwa DWA
+mengikuti \emph{global path} dengan  presisi pada lintasan lurus dan
+sederhana. Pada region B, \emph{mean CTE} sedikit meningkat menjadi $0.0311$ m
+dengan \emph{max CTE} $0.0937$ m, yang masih tergolong rendah mengingat lorong
+sempit pada region ini memberikan ruang bergerak yang lebih terbatas bagi robot.
+
+Pada region C, \emph{max cross track error} meningkat signifikan menjadi
+$0.1670$ m, hampir delapan kali lipat dibandingkan region A. Peningkatan ini
+disebabkan oleh keberadaan \emph{obstacle} yang tidak tercatat pada
+\emph{global costmap} (unknown obstacle) dan hanya terdeteksi oleh sensor
+LiDAR saat navigasi berlangsung. Ketika \emph{obstacle} tersebut berada tepat
+pada lintasan \emph{global path}, \emph{DWA planner} tidak memiliki pilihan
+selain menghasilkan \emph{trajectory} alternatif yang menyimpang dari
+\emph{global path} untuk menghindari tabrakan. Simpangan inilah yang tercermin
+sebagai lonjakan nilai \emph{max cross track error}. Meskipun demikian,
+\emph{mean CTE} region C tetap terkendali pada $0.0480$ m, menandakan bahwa
+setelah berhasil melewati \emph{obstacle}, DWA kembali mengikuti \emph{global
+path} dengan baik. Perilaku ini membuktikan bahwa DWA mampu menyeimbangkan
+antara \emph{obstacle avoidance} dan \emph{path following} secara real-time.
+

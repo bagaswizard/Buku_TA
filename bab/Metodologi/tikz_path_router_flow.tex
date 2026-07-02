@@ -1,22 +1,53 @@
+\usetikzlibrary{shapes.symbols}
 \definecolor{colPathRouter}{HTML}{E1BEE7}
 \begin{tikzpicture}[
-    node distance=0.4cm and 0.4cm,
+    node distance=1.0cm and 2.5cm,
+    startstop/.style={
+        rectangle, rounded corners=12pt, minimum width=3.0cm, minimum height=0.8cm,
+        align=center, draw, fill=colPathRouter, font=\small\bfseries
+    },
     process/.style={
-        rectangle, draw, rounded corners=3pt, minimum width=2cm, minimum height=1cm,
-        align=center, fill=colPathRouter, font=\footnotesize
+        rectangle, rounded corners=2pt, minimum width=5.0cm, minimum height=0.8cm,
+        align=center, draw, font=\small
+    },
+    decision/.style={
+        diamond, aspect=1.5, minimum width=3.5cm, minimum height=1cm,
+        align=center, draw, fill=colPathRouter!40, font=\small
     },
     arrow/.style={thick, ->, >=Stealth}
 ]
 
-\node[process] (goal) {Multi-Region\\Goal};
-\node[process, right=of goal] (graph) {Graph Nodes\\($v_0$--$v_5$)};
-\node[process, right=of graph] (route) {Build Route\\(A$\to$B$\to$C)};
-\node[process, right=of route] (sub) {Sequential\\Sub-Goals};
-\node[process, right=of sub] (send) {Send to\\Planner};
+% --- Main flow ---
+\node[startstop] (start) {Mulai};
+\node[process, below=of start] (goal) {Terima \emph{goal}};
+\node[decision, below=of goal, yshift=-0.2cm] (same) {Goal di\\\emph{region} sama?};
 
-\draw[arrow] (goal) -- (graph);
-\draw[arrow] (graph) -- (route);
-\draw[arrow] (route) -- (sub);
-\draw[arrow] (sub) -- (send);
+% Direct path (Ya)
+\node[process, below=of same] (direct) {Kirim \emph{goal} ke\\\emph{global planner}};
+
+% Multi-region path (Tidak)
+\node[process, right=of same, xshift=2.5cm] (route) {Tentukan rute dari\\\emph{topological graph}};
+\node[process, below=of route] (subgoal) {Kirim \emph{sub-goal}\\ke \emph{global planner}};
+\node[process, below=of subgoal] (transition) {Masuk \emph{transition mode}\\\footnotesize dan tunggu selesai};
+\node[decision, below=of transition, yshift=-0.2cm] (laststep) {\emph{Step}\\terakhir?};
+\node[process, below=of laststep] (final) {Kirim \emph{final goal}\\\footnotesize ke \emph{global planner}};
+
+\node[startstop, below=of final] (end) {Selesai};
+
+% --- Arrows ---
+\draw[arrow] (start) -- (goal);
+\draw[arrow] (goal) -- (same);
+\draw[arrow] (same) -- node[right] {Ya} (direct);
+\draw[arrow] (direct.south) -- (direct.south |- end.west) -- (end.west);
+
+\draw[arrow] (same.east) -- node[above] {Tidak} ++(2.5,0) -- (route.west);
+\draw[arrow] (route) -- (subgoal);
+\draw[arrow] (subgoal) -- (transition);
+\draw[arrow] (transition) -- (laststep);
+\draw[arrow] (laststep) -- node[right] {Ya} (final);
+\draw[arrow] (final) -- (end);
+
+% --- Loop back: Tidak dari laststep → back to subgoal ---
+\draw[arrow] (laststep.west) -- node[above] {Tidak} ++(-2.8,0) |- (subgoal.west);
 
 \end{tikzpicture}

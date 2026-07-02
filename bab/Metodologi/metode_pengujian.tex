@@ -1,37 +1,77 @@
-Pengujian sistem navigasi berbasis \emph{layered costmap} dilakukan pada lingkungan simulasi Mujoco yang diadaptasi dari arena Kontes Robot SAR Indonesia (KRSRI) 2024. Tujuan pengujian adalah untuk memvalidasi kinerja setiap komponen sistem navigasi, yaitu lokalisasi ICP, \emph{global planner} A*, dan \emph{local planner} DWA, dalam skenario yang merepresentasikan kondisi pasca gempa. Pengujian dilakukan pada tiga region (A, B, C) dengan variasi kondisi lantai dan konfigurasi parameter untuk mengevaluasi efektivitas dan keterbatasan pendekatan yang diusulkan.
+Pengujian sistem navigasi berbasis \emph{layered costmap} dilakukan pada lingkungan simulasi Mujoco yang diadaptasi dari arena Kontes Robot SAR Indonesia (KRSRI) 2024. Tujuan pengujian adalah untuk memvalidasi kinerja setiap komponen sistem navigasi, yaitu lokalisasi ICP, \emph{global planner} A*, dan \emph{local planner} DWA, dalam skenario yang merepresentasikan kondisi pasca gempa. Pengujian dilakukan pada tiga region (A, B, C) dengan variasi kondisi dan konfigurasi parameter untuk mengevaluasi efektivitas dan keterbatasan pendekatan yang diusulkan.
 
 \subsection{Pengujian Lokalisasi ICP}
 
-Pengujian lokalisasi ICP bertujuan untuk mengukur akurasi estimasi pose robot pada berbagai kondisi lantai dan region. ICP menggunakan prekomputasi KNN dengan tabel \emph{hash} (\emph{lookup} $O(1)$) yang dikonfigurasi dengan $K = 8$ dan radius pencarian $r = 10$ sel. Setiap iterasi ICP melakukan \emph{subsampling} \emph{scan} dengan \emph{random stride}, pencocokan titik menggunakan KNN, pembobotan, dan estimasi transformasi optimal melalui \emph{SVD solver}. Proses diulang hingga konvergen atau mencapai batas iterasi maksimum. Kecepatan gerak robot selama pengujian lokalisasi ditetapkan sebesar $0,025$ m/s agar diperoleh data \emph{scan} yang cukup padat untuk proses \emph{scan matching}.
+Pengujian lokalisasi ICP bertujuan untuk mengukur akurasi estimasi pose robot pada berbagai kondisi lantai dan region. Kecepatan gerak robot selama pengujian lokalisasi ditetapkan sebesar $0,025$ m/s agar diperoleh data \emph{scan} yang cukup padat untuk proses \emph{scan matching}. Metrik yang dievaluasi meliputi error estimasi pose pada sumbu $x$, sumbu $y$, dan $\theta$ (\emph{yaw}) di sepanjang lintasan robot. Tabel berikut menunjukan nilai parameter ICP yang digunakan saat pengujian.
 
-Metrik yang dievaluasi meliputi error estimasi pose pada sumbu $x$, sumbu $y$, dan $\theta$ (\emph{yaw}) di sepanjang lintasan robot. Pengujian dilakukan pada tiga skenario utama:
+\begin{table}[H]
+\centering
+\caption{Parameter ICP}
+\label{tab:icp_defaults}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Parameter} & \textbf{Nilai Default} & \textbf{Keterangan} \\
+\midrule
+$\text{max\_iter}$ & 50 & Iterasi maksimum ICP \\
+$s$          & 2            & \emph{Random stride} subsampling \\
+$t_{\text{norm}}$ & $0.01$ m & Batas konvergensi translasi \\
+$r_{\text{norm}}$ & $0.01$ rad ($\approx 0.57^\circ$) & Batas konvergensi rotasi \\
+$k$          & 3            & Jumlah \emph{nearest neighbors} \\
+$r$          & 10           & Radius pencarian \emph{neighbor} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Pengujian ICP dilakukan pada tiga skenario utama:
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.7\textwidth]{gambar/sim_RA.png}
+\begin{subfigure}{0.45\textwidth}
+\centering
+\includegraphics[width=\textwidth]{gambar/sim_RA.png}
 \caption{Simulasi di Region A}
 \label{fig:sim_ra}
-\end{figure}
-
-\begin{figure}[H]
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
 \centering
-\includegraphics[width=0.7\textwidth]{gambar/sim_RA_rough.png}
+\includegraphics[width=\textwidth]{gambar/sim_RA_rough.png}
 \caption{Simulasi di Region A dengan rintangan lantai}
 \label{fig:sim_ra_rough}
-\end{figure}
+\end{subfigure}
 
-\begin{figure}[H]
+\vspace{0.3cm}
+
+\begin{subfigure}{0.45\textwidth}
 \centering
-\includegraphics[width=0.7\textwidth]{gambar/sim_RC2.png}
+\includegraphics[width=\textwidth]{gambar/sim_RC2.png}
 \caption{Simulasi di Region C}
 \label{fig:sim_rc2}
+\end{subfigure}
+\caption{Visualisasi lingkungan simulasi di berbagai region}
+\label{fig:sim_all}
 \end{figure}
 
 \subsection{Pengujian Global Planner (A*)}
 
-Pengujian \emph{global planner} bertujuan untuk mengevaluasi pengaruh \emph{Cost Scaling Factor} (CSF) terhadap \emph{path} yang dihasilkan oleh algoritma A*. CSF memengaruhi kemiringan gradien biaya inflasi di sekitar \emph{obstacle} sebagaimana dijelaskan pada persamaan fungsi inflasi. Global planner menggunakan \emph{cost function} dengan parameter \emph{cost factor} $f = 0.55$, \emph{neutral cost} $c_{\text{neutral}} = 1$, dan \emph{lethal cost} $c_{\text{lethal}} = 253$.
+Pengujian \emph{global planner} bertujuan untuk mengevaluasi pengaruh \emph{Cost Scaling Factor} (CSF) terhadap \emph{path} yang dihasilkan oleh algoritma A*. CSF memengaruhi kemiringan gradien biaya inflasi di sekitar \emph{obstacle} sebagaimana dijelaskan pada persamaan fungsi inflasi. Global planner menggunakan \emph{cost function} dengan parameter berikut.
 
-Pengujian dilakukan pada seluruh tiga region (A, B, C) dengan masing-masing empat variasi nilai CSF: 10, 20, 50, dan 100. Metrik evaluasi yang digunakan meliputi:
+\begin{table}[H]
+\centering
+\caption{Parameter Default Cost Function}
+\label{tab:cost_defaults}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Parameter} & \textbf{Nilai Default} & \textbf{Keterangan} \\
+\midrule
+$f$          & 0.55   & \emph{Cost factor} \\
+$c_{\text{neutral}}$ & 1 & \emph{Neutral cost} \\
+$c_{\text{lethal}}$  & 253 & \emph{Lethal cost} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Pengujian dilakukan pada seluruh tiga region (A, B, C) dengan masing-masing empat variasi nilai cost scaling factor (CSF) pada global costmap: 10, 20, 50, dan 100. Metrik evaluasi yang digunakan meliputi:
 
 \begin{enumerate}
     \item Panjang \emph{path} yang dihasilkan (m).
@@ -41,38 +81,33 @@ Pengujian dilakukan pada seluruh tiga region (A, B, C) dengan masing-masing empa
     \item \emph{Cross track error} terhadap \emph{ground truth}, mencakup nilai rata-rata (\emph{mean}), maksimum (\emph{max}), dan simpangan baku (\emph{standard deviation}) (m).
 \end{enumerate}
 
-Hasil dari keempat nilai CSF pada setiap region dibandingkan untuk menentukan pengaruh CSF terhadap karakteristik \emph{path} dan menentukan nilai CSF yang paling sesuai untuk masing-masing region.
+Hasil dari keempat nilai CSF pada setiap region dibandingkan untuk menentukan pengaruh CSF terhadap karakteristik \emph{path} dan menentukan nilai CSF yang paling sesuai untuk masing-masing region. Standar deviasi tiap path juga dibandingkan dengan sebuah ground truth yang merupakan perkiraan jalu awal terbaik.
 
 \subsection{Pengujian Local Planner (DWA)}
 
-Pengujian \emph{local planner} DWA bertujuan untuk mengevaluasi kemampuan algoritma DWA dalam mengikuti \emph{global path} yang telah direncanakan sebelumnya. DWA bekerja dengan melakukan \emph{sampling} semua kemungkinan kecepatan $(v_x, v_y, \omega)$ dalam \emph{dynamic window}, mensimulasikan setiap sampel menjadi \emph{trajectory}, dan memilih \emph{trajectory} dengan skor terendah berdasarkan tujuh kriteria penilaian: \emph{oscillation cost}, \emph{obstacle cost}, \emph{goal front cost}, \emph{alignment cost}, \emph{path cost}, \emph{goal cost}, dan \emph{twirling cost}.
-
-Konfigurasi \emph{velocity sampling} yang digunakan adalah $N_{v_x} = 6$, $N_{v_y} = 6$, dan $N_{\omega} = 30$, sehingga total terdapat $1080$ \emph{trajectory} yang dievaluasi setiap siklus kendali.
-
-Batas kecepatan pada setiap \emph{region} dikonfigurasi secara berbeda sesuai dengan karakteristik medan:
+Pengujian \emph{local planner} DWA bertujuan untuk mengevaluasi kemampuan algoritma DWA dalam mengikuti \emph{global path} yang telah direncanakan sebelumnya. Parameter pada setiap \emph{region} dikonfigurasi secara berbeda sesuai dengan karakteristik medan:
 
 \begin{table}[H]
 \centering
-\caption{Konfigurasi batas kecepatan DWA per region}
+\footnotesize
+\caption{Konfigurasi parameter DWA setiap region}
 \label{tab:dwa_speed_limits}
-\begin{tabular}{lcccc}
+\begin{tabular}{l|c|c|c}
 \toprule
-\textbf{Region} & \textbf{max $v_x$} & \textbf{min $v_x$} & \textbf{max $v_y$} & \textbf{min $v_y$} \\
+\thead{Parameter} & \thead{A} & \thead{B} & \thead{C} \\
 \midrule
-A & 0,08 & 0,05  & 0,08 & $-0,08$ \\
-B & 0,08 & 0,05  & 0,08 & $-0,08$ \\
-C & 0,025 & $-0,025$ & 0,025 & $-0,025$ \\
+max $v_x$        & 0,08  & 0,04  & 0,05   \\
+min $v_x$        & 0,05  & 0,02  & $-0,05$ \\
+max $v_y$        & 0,08  & 0,04  & 0,05   \\
+min $v_y$        & $-0,08$ & $-0,04$ & $-0,05$ \\
+sim\_time        & 5,0   & 5,0   & 10,0   \\
+$v_x$ samples    & 6     & 6     & 18     \\
+$v_y$ samples    & 6     & 6     & 18     \\
+$v_\theta$ samples & 30  & 30    & 30     \\
+path bias        & 16,0  & 16,0  & 16,0   \\
+goal bias        & 32,0  & 32,0  & 24,0   \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Pada Region A dan B yang memiliki area lebih luas, robot dapat bergerak dengan kecepatan yang lebih tinggi. Sementara itu, Region C yang memiliki area lebih sempit dan \emph{trajectory} yang lebih kompleks dibatasi dengan kecepatan yang lebih rendah untuk menjaga stabilitas navigasi.
-
-Pengujian dilakukan pada dua skenario navigasi penuh dari Region A menuju Region C:
-
-\begin{enumerate}
-    \item \textbf{Kondisi normal}: Seluruh \emph{obstacle} telah diketahui oleh \emph{global path}.
-    \item \textbf{Kondisi gempa}: Terdapat \emph{obstacle} yang tidak diketahui oleh \emph{global path} dan baru terdeteksi oleh sensor LiDAR saat navigasi berlangsung.
-\end{enumerate}
-
-Metrik yang digunakan adalah waktu tempuh, serta \emph{mean cross track error} dan \emph{max cross track error} terhadap \emph{global path}.
+Pada Region A dan B yang memiliki area lebih luas, robot dapat bergerak dengan kecepatan yang lebih tinggi. Sementara itu, Region C yang memiliki area lebih sempit dan \emph{trajectory} yang lebih kompleks dibatasi dengan kecepatan yang lebih rendah untuk menjaga stabilitas navigasi. Metrik yang digunakan adalah waktu tempuh, serta \emph{mean cross track error} dan \emph{max cross track error} terhadap \emph{global path}.

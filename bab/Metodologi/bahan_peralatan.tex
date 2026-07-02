@@ -1,27 +1,38 @@
-Tugas akhir ini memanfaatkan model simulasi perangkat keras dan perangkat lunak yang dikonfigurasi dalam lingkungan Mujoco. Perangkat keras yang disebutkan merupakan model digital yang digunakan dalam simulasi, bukan perangkat fisik yang dioperasikan secara langsung.
+Tugas akhir ini memanfaatkan model simulasi perangkat keras dan perangkat lunak yang dikonfigurasi dalam simulator Mujoco. Perangkat keras yang disebutkan merupakan model digital yang digunakan dalam simulasi, bukan perangkat fisik yang dioperasikan secara langsung.
 
-\subsection{Model robot hexapod sebagai platform navigasi}
+\subsection{Model robot hexapod}
 
-Model robot hexapod pada lingkungan simulasi Mujoco digunakan sebagai platform utama. Model ini merepresentasikan robot hexapod berkaki enam yang masing-masing dapat dikendalikan secara individual, sehingga mampu menyesuaikan postur dan posisi saat berpindah antar region atau lapisan \emph{costmap}. Model robot ini dipilih karena sesuai dengan karakteristik gerak yang dibutuhkan untuk navigasi di medan tidak rata.
+Model robot hexapod pada lingkungan simulator Mujoco digunakan sebagai platform robot. Model ini merepresentasikan robot hexapod berkaki enam yang masing-masing dapat dikendalikan secara individual, sehingga mampu menyesuaikan postur dan posisi saat berpindah antar region atau lapisan \emph{costmap}. Model robot ini dipilih karena sesuai dengan karakteristik gerak yang dibutuhkan untuk navigasi di medan tidak rata.
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.6]{gambar/platform_robot.png}
+\includegraphics[scale=0.5]{gambar/platform_robot.png}
 \caption{Model platform navigasi yang digunakan dalam simulasi}
 \label{fig:platform_robot}
 \end{figure}
 
-\subsection{Sensor LiDAR 2D pada lingkungan simulasi}
+\subsection{Simulasi Sensor}
 
-Sensor LiDAR 2D pada lingkungan simulasi dikonfigurasi untuk mendeteksi rintangan di sekitar robot secara \emph{real-time}. Sensor bekerja dengan memancarkan sinar laser virtual dan mengukur jarak ke objek di sekitarnya. Data hasil pembacaan digunakan sebagai masukan untuk membentuk \emph{costmap} dan deteksi rintangan pada sistem navigasi.
+Sensor LiDAR 2D pada lingkungan simulasi dikonfigurasi untuk mendeteksi rintangan di sekitar robot secara \emph{real-time}. Sensor bekerja dengan memancarkan sinar laser virtual dan mengukur jarak ke objek di sekitarnya. Data hasil pembacaan digunakan sebagai masukan untuk membentuk \emph{costmap} dan deteksi rintangan pada sistem navigasi. Parameter sensor yang digunakan dalam simulasi disetarakan dengan spesifikasi YDLiDAR T-mini-plus, yaitu frekuensi \emph{scan} 12 Hz, \emph{scan angle} $360^\circ$, resolusi sudut $0.54^\circ$, dan jarak maksimum 12 m.
 
-Parameter sensor yang digunakan dalam simulasi disetarakan dengan spesifikasi YDLiDAR T-mini-plus, yaitu frekuensi \emph{scan} 12 Hz, \emph{scan angle} $360^\circ$, resolusi sudut $0.54^\circ$, dan jarak maksimum 12 m.
+CMPS14 adalah modul kompas magnetik canggih yang dilengkapi kompensasi kemiringan (tilt-compensated), menggabungkan magnetometer 3-sumbu, gyroscope 3-sumbu, dan akselerometer 3-sumbu dengan prosesor on-board. Modul ini menyederhanakan pelacakan orientasi dengan menghasilkan sudut Euler secara langsung untuk heading, pitch, dan roll.
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.4]{gambar/ydlidar-t-mini-plus.jpg}
-\caption{Sensor YDLiDAR T-mini-plus sebagai referensi parameter LiDAR 2D pada simulasi \parencite{ShenzhenEAITechnology2024ydlidar}}
+\begin{subfigure}{0.45\textwidth}
+\centering
+\includegraphics[scale=0.2]{gambar/ydlidar-t-mini-plus.jpg}
+\caption{Sensor YDLiDAR T-mini-plus}
 \label{fig:ydlidar}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+\centering
+\includegraphics[scale=0.1]{gambar/cmps14.jpg}
+\caption{Sensor compass CMPS14}
+\label{fig:cmps14}
+\end{subfigure}
+\caption{Referensi sensor yang digunakan dalam simulasi \parencite{ShenzhenEAITechnology2024ydlidar}}
 \end{figure}
 
 \subsection{Perangkat lunak pendukung}

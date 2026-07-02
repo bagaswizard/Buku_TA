@@ -6,16 +6,40 @@
 \section{Kesimpulan}
 \label{sec:kesimpulan}
 
-Berdasarkan eksperimen yang dilakukan pada simulasi, robot dapat berhasil menavigasi dari \emph{region} A ke \emph{region} C dengan waktu tempuh 127.26 detik. Hasil pengujian \emph{costmap} menunjukan bahwa \emph{cost scaling factor} sebesar 100 paling sesuai untuk menghasilkan jalur terpendek. Hasil ICP menunjukkan error yang wajar dan cukup akurat untuk digunakan dalam navigasi, serta dapat bekerja dengan \emph{costmap} transisi untuk menggabungkan tiap \emph{region}. Untuk lebih spesifiknya:
-\begin{enumerate}
-    \item Pengujian ICP pada lantai tidak rata menunjukan error lebih tinggi pada sumbu tegak lurus arah gerak dan yaw dibanding pada permukaan rate, yang disebabkan oleh perbedaan ketinggian lantai. 
-    \item Obstacle lebih kompleks dan trajectory rumit di region C menghasilkan error lebih tinggi pada ICP karena robot harus menyesuaikan posisi dan orientasi lebih sering untuk menghindari rintangan.
-    \item Costmap transisi dapat menggabungkan tiap \emph{region} dengan baik pada radius transisi minimal 0.26 meter.
-    \item Costmap inflasi dengan \emph{cost scaling factor} 100 dapat menghasilkan jalur terpendek dengan tetap menghindari obstacle.
-    \item DWA Planner dapat menghasilkan trajectory yang diikuti robot saat ada obstacle unknown
-\end{enumerate}
+\emph{Layered costmap} digunakan untuk merepresentasikan lingkungan 3D multi-lantai
+sebagai kumpulan peta 2D \emph{region} yang saling terhubung. Lingkungan 3D dipisahkan
+menjadi tiga \emph{region} (A, B, C) yang digabung menjadi satu \emph{combined map} 2D.
+Setiap \emph{region} memiliki \emph{costmap} global, lokal, dan transisi yang
+dikonfigurasi secara independen. \emph{Transition map} menyimpan metadata koneksi antar
+\emph{region} meliputi pasangan koneksi antar region, orientasi \emph{quaternion}, dan posisi awal
+robot. Representasi ini
+memungkinkan algoritma navigasi 2D bekerja pada lingkungan 3D karena setiap \emph{region}
+dapat ditangani secara independen menggunakan \emph{costmap} 2D konvensional.
 
-Dengan demikian, dapat disimpulkan bahwa metode navigasi berbasis \emph{layered costmap} yang dikembangkan dalam tugas akhir ini dapat digunakan untuk menavigasi robot pada lingkungan indoor bertingkat pasca gempa bumi.
+Algoritma lokalisasi ICP menggunakan \emph{hash-based} KNN  untuk estimasi pose robot secara
+presisi. Selama \emph{transition mode}, ICP dinonaktifkan sementara untuk mencegah
+koreksi pose yang tidak stabil pada zona transisi. \emph{Path router} memecah rute
+multi \emph{region} menjadi segmen per \emph{region} berdasarkan \emph{topological
+graph} dan mengirimkan \emph{sub-goal} ke setiap \emph{node} transisi secara berurutan.
+\emph{Global planner} menggunakan algoritma A* dan parameter
+\emph{Cost Scaling Factor} (CSF) mengatur keseimbangan antara efisiensi jalur dan
+keamanan terhadap \emph{obstacle}, dengan CSF 100 menghasilkan \emph{path} terpendek
+pada semua region. \emph{Local planner} DWA dikonfigurasi berbeda pada tiap
+\emph{region}, dengan kecepatan tinggi di Region A, kecepatan rendah di Region B, serta
+jumlah sampel dan \emph{sim\_time} lebih besar di Region C untuk menghasilkan
+\emph{trajectory} yang optimal sesuai karakteristik medan masing-masing.
+
+Robot darat otonom berhasil melakukan navigasi dari Region A ke Region C pada
+lingkungan simulasi Mujoco dengan tingkat keberhasilan 8 dari 10 percobaan. Waktu
+tempuh rata-rata untuk percobaan sukses adalah 199,35 detik, dengan variasi terbesar
+terjadi di Region C akibat perbedaan jumlah dan posisi \emph{unknown obstacle} yang
+dihadapi robot pada setiap percobaan. Dua kegagalan terjadi akibat \emph{transition mode} dimana percobaan 4 gagal karena DWA tidak menghasilkan
+\emph{trajectory} valid pasca lompatan, dan percobaan 8 gagal karena kehilangan
+lokalisasi ICP setelah keluar dari \emph{transition mode}. Seluruh komponen navigasi: lokalisasi ICP, \emph{layered costmap}, \emph{global planner} A*, \emph{path
+router}, \emph{region switcher}, dan \emph{local planner} DWA, terintegrasi dengan
+baik dan membuktikan bahwa pendekatan navigasi antar lantai berbasis \emph{layered
+costmap} layak digunakan untuk navigasi robot otonom di lingkungan \emph{indoor}
+multi lantai pasca gempa bumi.
 
 \section{Saran}
 \label{chap:saran}
@@ -24,24 +48,26 @@ Beberapa saran untuk pengembangan lebih lanjut dari sistem navigasi ini
 adalah sebagai berikut:
 
 \begin{enumerate}
-    \item \textbf{Pengujian di robot fisik.} Pengujian di lingkungan simulasi memberikan gambaran awal mengenai performa sistem navigasi, namun pengujian di robot fisik di lingkungan nyata akan memberikan informasi lebih mendalam mengenai tantangan yang mungkin muncul, seperti gangguan sensor, kondisi permukaan yang tidak terduga, dan interaksi dengan manusia atau objek lain.
-    \item \textbf{Prekomputasi KNN individual per region.} Setiap region
-    memiliki karakteristik obstacle yang berbeda, sehingga penggunaan
-    tabel hash KNN terpisah per region memungkinkan penyetelan parameter
-    radius dan jumlah \emph{nearest neighbors} secara independen sesuai
-    kebutuhan tiap region, yang berpotensi meningkatkan akurasi dan
-    efisiensi komputasi ICP.
+    \item \textbf{Pengujian di robot fisik} \newline Pengujian di lingkungan simulasi memberikan gambaran awal mengenai performa sistem navigasi, namun pengujian di robot fisik di lingkungan nyata akan memberikan informasi lebih mendalam mengenai tantangan yang mungkin muncul, seperti gangguan sensor, kondisi permukaan yang tidak terduga, dan interaksi dengan manusia atau objek lain.
 
-    \item \textbf{Fusion ICP dengan IMU.} Lonjakan error ICP di zona
+    \item \textbf{Fusion ICP dengan IMU} \newline Lonjakan error ICP di zona
     transisi akibat minimnya fitur LiDAR dapat dikompensasi dengan
     sensor IMU yang menyediakan data orientasi dan percepatan pada
     frekuensi tinggi, sehingga menjaga akurasi lokalisasi secara
     konsisten di seluruh region.
 
-    \item \textbf{Integrasi dengan Depth Camera.}
+    \item \textbf{Integrasi dengan Depth Camera} \newline
     Keterbatasan LiDAR 2D dalam mendeteksi obstacle vertikal dapat
     dilengkapi dengan data visual dari kamera atau \emph{depth sensor}
     untuk membangun representasi hibrida 3D-2D, yang memungkinkan
     robot memahami struktur lingkungan secara lebih utuh tanpa
     meninggalkan efisiensi navigasi berbasis \emph{occupancy grid}.
+
+    \item \textbf{Pengolahan peta secara otomatis berbasis \emph{point cloud}} \newline
+    Hubungan antar \emph{region} dapat dideteksi secara otomatis menggunakan
+    persamaan \emph{point cloud}. Dengan memanfaatkan algoritma \emph{point
+    cloud registration}, sistem dapat
+    mengidentifikasi korespondensi spasial antar \emph{region} secara langsung
+    dari data \emph{point cloud} 3D, termasuk menghitung matriks transformasi
+    dan orientasi relatif tanpa memerlukan anotasi manual.
 \end{enumerate}

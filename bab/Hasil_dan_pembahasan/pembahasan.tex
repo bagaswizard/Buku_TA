@@ -1,61 +1,143 @@
 \subsection{Pembahasan Costmap}
 
-Pemisahan \emph{costmap} menjadi global, lokal, dan
-transisi memungkinkan sistem navigasi menyesuaikan representasi
-lingkungan sesuai kebutuhan setiap komponen. \emph{Global costmap}
-memberikan informasi peta keseluruhan yang digunakan oleh
-\emph{global planner} untuk perencanaan jalur jarak jauh.
-\emph{Local costmap} memberikan informasi lingkungan sekitar robot
-secara \emph{real-time} yang digunakan oleh DWA \emph{local planner},
-sehingga robot dapat mengantisipasi rintangan baru yang terdeteksi
-oleh LiDAR. \emph{Transition costmap} memberikan informasi area
-transisi antar \emph{region} yang dipakai untuk berpindah antar
-\emph{region}, tetapi tidak mengganggu proses A* kecuali saat
-berhubungan dengan \emph{node graph}.
+Setiap lapisan \emph{costmap} memiliki parameter yang dapat diatur secara independen sesuai kebutuhan tiap \emph{region}. \emph{Global costmap} dikonfigurasi melalui nilai \emph{Cost Scaling Factor} (CSF) yang memengaruhi gradien biaya inflasi di sekitar \emph{obstacle}. Semakin tinggi CSF, \emph{path} yang dihasilkan semakin pendek karena robot diperbolehkan melintas lebih dekat ke \emph{obstacle}. Namun, nilai CSF yang terlalu tinggi dapat menyebabkan \emph{path} tidak aman jika \emph{clearance} terhadap \emph{obstacle} terlalu kecil. Untuk mengakomodasi perbedaan karakteristik medan, CSF dapat diatur berbeda pada tiap \emph{region}, misalnya CSF tinggi pada area terbuka dan CSF rendah pada lorong sempit.
 
-\subsection{Pembahasan Lokalisasi ICP}
+\emph{Local costmap} dapat dikonfigurasi melalui  (\emph{window size}) dan resolusi grid. Ukuran jendela yang lebih besar memberikan informasi lingkungan yang lebih luas bagi DWA \emph{local planner} dalam memilih \emph{trajectory}, tetapi memerlukan lebih banyak sumber daya komputasi. Sebaliknya, ukuran jendela yang terlalu kecil dapat menyebabkan DWA tidak memiliki cukup informasi untuk menghindari \emph{obstacle} yang berada di luar jangkauan. Parameter ini perlu disesuaikan dengan kecepatan robot dan kerapatan \emph{obstacle} di lingkungan sekitar.
 
-Sistem lokalisasi menggunakan tabel \emph{hash} untuk prekomputasi
-KNN tanpa algoritma pencarian spasial seperti KD-tree. Artinya,
-semakin besar ukuran peta, semakin besar tabel \emph{hash} yang perlu
-dicari, yang berpotensi memperlambat proses ICP. Meskipun demikian,
-risiko kehilangan lokalisasi dapat dimitigasi dengan mengurangi
-kecepatan robot saat mendekati area kritis.
+\emph{Transition costmap} memiliki parameter radius ekspansi dan nilai \emph{cost} pada zona transisi. Radius ekspansi menentukan seberapa jauh zona buffer menyebar dari garis transisi, yang memengaruhi seberapa awal robot mendeteksi bahwa ia akan berpindah \emph{region}. Nilai \emph{cost} pada zona transisi ($E = 5$) dan garis transisi ($T = 1$) digunakan oleh \emph{region switcher} untuk menentukan kapan robot harus bersiap melakukan lompatan dan kapan lompatan dieksekusi.
 
-Proses pelompatan \emph{region} menggunakan mekanisme \emph{waiting
-mode} yang hanya memprediksi waktu tunggu, sehingga tidak
-benar-benar akurat. Namun, mekanisme ini bersama dengan
-\emph{transition costmap} mampu mengatasi dampak dari hilangnya
-lokalisasi yang terjadi pada perbatasan \emph{region}. Ketika robot
-memasuki zona buffer, lompatan dihitung berdasarkan posisi relatif
-terhadap \emph{centroid} node entry, bukan berdasarkan estimasi
-ICP saat itu, sehingga akurasi lokalisasi yang menurun tidak
-memengaruhi keberhasilan transisi.
+Kemampuan untuk mengonfigurasi setiap lapisan \emph{costmap} secara terpisah memberikan fleksibilitas dalam menyesuaikan perilaku navigasi terhadap kondisi lingkungan yang berbeda. Pendekatan ini sejalan dengan prinsip \emph{layered costmap}, di mana setiap lapisan bertanggung jawab atas aspek lingkungan yang spesifik dan dapat dioptimalkan tanpa memengaruhi lapisan lainnya.
 
-\subsection{Pembahasan Global Planner}
+\subsection{Pembahasan Lokalisasi}
 
-Dalam proses navigasi, \emph{global planner} seharusnya hanya perlu
-melakukan kalkulasi \emph{path} sekali, yang kemudian \emph{path}
-tersebut diikuti oleh \emph{local planner}. Namun dalam praktiknya,
-ada kemungkinan \emph{path} yang dihasilkan \emph{global planner}
-tidak sesuai dengan kondisi lingkungan terkini, sehingga \emph{global
-planner} perlu mengkalkulasi ulang secara periodik. Dalam sistem ini,
-setiap kali robot melompat ke \emph{node} baru, \emph{global planner}
-juga membuat \emph{path} baru untuk segmen selanjutnya. Bentuk
-\emph{path} yang dihasilkan dapat diubah dari parameter
-\emph{planner} itu sendiri, tidak hanya dari \emph{costmap}.
-Parameter seperti \emph{cost factor}, \emph{neutral cost}, dan
-\emph{Cost Scaling Factor} memengaruhi bagaimana \emph{planner}
-menyeimbangkan antara jarak tempuh dan jarak aman terhadap
-\emph{obstacle}.
+Sistem lokalisasi merupakan hasil kerja sama antara ICP dan \emph{region switcher}. ICP bertanggung jawab melacak posisi robot secara
+presisi pada tingkat sub-meter, sedangkan \emph{region switcher} melacak lokasi
+robot pada tingkat yang lebih besar, yaitu menentukan \emph{region} mana yang
+sedang ditempati robot. Pembagian peran ini memungkinkan sistem untuk tetap
+mengetahui posisi robot secara global meskipun ICP mengalami penurunan akurasi
+di area tertentu, seperti zona transisi antar \emph{region}.
 
-\subsection{Pembahasan Local Planner (DWA)}
+Proses pelompatan \emph{region} menggunakan mekanisme \emph{transition mode}
+yang memanfaatkan data \emph{pitch} dari sensor kompas CMPS14 untuk mendeteksi
+perubahan kemiringan saat robot memasuki \emph{slope} pada Region B. Ketika
+nilai \emph{pitch} melebihi ambang batas ($12^\circ$), sistem langsung memicu
+lompatan tanpa harus menunggu \emph{timer} selesai. Mekanisme ini lebih responsif
+dibandingkan \emph{timer-based} karena mendeteksi transisi secara langsung
+berdasarkan perubahan fisik lingkungan, bukan berdasarkan estimasi waktu.
+\emph{Timer-based transition} tetap dipertahankan sebagai \emph{safety fallback}
+jika data \emph{pitch} tidak tersedia atau tidak mencukupi ambang batas.
 
-Pergerakan robot di lingkungan simulasi menghadapi beberapa lorong
-sempit di Region C. Penggunaan radius \emph{footprint} robot yang
-tepat dapat menghindari tabrakan dengan tembok, meskipun robot
-hexapod cukup kuat untuk tidak mudah tersangkut. Parameter DWA
+\subsection{Pembahasan Path Planner}
+
+Dalam sistem navigasi multi-\emph{region}, \emph{global planner} dan \emph{path
+router} bekerja sama untuk merencanakan perjalanan dari posisi robot menuju
+tujuan akhir. Bentuk \emph{path} pada setiap segmen dapat diubah melalui parameter
+\emph{planner} itu sendiri, tidak hanya dari \emph{costmap}. Parameter
+seperti \emph{cost factor}, \emph{neutral cost}, dan \emph{Cost Scaling
+Factor} memengaruhi bagaimana \emph{global planner} menyeimbangkan antara
+jarak tempuh dan jarak aman terhadap \emph{obstacle}. Setiap kali robot
+melompat ke \emph{node} baru, \emph{global planner} membuat \emph{path}
+baru untuk segmen selanjutnya, sehingga \emph{path} yang digunakan selalu
+sesuai dengan posisi dan \emph{region} robot saat itu.
+
+Hasil pengujian menunjukkan bahwa tidak ada satu nilai CSF yang optimal
+untuk semua \emph{region}. Pada Region C yang memiliki ruang
+terbuka, CSF 100 menghasilkan \emph{path} terpendek namun deviasinya
+terhadap \emph{ground truth} paling tinggi. Sebaliknya, pada Region B
+yang berupa lorong, seluruh nilai CSF menghasilkan \emph{path}
+yang hampir identik. Temuan ini menunjukkan perlunya strategi
+perencanaan jalur yang bersifat spesifik per \emph{region}. Dengan
+demikian, setiap segmen dapat menggunakan konfigurasi \emph{global
+planner} yang berbeda.
+
+\subsection{Pembahasan DWA Local Planner }
+
+Pergerakan robot di lingkungan simulasi menghadapi beberapa lorong sempit,
+terutama di Region C. Robot hexapod yang digunakan cukup kuat untuk tidak
+mudah tersangkut, namun radius \emph{footprint} tetap perlu dikonfigurasi
+dengan tepat agar dapat menghindari tabrakan dengan dinding. Parameter DWA
 memungkinkan robot bergerak secara \emph{omnidirectional}, yang
-sangat membantu dalam melewati lorong-lorong sempit. Untuk melewati
-lorong tertentu, robot perlu berada dalam orientasi tertentu, sehingga
-DWA melakukan gerak rotasi terlebih dahulu sebelum bergerak maju.
+membantu dalam melewati lorong-lorong sempit karena robot dapat bergerak
+menyamping tanpa harus berputar terlebih dahulu.
+
+Konfigurasi DWA yang berbeda pada tiap \emph{region} memungkinkan
+\emph{trajectory} yang dihasilkan tetap optimal sesuai karakteristik medan.
+Pada Region A yang luas, kecepatan tinggi ($0,08$ m/s) digunakan untuk meminimalkan
+waktu tempuh. Pada Region B yang berupa lorong sempit, kecepatan diturunkan
+($0,04$ m/s) untuk menjaga stabilitas navigasi pada ruang terbatas. Pada Region C
+dengan \emph{obstacle} yang kompleks, jumlah sampel kecepatan ditingkatkan
+(18 sampel) dan \emph{sim\_time} diperpanjang ($10$ detik) agar DWA memiliki
+lebih banyak kandidat lintasan untuk menemukan \emph{trajectory} yang aman.
+Selain itu, \emph{goal bias} pada Region C diturunkan menjadi $24$ (dari $32$)
+agar DWA lebih fleksibel dalam memilih lintasan yang menghindari \emph{obstacle}
+tanpa terlalu terikat pada arah tujuan. Penyesuaian ini menunjukkan bahwa
+konfigurasi DWA spesifik per \emph{region} berkontribusi langsung terhadap
+keberhasilan navigasi.
+
+\subsection{Pembahasan Navigasi Penuh dari Region A ke C}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{c|c|c|c|c|c|c|c}
+\toprule
+\thead{Percobaan} & \thead{Waktu A\\(s)} & \thead{Waktu T0\\(s)} & \thead{Waktu B\\(s)} & \thead{Waktu T1\\(s)} & \thead{Waktu C\\(s)} & \thead{Total\\(s)} & \thead{Sukses} \\
+\midrule
+1 & 13.56 & 12.52 & 5.46 & 7.73 & 214.54 & 233.56 & Ya \\
+2 & 14.50 & 14.33 & 6.41 & 7.27 & 165.45 & 186.36 & Ya \\
+3 & 14.50 & 16.96 & 7.73 & 6.98 & 151.12 & 173.35 & Ya \\
+4 & 15.59 & 11.75 & 7.33 & 7.86 & 115.32 & 138.24 & Tidak\\
+5 & 15.23 & 13.60 & 7.10 & 6.50 & 129.48 & 151.81 & Ya \\
+6 & 19.00 & 16.76 & 7.85 & 7.97 & 200.13 & 226.97 & Ya \\
+7 & 19.00 & 16.00 & 8.28 & 8.24 & 194.00 & 221.28 & Ya \\
+8 & 21.39 & 18.74 & 15.67 & 17.69 & 103.95 & 141.01 & Tidak \\
+9 & 18.43 & 16.55 & 8.77 & 8.04 & 166.53 & 193.74 & Ya \\
+10 & 17.48 & 14.97 & 7.83 & 8.48 & 182.42 & 207.73 & Ya \\
+Mean & 16.46 & 15.21 & 7.43 & 7.65 & 175.46 & 199.35 & 80\%\\
+\bottomrule
+\end{tabular}
+\caption{Rangkuman waktu tempuh }
+\label{tab:dwa_rangkuman_waktu}
+\end{table}
+
+Pengujian navigasi penuh dari region A ke region C dilakukan untuk mengevaluasi
+hasil keseluruhan sistem navigasi. Data waktu tempuh dibagi menjadi waktu di
+tiap region (A, B, dan C) serta waktu robot di zona transisi T0 (antara A dan
+B) dan T1 (antara B dan C). Dari 10 kali percobaan, diperoleh 8 keberhasilan
+dan 2 kegagalan. Waktu tempuh terbaik adalah 141.01 detik dan waktu terlama
+233.56 detik, yang menunjukkan variasi yang cukup besar dalam performa
+navigasi antar percobaan.
+
+Variasi waktu tempuh terbesar terjadi di region C. Hal ini disebabkan oleh
+karakteristik \emph{DWA planner} yang harus mensimulasikan lintasan
+dengan \emph{unknown obstacle}. Ketika robot mendekati \emph{unknown
+obstacle} yang terdeteksi oleh LiDAR saat navigasi berlangsung, DWA
+menurunkan kecepatan dan memilih lintasan yang lebih aman, sehingga
+memperpanjang waktu tempuh. Sebaliknya, pada region~A dan B dengan
+lingkungan yang lebih sederhana dan tanpa \emph{unknown obstacle}, durasi
+navigasi relatif konsisten antar percobaan. Hal ini terlihat dari nilai Total
+yang bervariasi antara 141.01 hingga 233.56 detik, di mana variasi tersebut
+hampir seluruhnya berasal dari fluktuasi waktu di region C (103.95-214.54
+detik) akibat perbedaan jumlah dan posisi \emph{unknown obstacle} yang
+dihadapi robot pada setiap percobaan.
+
+Dua kegagalan terjadi pada percobaan ke-4 dan ke-8. Pada percobaan ke-4,
+robot gagal menghasilkan lintasan setelah keluar dari \emph{transition mode}
+di region~C. \emph{DWA planner} tidak menemukan \emph{trajectory} yang valid
+dalam \emph{dynamic window} akibat konfigurasi kecepatan dan orientasi robot
+yang tidak ideal pasca lompatan, sehingga sistem tidak dapat melanjutkan
+navigasi. Pada percobaan ke-8, kegagalan disebabkan oleh hilangnya lokalisasi
+ICP setelah melewati \emph{transition mode}. Koréksi pose yang tidak stabil
+pasca lompatan menyebabkan \emph{local planner} menerima referensi posisi
+yang salah, sehingga navigasi tidak dapat dilanjutkan. Kedua kegagalan ini
+menunjukkan bahwa \emph{transition mode} merupakan titik kritis dalam sistem
+navigasi multi-\emph{region}.
+
+Secara keseluruhan, seluruh komponen navigasi (lokalisasi ICP, \emph{global
+planner} A*, \emph{path router}, \emph{region switcher}, dan \emph{DWA local
+planner}) terintegrasi dengan baik dan mampu melakukan navigasi dari region~A
+ke region~C secara otonom. Keberhasilan 8 dari 10 percobaan menunjukkan
+tingkat keandalan yang memadai, dengan dua kegagalan yang disebabkan oleh
+kondisi tepi pada \emph{transition mode} yang dapat diminimalkan melalui
+optimalisasi parameter \emph{transition costmap} dan penanganan \emph{edge
+case} pada mekanisme lompatan.

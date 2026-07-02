@@ -21,10 +21,36 @@
 \end{tabularx}
 \endgroup
 
-Indonesia mengalami frekuensi gempa bumi tinggi yang menyebabkan perubahan struktural signifikan pada lingkungan indoor bertingkat. Robot otonom dapat berperan mengeksplorasi area indoor pasca gempa yang tidak aman bagi manusia. Untuk melakukan misi tersebut, robot memerlukan kemampuan navigasi yang mampu bekerja pada lingkungan pasca gempa yang bertingkat. 
-Tugas akhir ini membahas pengembangan metode navigasi menggunakan \emph{layered costmap} supaya robot dapat melintasi lingkungan tersebut. Skema ini merepresentasikan lingkungan bertingkat sebagai kumpulan peta \emph{region} berbentuk \emph{occupancy grid} yang digabung menjadi satu \emph{map}. Dalam \emph{costmap} berlapis, tiap layer pada costmap menyimpan informasi penting berbeda seperti rintangan statis, \emph{obstacle dinamis}, zona inflasi, dan zona transisi antar \emph{map}, yang memungkinkan navigasi antar \emph{region}. Dalam arsitektur navigasi yang dikembangkan, setiap lantai atau tingkat pada lingkungan \textit{indoor} direpresentasikan secara unik oleh satu \emph{map} individual. Pendekatan ini menyederhanakan informasi lingkungan 3D menjadi representasi 2D yang dapat dikelola, sehingga memungkinkan penggunaan sensor \textit{LiDAR} 2D untuk menentukan lingkungan robot. Algoritma navigasi kemudian mengintegrasikan \emph{map} 2D tiap \emph{region} ini menjadi satu kesatuan dengan menggunakan \emph{Costmap} transisi, sehingga memungkinkan robot untuk memahami dan menavigasi lingkungan multi-lantai. Sistem ini memungkinkan robot untuk menavigasi dari satu \emph{region} ke \emph{region} lain dengan (1) lokalisasi posisi asli dengan elemen ICP dan \emph{region switcher}, (2) \emph{Path Planning} yang membuat rute antar \emph{region} menggunakan elemen \emph{path tracker}, dan (3) \emph{Path Tracking} yang menggunakan \emph{DWA Planner} untuk menghasilkan \emph{trajectory} yang diikuti robot.
-Algoritma navigasi ini diuji coba di lingkungan simulasi Mujoco yang dirancang untuk kondisi normal dan pasca gempa. 
-Robot sukses melakukan navigasi dari \emph{region} A sampai C dengan memakan waktu selama 127.26 detik. Kemudian, hasil pengujian \emph{costmap} menunjukan nilai \emph{cost scaling factor} 100 paling cocok untuk pembuatan \emph{path} yang paling pendek. Hasil ICP menunjukan error wajar dan cukup akurat untuk digunakan dalam navigasi, dan dapat bekerja dengan \emph{costmap} transisi untuk menggabungkan tiap \emph{region}.
+Indonesia mengalami frekuensi gempa bumi tinggi yang menyebabkan perubahan
+struktural signifikan pada lingkungan \emph{indoor} bertingkat. Robot otonom
+dapat berperan menavigasi area \emph{indoor} pasca gempa yang tidak aman
+bagi manusia. Untuk melakukan misi tersebut, robot memerlukan kemampuan
+navigasi yang mampu bekerja pada lingkungan pasca gempa yang bertingkat.
+Tugas akhir ini membahas pengembangan metode navigasi menggunakan \emph{layered
+costmap} supaya robot dapat melintasi lingkungan tersebut. Skema ini
+merepresentasikan lingkungan bertingkat sebagai kumpulan peta \emph{region}
+berbentuk \emph{occupancy grid} yang digabung menjadi satu \emph{map}. Dalam
+\emph{costmap} berlapis, tiap lapisan pada \emph{costmap} menyimpan informasi
+berbeda seperti rintangan statis, rintangan dinamis, lapisan inflasi, dan
+lapisan transisi antar \emph{map}, yang memungkinkan navigasi antar
+\emph{region}. Dalam arsitektur navigasi yang dikembangkan, setiap lantai pada
+lingkungan \emph{indoor} direpresentasikan oleh satu \emph{region} individual.
+Pendekatan ini menyederhanakan informasi lingkungan 3D menjadi representasi 2D
+yang dapat dikelola, sehingga memungkinkan penggunaan sensor \emph{LiDAR} 2D
+untuk menentukan lingkungan robot. Algoritma navigasi kemudian mengintegrasikan
+\emph{map} 2D tiap \emph{region} ini menjadi satu kesatuan dengan menggunakan
+\emph{costmap} transisi, sehingga memungkinkan robot untuk memahami dan
+menavigasi lingkungan multi-lantai. Sistem ini memungkinkan robot untuk
+menavigasi dari satu \emph{region} ke \emph{region} lain dengan (1) estimasi
+pose menggunakan \emph{iterative closest point} (ICP) dan \emph{region
+switcher}, (2) \emph{path planning} yang membuat rute antar \emph{region}
+menggunakan \emph{path router}, dan (3) \emph{path tracking} yang menggunakan
+\emph{dynamic window approach} (DWA) \emph{planner} untuk menghasilkan
+\emph{trajectory} yang diikuti robot.
+Dari hasil pengujian pada simulator MuJoCo, robot berhasil melakukan navigasi
+dari \emph{region} A sampai C dengan tingkat keberhasilan 80\% (8 dari 10
+percobaan), waktu tempuh rata-rata 199.35 detik, dan waktu terbaik 141.01
+detik.
 
 % % Ubah kata-kata berikut dengan kata kunci dari tugas akhir
 Kata Kunci:  \emph{Navigasi, Costmap, Robot, Antar lantai}

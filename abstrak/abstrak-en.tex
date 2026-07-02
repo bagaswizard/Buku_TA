@@ -22,9 +22,31 @@
 \endgroup
 
 \emph{% Isi Abstrak
-Indonesia experiences a high frequency of earthquakes, causing significant structural changes in multi-story indoor environments. Autonomous robots can play a role in exploring indoor areas after an earthquake that are unsafe for humans. To carry out this mission, robots require navigation capabilities that can operate in post-earthquake multi-level environments.
-This thesis discusses the development of a navigation method using a layered costmap to enable robots to traverse such environments. This scheme represents a multi-level environment as a collection of region maps in the form of occupancy grids combined into a single map. In the layered costmap, each layer stores different important information such as static obstacles, dynamic obstacles, inflation zones, and transition zones between maps, enabling inter-region navigation. In the developed navigation architecture, each floor or level of the indoor environment is uniquely represented by an individual map. This approach simplifies 3D environmental information into a manageable 2D representation, allowing the use of 2D LiDAR sensors to perceive the robot's environment. The navigation algorithm then integrates each region's 2D map into a unified whole using a transition costmap, enabling the robot to understand and navigate multi-floor environments. This system allows the robot to navigate from one region to another through (1) pose localization using ICP and a region switcher, (2) path planning that creates routes between regions using a path tracker, and (3) path tracking that uses a DWA Planner to generate trajectories for the robot to follow.
-This navigation algorithm was tested in a MuJoCo simulation environment designed for both normal and post-earthquake conditions. The robot successfully navigated from region A to region C, taking 127.26 seconds. Furthermore, the costmap test results showed that a cost scaling factor of 100 was most suitable for generating the shortest path. The ICP results showed reasonable error and sufficient accuracy for navigation, and were able to work with the transition costmap to connect each region.}
+Indonesia experiences a high frequency of earthquakes, causing significant structural
+changes to multi-story \emph{indoor} environments. Autonomous robots can play a role in
+navigating post-earthquake \emph{indoor} areas that are unsafe for humans. To accomplish
+this mission, robots require navigation capabilities that can operate in multi-story
+post-earthquake environments.
+This final project discusses the development of a navigation method using a \emph{layered
+costmap} to enable robots to traverse such environments. This scheme represents a
+multi-story environment as a collection of \emph{region} maps in the form of \emph{occupancy
+grids} merged into a single \emph{map}. In a \emph{layered costmap}, each layer stores
+different types of information, such as static obstacles, dynamic obstacles, inflation
+layer, and transition layers between \emph{maps}, enabling inter-\emph{region}
+navigation. In the developed navigation architecture, each floor of an \emph{indoor}
+environment is represented by an individual \emph{region}. This approach simplifies 3D
+environmental information into a manageable 2D representation, allowing the use of a 2D
+\emph{LiDAR} sensor to perceive the robot's surroundings. The navigation algorithm then
+integrates the 2D \emph{maps} of each \emph{region} into a unified system using a
+transition \emph{costmap}, enabling the robot to understand and navigate multi-story
+environments. The system allows the robot to navigate from one \emph{region} to another
+through (1) pose estimation using \emph{iterative closest point} (ICP) and a \emph{region
+switcher}, (2) \emph{path planning} that generates inter-\emph{region} routes using a
+\emph{path router}, and (3) \emph{path tracking} that uses a \emph{dynamic window
+approach} (DWA) \emph{planner} to generate the \emph{trajectory} followed by the robot.
+From the simulation results on the MuJoCo simulator, the robot successfully navigated
+from \emph{region} A to C with an 80\% success rate (8 out of 10 trials), an average
+travel time of 199.35 seconds, and a best time of 141.01 seconds.}
 % % Ubah kata-kata berikut dengan kata kunci dari tugas akhir dalam Bahasa Inggris
 
 \emph{Keywords}: \emph{Navigation, Costmap, Robot, Inter-floor}.
