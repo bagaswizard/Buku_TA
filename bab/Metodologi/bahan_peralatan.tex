@@ -13,9 +13,9 @@ Model robot hexapod digunakan sebagai platform robot pada lingkungan simulasi Mu
 
 \subsection{Simulasi Sensor}
 
-Sensor LiDAR 2D pada lingkungan simulasi dikonfigurasi untuk mendeteksi rintangan di sekitar robot secara \emph{real-time}. Sensor bekerja dengan memancarkan sinar laser virtual dan mengukur jarak ke objek di sekitarnya. Data hasil pembacaan digunakan sebagai masukan untuk membentuk \emph{costmap} dan deteksi rintangan pada sistem navigasi. Parameter sensor yang digunakan dalam simulasi disetarakan dengan spesifikasi YDLiDAR T-mini-plus, yaitu frekuensi \emph{scan} 12 Hz, \emph{scan angle} $360^\circ$, resolusi sudut $0.54^\circ$, dan jarak maksimum 12 m.
+Sensor LiDAR 2D pada lingkungan simulasi dikonfigurasi untuk mendeteksi rintangan di sekitar robot secara \emph{real-time}. Sensor bekerja dengan memancarkan sinar laser virtual dan mengukur jarak ke objek di sekitarnya. Data hasil pembacaan digunakan sebagai masukan untuk membentuk \emph{costmap} dan deteksi rintangan pada sistem navigasi. LiDAR yang digunakana adalah YDLiDAR T-mini-plus yang ditunjuk pada gambar \ref{fig:ydlidar}. LiDAR yang digunakan dalam simulasi disetarakan dengan spesifikasi YDLiDAR T-mini-plus, yaitu frekuensi \emph{scan} 12 Hz, \emph{scan angle} $360^\circ$, resolusi sudut $0.54^\circ$, dan jarak maksimum 12 m.
 
-CMPS14 adalah modul kompas magnetik canggih yang dilengkapi kompensasi kemiringan (tilt-compensated), menggabungkan magnetometer 3-sumbu, gyroscope 3-sumbu, dan akselerometer 3-sumbu dengan prosesor on-board. Modul ini menyederhanakan pelacakan orientasi dengan menghasilkan sudut Euler secara langsung untuk heading, pitch, dan roll.
+BNO080 (gambar \ref{fig:bno080}) adalah modul IMU (\emph{Inertial Measurement Unit}) 9-sumbu yang mengintegrasikan magnetometer 3-sumbu, gyroscope 3-sumbu, dan akselerometer 3-sumbu dengan prosesor. Prosesor tersebut menjalankan algoritma \emph{sensor fusion} secara internal untuk menggabungkan ketiga sensor tersebut, sehingga modul ini dapat menghasilkan estimasi orientasi yang stabil dan telah terkompensasi \emph{drift}. BNO080 menyederhanakan pelacakan orientasi dengan menghasilkan data orientasi secara langsung, dalam bentuk sudut Euler untuk \emph{heading}, \emph{pitch}, dan \emph{roll}.
 
 \begin{figure}[H]
 \centering
@@ -28,9 +28,9 @@ CMPS14 adalah modul kompas magnetik canggih yang dilengkapi kompensasi kemiringa
 \hfill
 \begin{subfigure}{0.45\textwidth}
 \centering
-\includegraphics[scale=0.1]{gambar/cmps14.jpg}
-\caption{Sensor compass CMPS14}
-\label{fig:cmps14}
+\includegraphics[scale=0.1]{gambar/BNO080.jpg}
+\caption{Sensor IMU BNO080}
+\label{fig:bno080}
 \end{subfigure}
 \caption{Referensi sensor yang digunakan dalam simulasi \parencite{ShenzhenEAITechnology2024ydlidar}}
 \end{figure}
