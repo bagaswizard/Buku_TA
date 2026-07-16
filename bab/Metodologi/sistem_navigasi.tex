@@ -8,7 +8,7 @@
 
 Sistem navigasi ini berfungsi untuk merencanakan dan mengeksekusi
 pergerakan robot dari satu region ke region lain pada lingkungan yang
-telah diketahui. Sistem dapat dibagi menjadi empat komponen utama,
+telah diketahui. Keseluruhan relasi dan hubungan antar komponen dalam sistem ditunjukan oleh gambar \ref{fig:arsitektur_navigasi}. Sistem dapat dibagi menjadi empat komponen utama,
 yaitu multimap server, costmap, lokalisasi, serta path planning dan
 tracking. Occupancy grid menyediakan representasi diskrit dari
 lingkungan. Costmap menyimpan informasi tersebut dalam bentuk peta
@@ -40,7 +40,7 @@ menghasilkan trajectory berupa kecepatan x, y, dan rotasi yang
 diberikan ke kontroler robot untuk dieksekusi.
 
 Untuk memfasilitasi tracking, lokalisasi ICP dan region switcher bekerja sama melacak posisi koordinat robot serta region tempat robot berada saat ini. Ketika robot mencapai
-zona transisi, sistem masuk menjadi \textbf{mode transisi} untuk melakukan navigasi di perbatasan antar region dimana sensor LiDAR tidak bisa diandalkan. Karena region B adalah penghubung region A-C dan merupakan bidang miring sehinga digunakan sensor compass. Setelah batas pitch tertentu region switcher melakukan perpindahan region dan memperbarui posisi awal ICP pada region yang baru. Diagram berikutnya menunjukan alur navigasi dengan flowchart.
+zona transisi, sistem masuk menjadi \textbf{mode transisi} untuk melakukan navigasi di perbatasan antar region dimana sensor LiDAR tidak bisa diandalkan. Karena region B adalah penghubung region A-C dan merupakan bidang miring sehinga digunakan sensor IMU untuk mendeteksi kemiringan. Setelah batas pitch tertentu region switcher melakukan perpindahan region dan memperbarui posisi awal ICP pada region yang baru. Gambar \ref{fig:main_navigation_flow} menunjukan diagram alur navigasi.
 
 \begin{figure}[H]
 \centering
@@ -60,7 +60,7 @@ zona transisi, sistem masuk menjadi \textbf{mode transisi} untuk melakukan navig
 \label{fig:icp_flow}
 \end{figure}
 
-Sistem navigasi ini menggunakan algoritma Iterative Closest Point (ICP) yang digunakan untuk memperkirakan koreksi pose robot terhadap static occupancy grid map. ICP bekerja dengan mencocokkan titik-titik dari laser scan dengan titik-titik yang sesuai pada peta, lalu menghitung transformasi optimal yang meminimalkan jarak antara pasangan titik tersebut. Proses ini iteratif, di mana setiap iterasi memperbaiki estimasi pose robot hingga konvergen ke solusi yang stabil. Sebelum ICP, dilakukan prekomputasi KNN untuk mempercepat pencarian pasangan titik selama proses ICP. 
+Sistem navigasi ini menggunakan algoritma Iterative Closest Point (ICP) yang digunakan untuk memperkirakan koreksi pose robot terhadap static occupancy grid map. ICP bekerja dengan mencocokkan titik-titik dari laser scan dengan titik-titik yang sesuai pada peta, lalu menghitung transformasi optimal yang meminimalkan jarak antara pasangan titik tersebut. Proses ini iteratif, di mana setiap iterasi memperbaiki estimasi pose robot hingga konvergen ke solusi yang stabil. Sebelum ICP, dilakukan prekomputasi KNN untuk mempercepat pencarian pasangan titik selama proses ICP. Alur garis besar ditunjukan pada gambar \ref{fig:icp_flow}.
 
 \subsubsection{Prekomputasi KNN}
 
@@ -248,7 +248,7 @@ w_y = o_y + \left(m_y + \frac{1}{2}\right) \cdot r
 
 Dalam sistem ini, terdapat tiga jenis \emph{costmap} yang masing-masing
 memiliki komposisi \emph{layer} berbeda sesuai dengan fungsinya.
-Komposisi tersebut dirangkum pada Tabel~\ref{tab:costmap_layers}.
+Komposisi tersebut dirangkum pada Tabel~\ref{tab:costmap_layers}, dan bentuk visualisasi ditunjukan oleh gambar \ref{fig:costmap_layers}.
 
 \begin{table}[H]
 \centering
@@ -420,7 +420,7 @@ C(d) =
 \label{eq:inflation_function}
 \end{equation}
 
-dimana: $d$ = jarak Euclidean dari cell ke obstacle terdekat, $R$ = inflation radius (jarak maksimum inflasi), $r_{\text{inscribed}}$ = inscribed radius (radius footprint robot), dan $\alpha$ = scaling factor (mengontrol kecuraman kurva cost). 
+dimana: $d$ = jarak Euclidean dari cell ke obstacle terdekat, $R$ = inflation radius (jarak maksimum inflasi), $r_{\text{inscribed}}$ = inscribed radius (radius footprint robot), dan $\alpha$ = scaling factor (mengontrol kecuraman kurva cost). Perbedaan sebelum dan sesudah static layer ditambah inflation layer dapat ditunjukan gambar \ref{fig:costmap_rviz}.
 
 \begin{figure}[H]
 \centering
@@ -557,7 +557,7 @@ relatif terhadap orientasi global yang dijadikan acuan.
 
 Region switcher bertugas mendeteksi kapan robot memasuki zona transisi,
 menghitung parameter lompatan, dan melakukan perpindahan \emph{region}
-beserta pembaruan pose robot. Region switcher menggunakan
+beserta pembaruan pose robot, dengan alur kerja seperti di gambar \ref{fig:region_switcher_flow}. Region switcher menggunakan
 \emph{transition costmap} yang menyediakan data zona transisi
 terpisah dari \emph{global costmap}, serta berkoordinasi dengan
 \emph{path router} untuk navigasi multi-region yang mulus. Mekanisme ini berkaitan langsung dengan
@@ -612,7 +612,7 @@ Eksekusi lompatan dalam \emph{transition mode} dipicu oleh dua mekanisme:
 \begin{enumerate}
   \item \textbf{\emph{Pitch-based detection}} \newline
   Jika robot menggunakan
-  compass dan region tujuan adalah \emph{slope} (region A/C datar, region B
+  IMU dan region tujuan adalah \emph{slope} (region A/C datar, region B
   \emph{slope}), perubahan \emph{pitch} langsung memicu lompatan:
   \begin{equation}
   |\theta_{\text{pitch}} - \theta_{\text{baseline}}| \geq \theta_{\text{threshold}}
@@ -677,7 +677,7 @@ Global planner bertugas merencanakan jalur dari posisi robot menuju
 tujuan dalam skala luas menggunakan peta global. Algoritma yang
 digunakan adalah A* dengan \emph{wavefront expansion} pada
 \emph{potential field} yang dihitung dari \emph{costmap} global.
-Proses perencanaan dimulai dengan kalkulasi biaya traversal,
+Proses \emph{planner} seperti ditunjukan pada gambar \ref{fig:global_planner_flow} dimulai dengan kalkulasi biaya traversal,
 dilanjutkan dengan ekspansi potensial, ekstraksi gradien, dan
 pembentukan jalur akhir.
 
@@ -842,7 +842,7 @@ Path router adalah komponen yang memungkinkan \emph{global planner}
 bekerja pada navigasi multi-\emph{region}. Ketika tujuan berada di
 \emph{region} yang berbeda dari posisi robot saat ini, \emph{path
 router} menyusun rencana perjalanan bertahap melalui \emph{node}
-transisi pada \emph{topological graph}.
+transisi pada \emph{topological graph}. Alur kerja lengkap ditunjukan oleh gambar \ref{fig:path_router_flow}
 
 Pada graph $G = (V, E)$ (Subbab~\ref{sec:topologi_graph}), perjalanan
 dari suatu \emph{node} awal ke \emph{node} tujuan dilakukan dengan
@@ -911,7 +911,7 @@ planner} yang merencanakan pergerakan robot dalam jangka pendek.
 Pada setiap siklus kontrol, DWA mengambil sampel kecepatan yang
 mungkin dicapai dalam batas akselerasi robot, mensimulasikan
 lintasan yang dihasilkan, dan memilih lintasan dengan skor terbaik.
-Algoritma ini bekerja dalam lima langkah utama: (1) sampling
+Seperti ditunjukan pada gambar \ref{fig:dwa_flow}, algoritma ini bekerja dalam lima langkah utama: (1) sampling
 kecepatan dalam \emph{dynamic window}, (2) simulasi lintasan
 menggunakan model kinematik, (3) penilaian lintasan berdasarkan
 kriteria jarak dan keselarasan, (4) pemilihan lintasan terbaik,

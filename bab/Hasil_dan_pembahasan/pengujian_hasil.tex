@@ -2,19 +2,26 @@
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.6\textwidth]{gambar/icp_errors_RA.png}
+\begin{subfigure}[t]{0.4\textwidth}
+\vspace{0pt}
+\centering
+\includegraphics[width=\textwidth]{gambar/icp_errors_RA.png}
 \caption{Error ICP di Region A}
 \label{fig:icp_errors_ra}
-\end{figure}
-
-\begin{figure}[H]
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.4\textwidth}
+\vspace{0pt}
 \centering
-\includegraphics[width=0.6\textwidth]{gambar/icp_errors_RA_rough.png}
+\includegraphics[width=\textwidth]{gambar/icp_errors_RA_rough.png}
 \caption{Error ICP di Region A pada lantai tidak rata}
 \label{fig:icp_errors_ra_rough}
+\end{subfigure}
+\caption{Perbandingan error ICP di Region A}
+\label{fig:icp_errors_ra_compare}
 \end{figure}
 
-Grafik pada Gambar~\ref{fig:icp_errors_ra_rough} menunjukkan error ICP pada sumbu $x$,
+Grafik pada Gambar~\ref{fig:icp_errors_ra} menunjukkan error ICP pada sumbu $x$,
 $y$, dan $\theta$ (yaw) saat robot melintasi Region A. Secara umum, performa ICP
 stabil dengan tingkat error yang rendah sepanjang lintasan. Namun, terjadi lonjakan
 error yang signifikan pada sekitar $t = 50$ detik. Lonjakan ini disebabkan oleh
@@ -37,7 +44,7 @@ zona transisi antar \emph{region}.
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.6\textwidth]{gambar/icp_errors_RC2}
+\includesvg[width=0.4\textwidth]{gambar/icp_errors_RC2}
 \caption{Error ICP di Region C}
 \label{fig:icp_errors_rc}
 \end{figure}
@@ -57,22 +64,29 @@ estimasi \emph{yaw}.
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.6\textwidth]{gambar/icp_position_x10}
+\begin{subfigure}[t]{0.4\textwidth}
+\vspace{0pt}
+\centering
+\includesvg[width=\textwidth]{gambar/icp_position_x10}
 \caption{Error ICP di Region A dengan data posisi}
 \label{fig:icp_errors_ra_posy}
-\end{figure}
-
-\begin{figure}[H]
+\end{subfigure}
+\qquad
+\begin{subfigure}[t]{0.28\textwidth}
+\vspace{0pt}
 \centering
-\includesvg[width=0.6\textwidth]{gambar/map_A}
+\includesvg[width=\textwidth]{gambar/map_A}
 \caption{Radius zona transisi}
 \label{fig:radius_transition}
+\end{subfigure}
+\caption{Visualisasi error ICP dan radius zona transisi}
+\label{fig:icp_radius_compare}
 \end{figure}
 
 Berdasarkan Gambar~\ref{fig:icp_errors_ra}, dapat pula diidentifikasi posisi robot
-saat kualitas ICP mulai menurun. Dari data tersebut, penurunan kualitas ICP mulai
+saat kualitas ICP mulai menurun. Dari data \ref{fig:icp_errors_ra_posy}, penurunan kualitas ICP mulai
 terjadi ketika robot berada pada posisi $y = 0.729$ m, atau sekitar $0.24$ m dari
-ujung \emph{map}. Hal ini menunjukkan bahwa zona transisi perlu dirancang dengan
+ujung \emph{map}. Gambar \ref{fig:radius_transition} menunjukkan bahwa zona transisi perlu dirancang dengan
 radius minimal $0.24$ m agar robot dapat melakukan transisi antar \emph{region}
 dengan aman sebelum kualitas lokalisasi mengalami penurunan signifikan.
 
@@ -122,7 +136,7 @@ dengan aman sebelum kualitas lokalisasi mengalami penurunan signifikan.
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.5\textwidth]{gambar/map_with_paths_RA.svg}
+\includesvg[width=0.4\textwidth]{gambar/map_with_paths_RA.svg}
 \caption{Semua path di region A.}
 \label{fig:path_all_ra}
 \end{figure}
@@ -145,7 +159,7 @@ tengah di antara dua \emph{obstacle}. Hal ini menghasilkan
 dan memiliki panjang yang bukan terpendek. Sebaliknya, pada CSF 100,
 \emph{path} bergerak lebih mepet ke \emph{obstacle}, memanfaatkan area biaya
 rendah yang lebih luas di dekat dinding. Hasilnya adalah \emph{path} yang
-lebih lurus dan lebih pendek.
+lebih lurus dan lebih pendek. Perbandingan dekat dapat dilihat dari gambar \ref{fig:path_all_ra}.
 
 \subsection{Hasil Path di Region B}
 
@@ -192,7 +206,7 @@ lebih lurus dan lebih pendek.
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.5\textwidth]{gambar/map_with_paths_RB.svg}
+\includesvg[width=0.4\textwidth]{gambar/map_with_paths_RB.svg}
 \caption{Semua path di region B.}
 \label{fig:path_all_rb}
 \end{figure}
@@ -214,25 +228,25 @@ Gambar~\ref{fig:path_all_rb}.
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}{0.2\textwidth}
     \centering
     \includegraphics[width=\textwidth]{gambar/path_CSF10_RC.png}
     \caption{Path dengan CSF 10}
 \end{subfigure}
 \qquad
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}{0.2\textwidth}
     \centering
     \includegraphics[width=\textwidth]{gambar/path_CSF20_RC.png}
     \caption{Path dengan CSF 20}
 \end{subfigure}
 \qquad
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}{0.2\textwidth}
     \centering
     \includegraphics[width=\textwidth]{gambar/path_CSF50_RC.png}
     \caption{Path dengan CSF 50}
 \end{subfigure}
 \qquad
-\begin{subfigure}{0.3\textwidth}
+\begin{subfigure}{0.2\textwidth}
     \centering
     \includegraphics[width=\textwidth]{gambar/path_CSF100_RC.png}
     \caption{Path dengan CSF 100}
@@ -255,7 +269,7 @@ Gambar~\ref{fig:path_all_rb}.
 
 \begin{figure}[H]
 \centering
-\includesvg[width=0.5\textwidth]{gambar/map_with_paths_RC.svg}
+\includesvg[width=0.4\textwidth]{gambar/map_with_paths_RC.svg}
 \caption{Semua path di region C.}
 \label{fig:path_all_rc}
 \end{figure}
@@ -272,42 +286,42 @@ menunjukkan karakteristik peralihan di antara kedua ekstrem tersebut. Dari
 keseluruhan hasil, CSF 100 menghasilkan \emph{path} yang paling sesuai untuk
 navigasi di Region C karena memberikan keseimbangan terbaik antara efisiensi
 jalur (lebih pendek) dan \emph{clearance} terhadap \emph{obstacle} yang
-masih memadai.
+masih memadai. Perbandingan dekat dapat dilihat dari gambar \ref{fig:path_all_rc}.
 
 \subsection{Hasil Deviasi Path}
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={cccc},
-           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \midrule},
+\csvreader[tabular={ccc},
+           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} \\ \midrule},
            late after line={\\\hline}]
   {lampiran/path_stats_RA.csv}
-  {1=\a,2=\b,3=\c,4=\d}
-  {\a & \b & \c & \d}
+  {1=\a,2=\b,3=\c}
+  {\a & \b & \c}
 \caption{Perbandingan path terhadap ground truth di region A}
 \label{tab:path_comparison_ra}
 \end{table}
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={cccc},
-           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \midrule},
+\csvreader[tabular={ccc},
+           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} \\ \midrule},
            late after line={\\\hline}]
   {lampiran/path_stats_RB.csv}
-  {1=\a,2=\b,3=\c,4=\d}
-  {\a & \b & \c & \d}
+  {1=\a,2=\b,3=\c}
+  {\a & \b & \c}
 \caption{Perbandingan path terhadap ground truth di region B}
 \label{tab:path_comparison_rb}
 \end{table}
 
 \begin{table}[H]
 \centering
-\csvreader[tabular={cccc},
-           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} & \thead{Standard\\deviation (m)} \\ \midrule},
+\csvreader[tabular={ccc},
+           table head={\toprule \thead{Cost Scaling\\Factor} & \thead{Mean cross track\\error (m)} & \thead{Max cross track\\error (m)} \\ \midrule},
            late after line={\\\hline}]
   {lampiran/path_stats_RC.csv}
-  {1=\a,2=\b,3=\c,4=\d}
-  {\a & \b & \c & \d}
+  {1=\a,2=\b,3=\c}
+  {\a & \b & \c}
 \caption{Perbandingan path terhadap ground truth di region C}
 \label{tab:path_comparison_rc}
 \end{table}

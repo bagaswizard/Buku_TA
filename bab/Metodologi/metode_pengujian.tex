@@ -1,8 +1,44 @@
 Pengujian sistem navigasi berbasis \emph{layered costmap} dilakukan pada lingkungan simulasi Mujoco yang diadaptasi dari arena Kontes Robot SAR Indonesia (KRSRI) 2024. Tujuan pengujian adalah untuk memvalidasi kinerja setiap komponen sistem navigasi, yaitu lokalisasi ICP, \emph{global planner} A*, dan \emph{local planner} DWA, dalam skenario yang merepresentasikan kondisi pasca gempa. Pengujian dilakukan pada tiga region (A, B, C) dengan variasi kondisi dan konfigurasi parameter untuk mengevaluasi efektivitas dan keterbatasan pendekatan yang diusulkan.
 
+\subsection{Definisi Kondisi Pasca Gempa}   
+Kondisi pasca gempa dalam pengujian ini direpresentasikan melalui
+dua elemen utama, yaitu rintangan tidak diketahui 
+dan permukaan tidak rata. Rintangan
+tidak diketahui merujuk pada objek atau puing yang keberadaannya tidak
+terdeteksi pada peta awal, seperti ditunjukkan pada Gambar~\ref{fig:unknown_obstacle}. Sementara
+itu, permukaan tidak rata merepresentasikan lantai yang rusak akibat gempa
+yang menantang
+kestabilan robot, seperti pada Gambar~\ref{fig:rough_terrain2}.
+Kombinasi kedua elemen tersebut membentuk skenario yang menyerupai lingkungan
+pasca gempa, sehingga dapat digunakan untuk mengevaluasi
+sistem navigasi yang diusulkan.
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.27\textwidth}
+\vspace{0pt}
+\centering
+\includegraphics[width=\textwidth]{gambar/rough_terrain2.png}
+\caption{Permukaan tidak rata}
+\label{fig:rough_terrain2}
+\end{subfigure}
+\qquad
+\begin{subfigure}[t]{0.3\textwidth}
+\vspace{0pt}
+\centering
+\includegraphics[width=\textwidth]{gambar/unknown_obstacle.png}
+\caption{Rintangan tidak diketahui}
+\label{fig:unknown_obstacle}
+\end{subfigure}
+\caption{Elemen kondisi pasca gempa}
+\label{fig:kondisi_gempa_visual}
+\end{figure}
+
+
 \subsection{Pengujian Lokalisasi ICP}
 
-Pengujian lokalisasi ICP bertujuan untuk mengukur akurasi estimasi pose robot pada berbagai kondisi lantai dan region. Kecepatan gerak robot selama pengujian lokalisasi ditetapkan sebesar $0,025$ m/s agar diperoleh data \emph{scan} yang cukup padat untuk proses \emph{scan matching}. Metrik yang dievaluasi meliputi error estimasi pose pada sumbu $x$, sumbu $y$, dan $\theta$ (\emph{yaw}) di sepanjang lintasan robot. Tabel berikut menunjukan nilai parameter ICP yang digunakan saat pengujian.
+Pengujian lokalisasi ICP bertujuan untuk mengukur akurasi estimasi pose robot pada berbagai kondisi lantai dan region. Kecepatan gerak robot selama pengujian lokalisasi ditetapkan sebesar $0,025$ m/s agar diperoleh data \emph{scan} yang cukup padat untuk proses \emph{scan matching}. Metrik yang dievaluasi meliputi error estimasi pose pada sumbu $x$, sumbu $y$, dan $\theta$ (\emph{yaw}) di sepanjang lintasan robot. Tabel \ref{tab:icp_defaults} menunjukan nilai parameter ICP yang digunakan saat pengujian. Pengujian di lakukan pada tiga kondisi, yaitu (1) kondisi region A normadatarl (gambar \ref{fig:sim_ra}),(2) kondisi region A dengan rintangan lantai (gambar \ref{fig:sim_ra_rough}), dan (3) kondisi region C dengan rintangan tidak diketahui (gambar \ref{fig:sim_rc2}).
 
 \begin{table}[H]
 \centering
@@ -22,18 +58,16 @@ $r$          & 10           & Radius pencarian \emph{neighbor} \\
 \end{tabular}
 \end{table}
 
-Pengujian ICP dilakukan pada tiga skenario utama:
-
 \begin{figure}[H]
 \centering
-\begin{subfigure}{0.45\textwidth}
+\begin{subfigure}[t]{0.3\textwidth}
 \centering
 \includegraphics[width=\textwidth]{gambar/sim_RA.png}
 \caption{Simulasi di Region A}
 \label{fig:sim_ra}
 \end{subfigure}
-\hfill
-\begin{subfigure}{0.45\textwidth}
+\qquad
+\begin{subfigure}[t]{0.3\textwidth}
 \centering
 \includegraphics[width=\textwidth]{gambar/sim_RA_rough.png}
 \caption{Simulasi di Region A dengan rintangan lantai}
@@ -42,7 +76,7 @@ Pengujian ICP dilakukan pada tiga skenario utama:
 
 \vspace{0.3cm}
 
-\begin{subfigure}{0.45\textwidth}
+\begin{subfigure}{0.3\textwidth}
 \centering
 \includegraphics[width=\textwidth]{gambar/sim_RC2.png}
 \caption{Simulasi di Region C}
@@ -81,7 +115,7 @@ Pengujian dilakukan pada seluruh tiga region (A, B, C) dengan masing-masing empa
     \item \emph{Cross track error} terhadap \emph{ground truth}, mencakup nilai rata-rata (\emph{mean}), maksimum (\emph{max}), dan simpangan baku (\emph{standard deviation}) (m).
 \end{enumerate}
 
-Hasil dari keempat nilai CSF pada setiap region dibandingkan untuk menentukan pengaruh CSF terhadap karakteristik \emph{path} dan menentukan nilai CSF yang paling sesuai untuk masing-masing region. Standar deviasi tiap path juga dibandingkan dengan sebuah ground truth yang merupakan perkiraan jalu awal terbaik.
+Hasil dari keempat nilai CSF pada setiap region dibandingkan untuk menentukan pengaruh CSF terhadap karakteristik \emph{path} dan menentukan nilai CSF yang paling sesuai untuk masing-masing region. Standar deviasi tiap path juga dibandingkan dengan sebuah ground truth yang merupakan perkiraan jalur awal terbaik.
 
 \subsection{Pengujian Local Planner (DWA)}
 

@@ -14,6 +14,11 @@ Dalam proses pembuatan algoritma, sulit untuk diuji pada kondisi pasca gempa yan
 
 Di dalam tugas akhir ini, diusulkan sebuah metode untuk mencoba menjawab permasalahan tersebut. Pada implementasi navigasi untuk robot darat otonom, umum digunakan \emph{occupancy grid} dan \emph{costmap} 2D untuk menyimpan informasi lingkungan. Metode ini terbatas saat robot perlu mencapai lokasi yang tidak terletak pada bidang yang sama. Untuk membenahi ini, sebuah metode untuk menyederhanakan informasi lingkungan 3D menjadi direpresentasikan oleh beberapa bidang \emph{costmap} 2D atau \emph{layered} \emph{costmap}. Tiap \emph{map} dapat mewakili sebuah lantai di dalam bangunan atau lingkungan indoor. Lalu, robot darat otonom dapat bergerak pada salah satu \emph{map} tertentu, kemudian berpindah ke \emph{map} lain sesuai posisinya di bangunan.
 
+Metode \emph{layered costmap} yang diusulkan dalam tugas akhir telah digunakan sebagai bagian dari sistem navigasi robot otonom Pada penelitian-penelitian terdahulu. Perbedaan disini terletak pada penambahan \emph{layer} baru yang digunakan pada navigasi robot di lingkungan bertingkat, dimana belum dieksplorasi pada penelitian sebelumnya. Selain
+itu, navigasi antar lantai juga pernah dilakukan pada studi terdahulu
+namun, penelitian tersebut umumnya memisahkan peta tiap lantai pada file masing-masing. Berbeda dengan pendekatan tersebut, tugas akhir ini mengajukan
+metode dengan menggunakan satu peta gabungan (\emph{combined map}) yang
+menyatukan seluruh region ke dalam satu representasi \emph{costmap} 2D.
 
 \par\vspace{1.2cm}
 
@@ -33,7 +38,7 @@ Berdasarkan latar belakang pada bagian sebelumnya, terdapat beberapa inti masala
 
 Dalam tugas akhir ini, metode multilayer \emph{costmap} yang dikembangkan tidak dirancang untuk langsung digunakan di kondisi pasca gempa. Hal ini disebabkan oleh beberapa faktor berikut:
 \begin{enumerate}
-  \item Pengujian dilakukan pada simulasi yang didesain untuk merekayasa kondisi pasca gempa. Arena dilengkapi dengan rekayasa rintangan tidak diketahui, tanjakan, dan permukaan tidak rata, yang dibuat pada skala lebih kecil. 
+  \item Pengujian dilakukan pada simulasi yang didesain untuk merekayasa kondisi pasca gempa. Arena dilengkapi dengan rekayasa rintangan tidak diketahui dan permukaan tidak rata, yang dibuat pada skala lebih kecil. 
   \item Navigasi dilakukan oleh robot darat hexapod yang melakukan navigasi secara otonom, dengan bergerak dari titik awal menuju tujuan yang telah ditentukan. 
   \item Algoritma navigasi digunakan pada kondisi sudah diketahui lingkungan utamanya (\emph{known map}).
 \end{enumerate}

@@ -62,7 +62,7 @@ Gambar~\ref{fig:tiga_gambar}.
 \label{fig:tiga_gambar}
 \end{figure}
 
-Sistem navigasi tidak menggunakan peta individu dari masing-masing \emph{region} secara terpisah, melainkan menggunakan satu peta utama yang merupakan hasil kombinasi seluruh \emph{region}. Dalam peta utama tersebut, setiap \emph{region} dipisahkan oleh area \emph{unknown} (wilayah yang tidak diketahui).
+Sistem navigasi tidak menggunakan peta individu dari masing-masing \emph{region} secara terpisah, melainkan menggunakan satu peta utama yang merupakan hasil kombinasi seluruh \emph{region} seperti di gambar \ref{fig:combined_map}. Dalam peta utama tersebut, setiap \emph{region} dipisahkan oleh area \emph{unknown} (wilayah yang tidak diketahui).
 
 \begin{figure}[H]
 \centering
@@ -104,7 +104,7 @@ oleh satu \emph{region}. Banyaknya bagian tersebut ditentukan oleh jumlah peta
 \label{fig:transition_map_all}
 \end{figure}
 
-Peta transisi digunakan untuk menandakan perbatasan antar \emph{region} dalam peta gabungan. Peta ini dibuat melalui proses anotasi terhadap peta gabungan, dimana pengguna secara manual menandai piksel-piksel yang mewakili perbatasan antar \emph{region}. Proses anotasi ini menghasilkan 'metadata' yang menyimpan informasi sebagai berikut: (1) pasangan \emph{region} yang terhubung, (2) orientasi setiap \emph{region}
+Peta transisi digunakan untuk menandakan perbatasan antar \emph{region} dalam peta gabungan. Peta ini dibuat melalui proses anotasi terhadap peta gabungan, dimana pengguna secara manual menandai piksel-piksel yang mewakili perbatasan antar \emph{region}. Hasil peta tersebut seperti gambar \ref{fig:transition_map} dan dari overlay gambar \ref{fig:transition_map_overlay} menunjukan posisi garis transisi dibanding peta gabungan. Proses anotasi menghasilkan 'metadata' yang menyimpan informasi sebagai berikut: (1) pasangan \emph{region} yang terhubung, (2) orientasi setiap \emph{region}
 terhadap \emph{global frame of reference} dalam bentuk \emph{quaternion}, serta
 (3) posisi inisial robot pada setiap \emph{region} dalam koordinat piksel.
 
