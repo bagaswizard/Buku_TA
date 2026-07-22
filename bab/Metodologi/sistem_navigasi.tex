@@ -40,7 +40,7 @@ menghasilkan trajectory berupa kecepatan x, y, dan rotasi yang
 diberikan ke kontroler robot untuk dieksekusi.
 
 Untuk memfasilitasi tracking, lokalisasi ICP dan region switcher bekerja sama melacak posisi koordinat robot serta region tempat robot berada saat ini. Ketika robot mencapai
-zona transisi, sistem masuk menjadi \textbf{mode transisi} untuk melakukan navigasi di perbatasan antar region dimana sensor LiDAR tidak bisa diandalkan. Karena region B adalah penghubung region A-C dan merupakan bidang miring sehinga digunakan sensor IMU untuk mendeteksi kemiringan. Setelah batas pitch tertentu region switcher melakukan perpindahan region dan memperbarui posisi awal ICP pada region yang baru. Gambar \ref{fig:main_navigation_flow} menunjukan diagram alur navigasi.
+zona transisi, sistem masuk menjadi \textbf{mode transisi} untuk melakukan navigasi di perbatasan antar region dimana sensor LiDAR tidak bisa diandalkan. Karena region B adalah penghubung region A-C dan merupakan bidang miring sehingga digunakan sensor IMU untuk mendeteksi kemiringan. Setelah batas pitch tertentu region switcher melakukan perpindahan region dan memperbarui posisi awal ICP pada region yang baru. Gambar \ref{fig:main_navigation_flow} menunjukkan diagram alur navigasi.
 
 \begin{figure}[H]
 \centering
@@ -71,7 +71,7 @@ Untuk setiap sel rintangan (occupied) pada indeks $i_{\text{occ}}$:
 \begin{enumerate}
     \item Cek kejangkauan menggunakan Moore neighbourhood 3×3 (8 tetangga terdekat). Jika tidak ada satupun sel bebas di antara tetangganya, maka sel rintangan tersebut berada di dalam tembok (interior) dan tidak akan pernah terdeteksi oleh laser hanya mengenai permukaan tembok, bukan interiornya. Sel seperti ini diabaikan untuk menghemat memori dan komputasi.
     \item Iterasi area sekitar sel rintangan yang dapat dicapai. Semakin besar $r$, semakin banyak sel yang akan memiliki KNN precomputed, tetapi juga semakin besar ukuran hash table.
-    \item Untuk setiap sel tetangga pada indeks $i_{\text{nb}}$ yang berada dalam radius $r$, \emph{world coordinates} dari sel rintangan $i_{\text{occ}}$ dimasukkan ke dalam daftar KNN milik $i_{\text{nb}}$. Daftar ini dijaga tetap terurut berdasarkan jarak Euclidean  dan dibatasi maksimal $K$ entry. Jika sudah penuh dan jarak lebih besar dari entry terjauh, data diabaikan, namun jika jarak lebih kecil, entry terjauh dihapus dan data baru dimasukkan pada posisi yang tepat.
+    \item Untuk setiap sel tetangga pada indeks $i_{\text{nb}}$ yang berada dalam radius $r$, \emph{world coordinates} dari sel rintangan $i_{\text{occ}}$ dimasukkan ke dalam daftar KNN milik $i_{\text{nb}}$. Daftar ini dijaga tetap terurut berdasarkan jarak Euclidean dan dibatasi maksimal $K$ entry. Jika sudah penuh dan jarak lebih besar dari entry terjauh, data diabaikan, namun jika jarak lebih kecil, entry terjauh dihapus dan data baru dimasukkan pada posisi yang tepat.
 \end{enumerate}
 
 \subsubsection{Proses Data LiDAR}
